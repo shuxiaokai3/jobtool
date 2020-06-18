@@ -1,0 +1,27 @@
+[
+    {
+        "name": "api文档",
+        "path": "/v1/a/a",
+        "icon": "iconAPIwendang"
+    },
+    {
+        "name": "项目地址",
+        "path": "/v1/b/b",
+        "icon": "iconicon-test"
+    },
+    {
+        "name": "文件管理",
+        "path": "/v1/c/c",
+        "icon": "iconwenjianguanli"
+    },
+    {
+        "name": "在线面试",
+        "path": "/v1/e/e",
+        "icon": "iconmianshi"
+    },
+    {
+        "name": "权限管理",
+        "path": "/v1/g/g",
+        "icon": "iconquanxian"
+    }
+]

@@ -1,0 +1,14 @@
+@charset "utf-8";
+#app {
+    .el-divider__text {
+        color: $cyan;
+    }
+    .is-view {
+        .el-form-item {
+            margin-bottom: 0;
+        }
+    }
+}
+.el-input--mini .el-input__inner {
+    // height: 28px !important; //fix size="mini"高度改变
+}
