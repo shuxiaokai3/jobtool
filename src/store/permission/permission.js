@@ -1,6 +1,6 @@
 /** 
  * @description        权限相关
- * @autor              shuxiaokai
+ * @author              shuxiaokai
  * @create             2020-02-25 16:38
  */
 import api from "@/api/api"
@@ -12,13 +12,13 @@ import notFound from "@/pages/layout/layout/404/404.vue"
 const axios = api.axios;
 export default {
     state: {
-        userInfo: {}, //用户信息
-        routes: [], //路由
-        menus: [], //用户菜单
-        matchedRoutesCache: [],
-        loadingBanner: false, //是否加载banner中
+        userInfo: {}, //-----------用户信息
+        routes: [], //-------------路由
+        menus: [], //--------------用户菜单
+        loadingBanner: false, //---是否加载banner中
     },
     mutations: {
+        //改变当前访问菜单
         changeMenus(state, payload) {
             state.menus = payload;
         },
@@ -36,14 +36,13 @@ export default {
             const matchedRoutes = [];
             routes.forEach((route) => { //遍历本地所有路由
                 state.routes.forEach(val => {
-                    if (val.path === route.path && !state.matchedRoutesCache.find(v => v.path === val.path)) { //本地路由和远程匹配,并且不存在缓存之中
+                    if (val.path === route.path) {
                         if (!matchedRoutes.find(m => m.path === val.path)) { //如果已经存在匹配的数据则不再push
                             matchedRoutes.push(route);
                         }
                     }
                 });
             });
-            state.matchedRoutesCache = unique(state.matchedRoutesCache.concat(matchedRoutes), "path");
             router.addRoutes([
                 {
                     path: "/v1",
