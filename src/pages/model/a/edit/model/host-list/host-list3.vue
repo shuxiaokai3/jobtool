@@ -115,7 +115,7 @@ export default {
                 const params = {
                     ids: [id]
                 };
-                this.axios.delete("/api/project/doc_service", { data: params }).then(res => {
+                this.axios.delete("/api/project/doc_service", { data: params }).then(() => {
                     this.getData();
                 }).catch(err => {
                     this.$errorThrow(err, this);
@@ -161,7 +161,7 @@ export default {
             const params = Object.assign({
                 projectId: this.$route.query._id
             }, row)
-            this.axios.put("/api/project/doc_service", params).then(res => {
+            this.axios.put("/api/project/doc_service", params).then(() => {
                 this.$set(row, "__isEditing", false);
                 this.currentEditingIndex = -1;                
             }).catch(err => {

@@ -28,12 +28,12 @@
  * // => 0
  */
 
-function toNumber(variable) {
-    if (typeof variable === "number") {
-        return variable;
-    }
-    if (typeof variable === "string") {
-        return +variable;
-    }
-    return NaN;
-}
+// function toNumber(variable) {
+//     if (typeof variable === "number") {
+//         return variable;
+//     }
+//     if (typeof variable === "string") {
+//         return +variable;
+//     }
+//     return NaN;
+// }

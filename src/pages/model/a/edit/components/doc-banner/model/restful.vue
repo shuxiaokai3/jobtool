@@ -105,7 +105,7 @@ export default {
                         }
                         docs.push(doc);
                     }
-                    this.axios.post("/api/project/new_doc_multi", { docs }).then(res => {
+                    this.axios.post("/api/project/new_doc_multi", { docs }).then(() => {
                         this.$message.success("添加成功");
                         this.$emit("close");
                     }).catch(err => {

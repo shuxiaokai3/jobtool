@@ -58,7 +58,7 @@ export default {
             this.$refs["form"].validate(valid => {
                 if (valid) {
                     this.loading = true;
-                    this.axios.post("/api/project/add_project_type", this.formInfo).then(res => {
+                    this.axios.post("/api/project/add_project_type", this.formInfo).then(() => {
                         this.$message.success("添加成功");
                         this.$emit("close");
                     }).catch(err => {

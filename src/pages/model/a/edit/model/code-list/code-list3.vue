@@ -212,7 +212,7 @@ export default {
             const params = {};
             params[key] = row[key];
             params._id = row._id;
-            this.axios.put("/api/project/doc_code", params).then(res => {
+            this.axios.put("/api/project/doc_code", params).then(() => {
                 
             }).catch(err => {
                 this.$errorThrow(err, this);
