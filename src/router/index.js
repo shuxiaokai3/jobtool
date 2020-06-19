@@ -14,12 +14,12 @@ Vue.use(Router)
 
 const allRoutes = [
     {
-        path: "/v1/a/a",
+        path: "/v1/apidoc/doc-list",
         name: "文档工具-文档列表",
         meta: {
             title: "项目列表"
         },
-        component: () => import("@/pages/model/a/a"),
+        component: () => import("@/pages/modules/apidoc/doc-list/doc-list"),
     },
     {
         path: "/v1/b/b",
@@ -111,8 +111,6 @@ router.beforeEach((to, from, next) => {
         next();
         return;
     }
-
-    
     if (!hasPermission) { //未获取到路由
         store.dispatch("getPermission").then(() => {
             next();
