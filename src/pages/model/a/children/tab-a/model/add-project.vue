@@ -9,11 +9,6 @@
             <el-form-item label="项目名称：" label-width="150px" prop="projectName">
                 <el-input v-model="formInfo.projectName" name="name" size="mini" placeholder="例如：xxx" class="w-100" maxlength="100" clearable></el-input>
             </el-form-item>
-            <el-form-item label="项目类型：" prop="projectType">
-                <el-select v-model="formInfo.projectType" size="mini" class="w-100" name="name" clearable filterable>
-                    <el-option v-for="(item,index) in projectTypeEnum" :key="index" :value="item._id" :label="item.projectTypeName"></el-option>
-                </el-select>
-            </el-form-item>
             <el-form-item label="备注：" prop="remark">
                 <el-input v-model="formInfo.remark" name="name" size="mini" placeholder="填写一些备注" class="w-100" maxlength="100" clearable></el-input>
             </el-form-item>
@@ -45,8 +40,6 @@ export default {
             //=====================================验证参数====================================//
             rules: {
                 projectName: [{ required: true, message: "请填写项目名称", trigger: "blur" }],
-                projectType: [{ required: true, message: "请选择项目类型", trigger: "change" }],
-                remark: [{ required: true, message: "请填项目备注", trigger: "blur" }],
             },
             //=====================================其他参数====================================//
             loading: false

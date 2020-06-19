@@ -8,16 +8,10 @@
     <div class="a-tab-a">
         <div class="search">
             <div class="search-item">
-                <el-input v-model="projectName" placeholder="搜索项目名称" prefix-icon="el-icon-search" @input="filterProject"></el-input>
-            </div>
-            <div class="d-flex center mr-5">
-                <el-checkbox-group v-model="selectProjectTypeArr" @change="getAllProject">
-                    <el-checkbox v-for="(item, index) in projectTypeEnum" :key="index" :label="item._id">{{ item.projectTypeName }}</el-checkbox>
-                </el-checkbox-group>
+                <el-input v-model="projectName" placeholder="搜索项目名称" prefix-icon="el-icon-search" @input="filterProject" clearable></el-input>
             </div>
             <div class="d-flex center">
                 <el-button size="small" type="success" icon="el-icon-plus" @click="dialogVisible2 = true">新建项目</el-button>
-                <el-button size="small" icon="el-icon-edit" @click="dialogVisible3 = true">类型维护</el-button>
             </div> 
         </div>
         <div class="doc-wrap mt-3">
@@ -55,33 +49,27 @@
             </div>
         </div>
         <s-project-model v-if="dialogVisible2" :is-show="dialogVisible2" @close="dialogVisible2 = false;getAllProject()"></s-project-model>
-        <s-project-type-list-model v-if="dialogVisible3" :is-show="dialogVisible3" @close="dialogVisible3 = false;getProjectType()"></s-project-type-list-model>
     </div>
 </template>
 
 <script>
 import projectModel from "./model/add-project"
-import projectListModel from "./model/crud-project-type"
 /*eslint-disable vue/no-reserved-keys*/
 export default {
     components: {
         "s-project-model": projectModel,
-        "s-project-type-list-model": projectListModel,
     },
     data() {
         return {
             projectName: "", //----------项目名称
             formInfo: { //---------------查询参数
-                projectType: ""
             },
             projectList: [], //----------项目列表
-            __projectList: [], //----------项目列表备份
+            __projectList: [], //--------项目列表备份
             selectProjectTypeArr: [], //-已选择项目类型数组
-            //=====================================枚举值====================================//
-            projectTypeEnum: [],
             //=====================================其他参数====================================//
-            dialogVisible2: false, //新增项目弹窗
-            dialogVisible3: false, //类型维护弹窗
+            dialogVisible2: false, //-----新增项目弹窗
+            dialogVisible3: false, //-----类型维护弹窗
         };
     },
     watch: {
@@ -93,12 +81,9 @@ export default {
         }
     },
     created() {
-        this.getProjectType();
         this.getAllProject();
     },
     methods: {
-        handleSelect() {},
-        handleIconClick() {},
         //=====================================操作相关====================================//
         // 过滤项目名称
         filterProject() {
@@ -142,14 +127,6 @@ export default {
                 this.$errorThrow(err, this);
             });
         },
-        //=====================================获取枚举值====================================//
-        getProjectType() {
-            this.axios.get("/api/project/project_type_enum").then(res => {
-                this.projectTypeEnum = res.data;
-            }).catch(err => {
-                this.$errorThrow(err, this);
-            });
-        }
     }
 };
 </script>
