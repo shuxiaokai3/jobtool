@@ -13,6 +13,7 @@
             <div class="right">
                 <h2 class="text-center">欢迎登录</h2>
                 <el-tabs v-model="activeName" class="w-100" @tab-click="handleClickTabs">
+                    <!-- 账号登录 -->
                     <el-tab-pane label="账号登录" name="first">
                         <el-form ref="form" :model="userInfo" :rules="rules" @submit.native.stop.prevent="handleLogin">
                             <el-form-item prop="loginName">
@@ -32,14 +33,12 @@
                             </el-form-item>
                         </el-form>
                     </el-tab-pane>
+                    <!-- 手机号登录 -->
                     <el-tab-pane label="手机登录" name="second">
                         <el-form ref="form2" :model="userInfo2" :rules="rules2" @submit.native.stop.prevent="handleLogin2">
                             <el-form-item prop="phone">
                                 <el-input v-model="userInfo2.phone" prefix-icon="el-icon-user" name="phone" type="text" autocomplete="off" placeholder="请输入手机号..."></el-input>
                             </el-form-item>
-                            <!-- <el-form-item prop="password">
-                                <el-input v-model="userInfo2.password" prefix-icon="el-icon-lock" name="password" type="password" autocomplete="off" placeholder="请输入密码..."></el-input>
-                            </el-form-item> -->
                             <el-form-item prop="smsCode">
                                 <div class="d-flex">
                                     <el-input v-model="userInfo2.smsCode" name="smsCode" type="text" autocomplete="off" placeholder="验证码"></el-input>
@@ -63,15 +62,16 @@ export default {
         return {
             //=====================================登录参数====================================//
             userInfo: { //账号密码登录
-                loginName: "shu",
-                password: "111111",
-                captcha: ""
+                loginName: "shu", //-----------登录名称
+                password: "111111", //---------密码
+                captcha: "", //----------------验证码
             },
-            userInfo2: {
-                phone: "",
-                smsCode: "",
+            userInfo2: { //手机号密码登录
+                phone: "", //------------------手机号码
+                smsCode: "", //----------------短信验证码
             },
-            random: Math.random(),
+            random: Math.random(), //----------验证码随机参数
+            //=====================================校验规则====================================//
             rules: {
                 loginName: [{ required: true, message: "请输入用户名", trigger: "blur" }],
                 password: [{ required: true, message: "请输入密码", trigger: "blur" }],
@@ -82,9 +82,9 @@ export default {
                 smsCode: [{ required: true, message: "请输入验证码", trigger: "blur" }],
             },
             //=====================================其他参数====================================//
-            activeName: "first",
-            isShowCapture: false, //是否展示验证码
-            loading: false, //登录loading
+            activeName: "first", //----------tabs切换
+            isShowCapture: false, //---------是否展示验证码
+            loading: false, //---------------登录按钮loading
         };
     },
     computed: {
@@ -130,7 +130,7 @@ export default {
                             this.$message.warning(res.msg);
                             this.isShowCapture = true;
                         } else {
-                            this.$router.push("/");
+                            this.$router.push("/v1/a/a");
                             sessionStorage.setItem("userInfo", JSON.stringify(res.data));
                         }
                     }).catch(err => {

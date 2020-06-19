@@ -1,6 +1,6 @@
 /* 
     @description  mock二次封装
-    @autor        shuxiaokai
+    @author        shuxiaokai
     @create       2019-04-16 19:26"
 */
 import Mock from "mockjs";
@@ -10,7 +10,7 @@ const Random = Mock.Random;
 
 /* 
     @description  扩展数据模板
-    @autor        shuxiaokai
+    @author        shuxiaokai
     @create       2019-04-16 19:29"
     @params       
     @return       
@@ -18,7 +18,7 @@ const Random = Mock.Random;
 Random.extend({
     /** 
     * @description        食品大类
-    * @autor              shuxiaokai
+    * @author             shuxiaokai
     * @create             2020-02-19 15:22
     */
     aClass() {
@@ -42,7 +42,7 @@ Random.extend({
     },
     /** 
      * @description        食品亚类
-     * @autor              shuxiaokai
+     * @author             shuxiaokai
      * @create             2020-02-19 15:22
      */
     bClass() {
@@ -59,7 +59,7 @@ Random.extend({
     },
     /** 
      * @description        食品细类
-     * @autor              shuxiaokai
+     * @author             shuxiaokai
      * @create             2020-02-19 15:23
      */
     cClass() {
@@ -76,7 +76,7 @@ Random.extend({
     },
     /** 
     * @description        公司名称
-    * @autor              shuxiaokai
+    * @author             shuxiaokai
     * @create             2020-02-19 15:23
     */
     ccompany() {
@@ -93,7 +93,7 @@ Random.extend({
     },
     /** 
     * @description        随机地址
-    * @autor              shuxiaokai
+    * @author             shuxiaokai
     * @create             2020-02-19 15:23
     */
     address() {
@@ -110,7 +110,7 @@ Random.extend({
 
     /**
     * @description        随机区域
-    * @autor              shuxiaokai
+    * @author             shuxiaokai
     * @create             2020-02-19 15:23
     */
     area() {
@@ -132,7 +132,7 @@ Random.extend({
 
     /**
     * @description        随机区域
-    * @autor              shuxiaokai
+    * @author             shuxiaokai
     * @create             2020-02-19 15:23
     */
     month() {
@@ -154,7 +154,7 @@ Random.extend({
 
     /**
     * @description        随机区域
-    * @autor              shuxiaokai
+    * @author             shuxiaokai
     * @create             2020-02-19 15:23
     */
     inspectionType() {
@@ -169,7 +169,7 @@ Random.extend({
 
     /** 
      * @description        随机图片
-     * @autor              shuxiaokai
+     * @author             shuxiaokai
      * @create             2020-02-19 15:24
      */
     image() {
@@ -181,7 +181,7 @@ Random.extend({
     },
     /** 
      * @description        随机文件
-     * @autor              shuxiaokai
+     * @author             shuxiaokai
      * @create             2020-02-19 15:24
      */
     file() {
@@ -193,7 +193,7 @@ Random.extend({
     },
     /** 
      * @description        计划名称
-     * @autor              shuxiaokai
+     * @author             shuxiaokai
      * @create             2020-02-19 15:25
      */
     planName() {
@@ -212,7 +212,7 @@ Random.extend({
     },
     /** 
      * @description        计划类型
-     * @autor              shuxiaokai
+     * @author             shuxiaokai
      * @create             2020-02-19 15:25
      */
     planType() {
@@ -228,7 +228,7 @@ Random.extend({
 
     /** 
      * @description        随机抽样单编号
-     * @autor              shuxiaokai
+     * @author             shuxiaokai
      * @create             2020-02-19 15:24
      */
     sampleCode() {
@@ -236,7 +236,7 @@ Random.extend({
     },
     /** 
      * @description        测试数据  随机生成   时间   数字   字符串  对象   null  undefined  ""  0  -1  NaN  Infinity 长字符串  长数字   空对象 最大值  最小值 MAX_VALUE  MIN_VALUE
-     * @autor              shuxiaokai
+     * @author             shuxiaokai
      * @create             2020-02-19 15:24
      */
     testData(strict) {

@@ -1,6 +1,6 @@
 /** 
     @description        根据Object.prototype.toString 返回变量类型值(小写)
-    @autor              shuxiaokai
+    @author             shuxiaokai
     @create             2019-11-21 13:13
     @update             2019-11-21 13:13
     @since              2019-11-21 13:13

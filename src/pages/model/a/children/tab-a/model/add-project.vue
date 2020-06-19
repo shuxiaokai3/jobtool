@@ -58,7 +58,7 @@ export default {
     methods: {
         /* 
             @description  获取项目类型枚举
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-20 20:33"
             @params       null
             @return       null
@@ -73,7 +73,7 @@ export default {
         //=====================================操作====================================//
         /* 
             @description  新增项目
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-20 20:14"
             @params       null
             @return       null
@@ -95,7 +95,7 @@ export default {
         },
         /* 
             @description  关闭弹窗
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-19 22:39"
             @params       null
             @return       null

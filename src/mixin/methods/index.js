@@ -66,7 +66,7 @@ export default {
     },
     /* 
         @description  随机生成提示信息
-        @autor        shuxiaokai
+        @author        shuxiaokai
         @create       2019-06-25 13:33"
         @params       
         @return       
@@ -83,7 +83,7 @@ export default {
     },
     /* 
         @description  删除字段值为 "", null, undefined的字段 
-        @autor        shuxiaokai
+        @author        shuxiaokai
         @create       2019-07-02 17:03"
         @params       data(原始值)
         @params       deep(是否遍历子对象); 只针对

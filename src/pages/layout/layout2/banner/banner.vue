@@ -1,6 +1,6 @@
 /* 
     @description  banner页面
-    @autor        shuxiaokai
+    @author        shuxiaokai
     @create       2019-07-21 09:24"
 */
 <template>

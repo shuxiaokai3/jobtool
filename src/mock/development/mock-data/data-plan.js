@@ -1,6 +1,6 @@
 /**
  * @description        demo mock数据
- * @autor              liqx
+ * @author              liqx
  * @create             2020-02-19 15:10
  */
 import Mock from "./mockjs.js";

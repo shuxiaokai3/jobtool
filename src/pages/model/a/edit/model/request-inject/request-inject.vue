@@ -55,7 +55,7 @@ export default {
     methods: {
         /* 
             @description  接口注入
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-11-27 16:42"
             @params       null
             @return       null
@@ -77,7 +77,7 @@ export default {
         },
         /* 
             @description  关闭弹窗
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-19 22:39"
             @params       null
             @return       null

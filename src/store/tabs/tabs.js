@@ -1,7 +1,7 @@
 
 /** 
  * @description        api文档tabs
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @updateAuthor       shuxiaokai
  * @create             2020-01-13 14:24
  * @update             2020-01-13 14:24
@@ -18,7 +18,7 @@ export default {
     mutations: {
         /** 
          * @description        新增一个tab
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2020-01-14 14:27
          * @update             2020-01-14 14:27
@@ -51,7 +51,7 @@ export default {
         },
         /** 
          * @description        更新当前被选中的tab
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2020-01-14 14:27
          * @update             2020-01-14 14:27
@@ -113,7 +113,7 @@ export default {
 
         /** 
          * @description        删除一个tab
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2020-01-14 14:24
          * @update             2020-01-14 14:24
@@ -155,7 +155,7 @@ export default {
         },
         /** 
          * @description        根据起始位置删除
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2020-01-14 17:37
          * @update             2020-01-14 17:37

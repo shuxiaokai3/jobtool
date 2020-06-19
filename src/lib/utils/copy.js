@@ -1,6 +1,6 @@
 /** 
     @description        复制文本
-    @autor              shuxiaokai
+    @author             shuxiaokai
     @create             2019-11-21 13:13
     @param {string}}    text - 需要复制的文本       
 */

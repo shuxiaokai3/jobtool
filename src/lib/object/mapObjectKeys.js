@@ -1,6 +1,6 @@
 /** 
  * @description        将一个对象的key映射为另一个key(这个操作会改变当前对象,这个操作不会深拷贝数据)
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @updateAuthor       shuxiaokai
  * @create             2020-01-08 21:08
  * @update             2020-01-08 21:08

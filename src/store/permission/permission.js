@@ -1,6 +1,6 @@
 /** 
  * @description        权限相关
- * @author              shuxiaokai
+ * @author             shuxiaokai
  * @create             2020-02-25 16:38
  */
 import api from "@/api/api"

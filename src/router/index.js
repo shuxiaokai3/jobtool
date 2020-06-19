@@ -111,6 +111,8 @@ router.beforeEach((to, from, next) => {
         next();
         return;
     }
+
+    
     if (!hasPermission) { //未获取到路由
         store.dispatch("getPermission").then(() => {
             next();

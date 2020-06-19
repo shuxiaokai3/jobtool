@@ -1,7 +1,7 @@
 /** 
  * @tip                class typeof的值也为function
  * @description        判断是否为函数(typeof运算符能比较准确给出变量类型为函数)
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @updateAuthor       shuxiaokai
  * @create             2019-11-27 10:36
  * @update             2019-11-27 10:36

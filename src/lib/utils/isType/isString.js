@@ -1,6 +1,6 @@
 /** 
  * @description        判断一个变量是否为原始字符串或者包装类型字符串
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @updateAuthor       shuxiaokai
  * @create             2019-11-27 10:40
  * @update             2019-11-27 10:40

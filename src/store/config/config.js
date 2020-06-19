@@ -1,7 +1,7 @@
 
 /** 
  * @description        配置信息
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @updateAuthor       shuxiaokai
  * @create             2020-01-09 18:39
  * @update             2020-01-09 18:39

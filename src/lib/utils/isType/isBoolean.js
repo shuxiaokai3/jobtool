@@ -1,6 +1,6 @@
 /** 
  * @description        判断一个变量是否为布尔值(原始布尔值或者包装类型布尔值)
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @updateAuthor       shuxiaokai
  * @create             2019-11-27 11:01
  * @update             2019-11-27 11:01

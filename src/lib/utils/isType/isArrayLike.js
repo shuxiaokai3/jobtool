@@ -1,7 +1,7 @@
 
 /** 
  * @description        判断是否为类数组(存在length，并且lengh为非负整数，并且不为 null，undefined,function)
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @updateAuthor       shuxiaokai
  * @create             2019-11-27 14:57
  * @update             2019-11-27 14:57

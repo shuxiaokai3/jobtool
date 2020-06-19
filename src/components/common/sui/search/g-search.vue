@@ -44,7 +44,7 @@ export default {
             type: Boolean,
             default: false,
         },
-        autoRequest: { //是否触发自动请求
+        authorequest: { //是否触发自动请求
             type: Boolean,
             default: false
         },

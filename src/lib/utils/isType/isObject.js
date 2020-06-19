@@ -1,7 +1,7 @@
 /** 
  * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
  * @description        判断变量是否为非基本类型
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @updateAuthor       shuxiaokai
  * @create             2019-11-27 11:16
  * @update             2019-11-27 11:16

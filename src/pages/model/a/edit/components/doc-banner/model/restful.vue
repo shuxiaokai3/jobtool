@@ -65,7 +65,7 @@ export default {
     methods: {
         /** 
         * @description        新增restful
-        * @autor              shuxiaokai
+        * @author             shuxiaokai
         * @updateAuthor       shuxiaokai
         * @create             2020-01-13 13:26
         * @update             2020-01-13 13:26
@@ -135,7 +135,7 @@ export default {
         },
         /** 
          * @description        验证请求url格式是否正确
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2019-12-02 16:29
          * @update             2019-12-02 16:29
@@ -157,7 +157,7 @@ export default {
         },
         /** 
         * @description        关闭弹窗
-        * @autor              shuxiaokai
+        * @author             shuxiaokai
         * @updateAuthor       shuxiaokai
         * @create             2020-01-13 13:26
         * @update             2020-01-13 13:26

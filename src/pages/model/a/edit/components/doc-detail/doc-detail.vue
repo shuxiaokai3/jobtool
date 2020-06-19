@@ -257,7 +257,7 @@ export default {
         //=====================================获取数据====================================//
         /** 
          * @description        获取文档详细数据
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2020-01-15 13:29
          * @update             2020-01-15 13:29
@@ -307,7 +307,7 @@ export default {
         },
         /** 
          * @description        是否使用缓存
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2019-12-04 08:56
          * @update             2019-12-04 08:56
@@ -327,7 +327,7 @@ export default {
         },
         /** 
         * @description        获取参数组枚举信息
-        * @autor              shuxiaokai
+        * @author             shuxiaokai
         * @updateAuthor       shuxiaokai
         * @create             2020-01-15 13:27
         * @update             2020-01-15 13:27
@@ -347,7 +347,7 @@ export default {
         //=====================================获取枚举数据====================================//
         /** 
         * @description        获取host枚举
-        * @autor              shuxiaokai
+        * @author             shuxiaokai
         * @updateAuthor       shuxiaokai
         * @create             2020-01-15 13:17
         * @update             2020-01-15 13:17
@@ -372,7 +372,7 @@ export default {
         },
         /** 
          * @description        获取用户自定义请求参数信息
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2019-11-22 17:52
          * @update             2019-11-22 17:52
@@ -390,7 +390,7 @@ export default {
         //=====================================辅助操作====================================//
         /** 
          * @description        去除无效参数
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2020-01-15 13:27
          * @update             2020-01-15 13:27
@@ -421,7 +421,7 @@ export default {
         },
         /** 
             @description  验证返回值，将某些空数组值修改为有数据
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-29 13:50"
             @params       
             @return       null
@@ -447,7 +447,7 @@ export default {
         },
         /** 
          * @description        验证请求url格式是否正确
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2019-12-02 16:29
          * @update             2019-12-02 16:29
@@ -490,7 +490,7 @@ export default {
         //=====================================提交操作====================================//
         /** 
         * @description        发布文档
-        * @autor              shuxiaokai
+        * @author             shuxiaokai
         * @updateAuthor       shuxiaokai
         * @create             2020-01-15 13:27
         * @update             2020-01-15 13:27
@@ -530,7 +530,7 @@ export default {
         },
         /* 
             @description  连通性测试
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-29 13:10"
             @params       
             @return       null

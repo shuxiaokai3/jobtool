@@ -49,7 +49,7 @@ export default {
     methods: {
         /* 
             @description  添加项目类型
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-19 22:34"
             @params       null
             @return       null
@@ -71,7 +71,7 @@ export default {
         },
         /* 
             @description  关闭弹窗
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-19 22:39"
             @params       null
             @return       null

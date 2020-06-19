@@ -291,7 +291,7 @@ export default {
         //=====================================文件相关判断====================================//
         /* 
             @description  检查上传文件大小和类型
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-07-04 14:05"
             @params       
             @return       
@@ -337,7 +337,7 @@ export default {
         },
         /* 
             @description  超出允许上传个数
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-07-04 14:14"
         */
         limitPic() {
@@ -349,7 +349,7 @@ export default {
         //=====================================上传成功组装数据====================================//
         /* 
             @description  成功回调，处理相关数据组装任务
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-07-04 14:16"
             @params       
             @return       
@@ -379,7 +379,7 @@ export default {
         //=====================================文件下载====================================//
         /* 
             @description  文件下载
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-07-04 17:53"
             @params       
             @return       
@@ -398,7 +398,7 @@ export default {
         },
         /* 
             @description  预览文件
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-07-04 17:53"
         */
         handlePictureCardPreview(file) {
@@ -426,7 +426,7 @@ export default {
         },
         /* 
             @description  删除文件
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-07-04 17:53"
         */
         handleRemove(file) {

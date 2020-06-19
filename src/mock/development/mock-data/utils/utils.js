@@ -4,7 +4,7 @@
 const utils = {
     /* 
         @description  包装返回对象，支持传入随机值导致报错
-        @autor        shuxiaokai
+        @author        shuxiaokai
         @create       2019-04-16 16:39"
         @params       obj<Object> 返回值
         @params       options<Object>   p: 0-1 报错概率   
@@ -30,7 +30,7 @@ const utils = {
 
     /* 
         @description  循环随机生成数据
-        @autor        shuxiaokai
+        @author        shuxiaokai
         @create       2019-04-25 10:57"
         @params       rule 生成规则
         @params       times 重复次数

@@ -1,6 +1,6 @@
 /** 
  * @description        判断变量是否为数字(Infinity,-Infinity,NaN,Number.MAX_VALUE,new Number(222))
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @updateAuthor       shuxiaokai
  * @create             2019-11-27 09:56
  * @update             2019-11-27 09:56

@@ -127,7 +127,7 @@ export default {
                     this.formInfo[this.vModels[index]] = val;
                 })
             }
-            if (!this.getAncestorComponent("SSearch").autoRequest) {
+            if (!this.getAncestorComponent("SSearch").authorequest) {
                 return;
             }
             if (!this.debounceFn) {

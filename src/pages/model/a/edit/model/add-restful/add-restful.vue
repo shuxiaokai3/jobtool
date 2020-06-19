@@ -279,7 +279,7 @@ export default {
         //=========================================================================//
         /** 
         * @description        关闭弹窗
-        * @autor              shuxiaokai
+        * @author             shuxiaokai
         * @updateAuthor       shuxiaokai
         * @create             2020-01-13 13:26
         * @update             2020-01-13 13:26

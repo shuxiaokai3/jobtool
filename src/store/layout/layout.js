@@ -12,7 +12,7 @@ export default {
         //=====================================tabs切换====================================//
         /** 
          * @description        新增一个tab
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2020-01-14 14:27
          * @update             2020-01-14 14:27
@@ -46,7 +46,7 @@ export default {
         },
         /** 
          * @description        删除一个tab
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2020-01-14 14:24
          * @update             2020-01-14 14:24
@@ -60,7 +60,7 @@ export default {
         },
         /** 
          * @description        根据起始位置删除
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2020-01-14 17:37
          * @update             2020-01-14 17:37
@@ -109,7 +109,7 @@ export default {
         //缓存相关
         /** 
             @description  改变一个页面缓存
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-19 13:25"
             @params       { path: "/v1/d", fullPath: "/v1/d/d-edit?id=2168" }     当前路由完整路径
         */
@@ -131,7 +131,7 @@ export default {
         },
         /**
             @description  刷新缓存页面，通过v-if重新加载路由
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-19 13:29"
         */
         freshCachePage(state) {

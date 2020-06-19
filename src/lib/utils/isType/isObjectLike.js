@@ -1,7 +1,7 @@
 /** 
  * 注意 dom对象,[]也是objectLike
  * @description        非null  typeof 值为 object
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @updateAuthor       shuxiaokai
  * @create             2019-11-27 09:42
  * @update             2019-11-27 09:42

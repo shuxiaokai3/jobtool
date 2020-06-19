@@ -1,7 +1,7 @@
 
 /** 
  * @description        debounce(调用动作n秒后才会执行，在这n秒内又调用此动作则重新计算时间)
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @updateAuthor       shuxiaokai
  * @create             2020-01-31 17:14
  * @update             2020-01-31 17:14

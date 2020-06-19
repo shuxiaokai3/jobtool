@@ -119,7 +119,7 @@ export default {
         //=====================================文件相关判断====================================//
         /* 
             @description  检查上传文件大小和类型
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-07-04 14:05"
             @params       
             @return       

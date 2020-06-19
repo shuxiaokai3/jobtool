@@ -128,7 +128,7 @@ export default {
         //=====================================表格相关====================================//
         /** 
             @description  获取表格数据
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-11-12 13:57"
         */
         getData() {
@@ -182,7 +182,7 @@ export default {
         //=====================================修改====================================//
         /** 
          * @description        让当前行处于修改状态
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2019-12-30 13:21
          * @update             2019-12-30 13:21
@@ -194,7 +194,7 @@ export default {
         },
         /** 
          * @description        确认修改当前行
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2019-12-30 13:21
          * @update             2019-12-30 13:21
@@ -211,7 +211,7 @@ export default {
         },
         /** 
          * @description        取消修改
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2019-12-30 13:22
          * @update             2019-12-30 13:22
@@ -224,7 +224,7 @@ export default {
         //=====================================删除====================================//
         /** 
         * @description        删除一个域名
-        * @autor              shuxiaokai
+        * @author             shuxiaokai
         * @updateAuthor       shuxiaokai
         * @create             2019-12-30 10:42
         * @update             2019-12-30 10:42
@@ -248,7 +248,7 @@ export default {
         //=====================================其他操作====================================//
         /** 
             @description  关闭弹窗
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-19 22:39"
         */
         closeModel() {

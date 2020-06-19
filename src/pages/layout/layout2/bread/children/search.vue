@@ -30,7 +30,7 @@ export default {
     methods: {
         /* 
             @description  初始化路由，将可检索路由赋值
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-07-31 17:04"
         */
         initAllRoutes() {
