@@ -6,7 +6,7 @@
 */
 <template>
     <div class="s-content">
-        <div class="s-header clearfix">
+        <div class="s-header hidden-md-and-down">
             <div class="header-left fl">
                 <el-menu :default-active="activeMenu" mode="horizontal" background-color="#343a40" text-color="#fff" active-text-color="#ffd04b" :router="true">
                     <el-menu-item>
