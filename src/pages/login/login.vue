@@ -7,9 +7,7 @@
 <template>
     <div class="login-container d-flex a-center j-center">
         <div class="login-box d-flex">
-            <div class="left">
-                
-            </div>
+            <div class="left hidden-md-and-down"></div>
             <div class="right">
                 <h2 class="text-center">欢迎登录</h2>
                 <el-tabs v-model="activeName" class="w-100" @tab-click="handleClickTabs">
@@ -130,7 +128,7 @@ export default {
                             this.$message.warning(res.msg);
                             this.isShowCapture = true;
                         } else {
-                            this.$router.push("/v1/a/a");
+                            this.$router.push("/v1/apidoc/doc-list");
                             sessionStorage.setItem("userInfo", JSON.stringify(res.data));
                         }
                     }).catch(err => {
