@@ -12,7 +12,7 @@
             <el-button size="small" type="success" icon="el-icon-plus" @click="dialogVisible2 = true">新建项目</el-button>
         </div> 
         <!-- 项目列表 -->
-        <div class="project-wrap mt-3">
+        <div v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)" class="project-wrap mt-3">
             <div v-for="(item, index) in projectList" :key="index" class="project-list">
                 <div class="project-header">
                     <div class="title theme-color text-ellipsis">{{ item.projectName }}</div>
@@ -35,9 +35,9 @@
                     <span>最新更新:</span>
                     <span title="最新更新">{{ new Date(item.updatedAt).toLocaleDateString() }}</span>&nbsp;&nbsp;
                 </div>
-                <div class="d-flex j-end a-center gray-500 mt-2">
+                <div class="d-flex j-end a-center gray-500">
                     <span>创建者:</span>
-                    <span title="创建者">{{ new Date(item.updatedAt).toLocaleDateString() }}</span>&nbsp;&nbsp;
+                    <span title="创建者">{{ item.owner.name }}</span>&nbsp;&nbsp;
                 </div>
                 <div class="project-bottom d-flex">
                     <div>
@@ -60,6 +60,8 @@ export default {
             projectList: [], //------项目列表
             projectListCopy: [], //--项目列表拷贝用户数据过滤
             projectName: "", //------搜索框项目名称
+            //=====================================其他====================================//
+            loading: false, //-------数据加载状态
         };
     },
     created() {
@@ -101,13 +103,15 @@ export default {
     .project-wrap {
         display: flex;
         flex-wrap: wrap;
+        min-height: 300px;
+        align-items: flex-start;
         @media only screen and (max-width: 1199px) {
             justify-content: center;
         }
     }
     .project-list {
         width: 300px;
-        height: 180px;
+        // height: 180px;
         border: 1px solid $gray-200;
         box-shadow: $box-shadow-sm;
         margin-right: 30px;
@@ -144,12 +148,10 @@ export default {
         }
         .project-bottom {
             width: 100%;
-            position: absolute;
-            padding: 10px;
+            padding: 10px 0;
             bottom: 10px;
             display: flex;
             align-items: center;
-            left: 0;
         }
         .start {
             position: absolute;
