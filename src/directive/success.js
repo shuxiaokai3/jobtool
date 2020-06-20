@@ -1,7 +1,7 @@
 
 /* 
     @description  成功提示，冒泡提示
-    @autor        shuxiaokai
+    @author        shuxiaokai
     @create       2019-07-12 10:32"
     @params       
     @return       

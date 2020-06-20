@@ -161,7 +161,7 @@ export default {
         //=====================================初始化操作====================================//
         /* 
             @description  渲染函数
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-09-18 20:15"
         */
         renderContent(h, { node, data }) {
@@ -229,7 +229,7 @@ export default {
         //=====================================其他交互====================================//
         /* 
             @description  新增一行请求参数
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-09-18 20:16"
             @params       data<Object>当前节点数据
         */
@@ -261,7 +261,7 @@ export default {
         },
         /* 
             @description  新增一个嵌套请求参数
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-09-19 10:45"
             @params       data<Object>当前节点数据
         */
@@ -280,7 +280,7 @@ export default {
         }, 
         /* 
             @description  删除请求参数
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-09-19 10:44"
             @params       node<Object>当前节点
             @params       data<Object>节点数据
@@ -325,7 +325,7 @@ export default {
         },
         /* 
             @description  获取远程联想数据
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-28 11:29"
         */
         handleSelectRemoteData(val, data) {
@@ -338,7 +338,7 @@ export default {
         },
         /* 
             @description  配置常见请求头参数
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-09-19 10:52"
         */
         handleSelectParams(val, data) {
@@ -351,7 +351,7 @@ export default {
         },
         /* 
             @description  上传请求json参数
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-09-19 14:04"
         */
         handleUploadRequestJson() {
@@ -359,7 +359,7 @@ export default {
         },
         /** 
          * @description        处理json转换以后的数据
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2019-11-25 16:46
          * @update             2019-11-25 16:46
@@ -391,7 +391,7 @@ export default {
         },
         /** 
          * @description        将对象转换为后台接受的请求参数
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2019-11-25 15:14
          * @update             2019-11-25 15:14
@@ -447,7 +447,7 @@ export default {
         //=====================================前后端交互====================================//
         /* 
             @description  获取请求参数信息
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-11-07 11:27"
         */
         getPresetParamsInfo() {

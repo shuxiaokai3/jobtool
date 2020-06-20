@@ -71,7 +71,7 @@ export default {
     methods: {
         /** 
          * @description        处理鼠标按下事件
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2019-12-30 09:02
          * @update             2019-12-30 09:02
@@ -83,7 +83,7 @@ export default {
         },
         /** 
          * @description        处理鼠标移动事件
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2019-12-30 09:02
          * @update             2019-12-30 09:02

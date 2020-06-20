@@ -2,7 +2,7 @@
 /** 
  * tip  lodash中将Object.create(null)归纳到plainObject，实际中使用较少，不予考虑
  * @description        判断一个变量是否由Object构造函数创建
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @updateAuthor       shuxiaokai
  * @create             2019-11-27 13:29
  * @update             2019-11-27 13:29

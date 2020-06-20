@@ -185,7 +185,7 @@ export default {
                 }
             }
             resultStr = `<!-- 搜索条件 -->
-        <s-search autoRequest @change="handleChange">${resultStr}
+        <s-search authorequest @change="handleChange">${resultStr}
         </s-search>
             `
             return resultStr;

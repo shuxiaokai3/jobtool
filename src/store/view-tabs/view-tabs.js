@@ -1,6 +1,6 @@
 /* 
     @description  预览文档tabs
-    @autor        shuxiaokai
+    @author        shuxiaokai
     @create       2019-07-26 17:42"
 */
 
@@ -29,7 +29,7 @@ export default {
         },
         /* 
             @description  删除tabs
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-23 16:46"
             @params       tabs的id
             @return       null
@@ -56,7 +56,7 @@ export default {
         },
         /* 
             @description  关闭多个标签
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-07-21 09:37"
             @params       state<object> store状态
             @params       payload.start<int> 关闭的起始位置

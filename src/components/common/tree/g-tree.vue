@@ -80,7 +80,7 @@ export default {
         //=====================================请求参数相关====================================//
         /** 
             @description  渲染函数
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-09-18 20:15"
         */
         renderContent(h, { node, data }) {
@@ -141,7 +141,7 @@ export default {
         },
         /** 
             @description  新增一行请求参数
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-09-18 20:16"
             @params       data<Object>当前节点数据
         */
@@ -173,7 +173,7 @@ export default {
         },
         /** 
             @description  新增一个嵌套请求参数
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-09-19 10:45"
             @params       data<Object>当前节点数据
         */
@@ -195,7 +195,7 @@ export default {
         }, 
         /** 
             @description  删除请求参数
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-09-19 10:44"
             @params       node<Object>当前节点
             @params       data<Object>节点数据
@@ -238,7 +238,7 @@ export default {
         },
         /** 
             @description  配置常见请求头参数
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-09-19 10:52"
         */
         configParams() {
@@ -246,7 +246,7 @@ export default {
         },
         /** 
             @description  配置常见请求头参数
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-09-19 10:52"
         */
         handleSelectParams(val) {
@@ -254,7 +254,7 @@ export default {
         },
         /** 
             @description  上传请求json参数
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-09-19 14:04"
         */
         handleUploadRequestJson() {},
@@ -276,7 +276,7 @@ export default {
         },
         /** 
             @description  获取远程联想数据
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-28 11:29"
             @params       
             @return       null

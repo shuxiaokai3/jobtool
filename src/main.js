@@ -7,6 +7,7 @@ import { BaseConfig } from "@/config.default.js";
 import utils from "@/lib"
 import "./registerServiceWorker";
 import "element-ui/lib/theme-chalk/index.css";
+import "element-ui/lib/theme-chalk/display.css";
 import "./components/index";
 import "./mixin"
 import "./directive"

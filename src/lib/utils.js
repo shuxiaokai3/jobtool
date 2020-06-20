@@ -1,7 +1,7 @@
 
 /* 
     @description  返回变量类型
-    @autor        shuxiaokai
+    @author        shuxiaokai
     @create       2019-10-29 16:32"
     @params {any}      variable
     @return       小写对象类型(null,number,string,boolean,symbol,function,object,array,regexp)
@@ -12,7 +12,7 @@ export const getType = function(variable) {
 
 /** 
  * @description        递归执行某个方法(可能会改变原对象)
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @updateAuthor       shuxiaokai
  * @create             2020-01-08 21:32
  * @update             2020-01-08 21:32
@@ -40,7 +40,7 @@ export const recursion = function(config) {
 
 /* 
     @description  给树形结构数据添加额外key值
-    @autor        shuxiaokai
+    @author        shuxiaokai
     @create       2019-10-29 16:33"
     @params {Array} 数组类型，并且嵌套元素key值必须为children      
     @params {Array<String>} 需要添加的key     
@@ -103,7 +103,7 @@ export const addObjectTreeKey = function(treeData, params, options = {}) {
 
 /* 
     @description  给树形结构数据添加额外key值
-    @autor        shuxiaokai
+    @author        shuxiaokai
     @create       2019-10-29 16:33"
     @params {Array} 数组类型，并且嵌套元素key值必须为children      
     @params {Array<String>} 需要添加的key     
@@ -173,7 +173,7 @@ export const addArrayTreeKey = function(treeData, params, options = {}) {
 }
 /* 
     @description  判断数组是否完全包含某个数组的数据
-    @autor        shuxiaokai
+    @author        shuxiaokai
     @create       2019-10-31 13:38"
     @params {Array}      arr 原数组
     @params {Array}      arr2 被包含数组
@@ -219,7 +219,7 @@ export const fullIncludes = function(arr, arr2) {
 //=====================================工具方法====================================//
 /* 
     @description  查找父节点
-    @autor        shuxiaokai
+    @author        shuxiaokai
     @create       2019-10-22 09:13"
     @params {String}       节点的id值
     @params {Array}        需要查找的树形组件
@@ -248,7 +248,7 @@ export const findParentNode = function(id, treeData, fn) {
 };
 /* 
     @description  查找某个节点所有子节点id(包括自身)
-    @autor              shuxiaokai
+    @author             shuxiaokai
     @create             2019-10-23 16:35"
     @params {Array}     当前节点数组      
     @params {Object}    当前节点id和children映射      
@@ -273,7 +273,7 @@ export const findChildrenNodeIds = function(node, props = {}) {
 };
 /* 
     @description  查找某个节点
-    @autor        shuxiaokai
+    @author        shuxiaokai
     @create       2019-10-23 19:23"
     @params {String}       节点的id值
     @params {Array}        需要查找的树形组件
@@ -302,7 +302,7 @@ export const findoNode = function(id, treeData, fn) {
 
 /* 
     @description  数组对象去重
-    @autor        shuxiaokai
+    @author        shuxiaokai
     @create       2019-11-14 14:57"
     @params {Array<Object>?}      arrData 需要去重数组
     @params {Array<String>?}      arrData 需要去重数组
@@ -337,7 +337,7 @@ export const zipArr = function(arrData, key) {
 };
 /** 
  * @description        遍历森林
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @create             2020-03-02 10:17
  * @params {array}     arrData 需要去重数组
  * @params {function}  arrData 需要去重数组

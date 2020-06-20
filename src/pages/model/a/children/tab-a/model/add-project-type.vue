@@ -49,7 +49,7 @@ export default {
     methods: {
         /* 
             @description  添加项目类型
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-19 22:34"
             @params       null
             @return       null
@@ -58,7 +58,7 @@ export default {
             this.$refs["form"].validate(valid => {
                 if (valid) {
                     this.loading = true;
-                    this.axios.post("/api/project/add_project_type", this.formInfo).then(res => {
+                    this.axios.post("/api/project/add_project_type", this.formInfo).then(() => {
                         this.$message.success("添加成功");
                         this.$emit("close");
                     }).catch(err => {
@@ -71,7 +71,7 @@ export default {
         },
         /* 
             @description  关闭弹窗
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-19 22:39"
             @params       null
             @return       null

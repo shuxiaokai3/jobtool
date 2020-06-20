@@ -70,7 +70,7 @@ export default {
     methods: {
         /* 
             @description  新增参数组名称
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-11-06 22:44"
             @params       null
             @return       null
@@ -99,7 +99,7 @@ export default {
         },
         /* 
             @description  关闭弹窗
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-19 22:39"
             @params       null
             @return       null

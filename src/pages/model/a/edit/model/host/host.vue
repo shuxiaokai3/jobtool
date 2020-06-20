@@ -72,7 +72,7 @@ export default {
     methods: {
         /* 
             @description  新增host
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-28 10:26"
             @params       null
             @return       null
@@ -97,7 +97,7 @@ export default {
         },
         /* 
             @description  关闭弹窗
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-19 22:39"
             @params       null
             @return       null

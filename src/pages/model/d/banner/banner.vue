@@ -269,7 +269,7 @@ export default {
         },
         /* 
             @description  循环匹配关键字
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-11-15 17:31"
             @params       
             @return       null

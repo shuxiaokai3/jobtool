@@ -1,6 +1,6 @@
 /** 
  * @description        判断一个变量是否为数组(类数组不属于该范围)
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @updateAuthor       shuxiaokai
  * @create             2019-11-27 11:07
  * @update             2019-11-27 11:07

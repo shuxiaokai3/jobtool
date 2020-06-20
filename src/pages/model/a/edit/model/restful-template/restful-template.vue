@@ -185,7 +185,7 @@ export default {
     methods: {
         /** 
             @description  添加restful模板
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2020-02-01 20:48"
             @params       null
             @return       null
@@ -231,7 +231,7 @@ export default {
         },
         /** 
          * @description        去除无效参数
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2020-01-15 13:27
          * @update             2020-01-15 13:27
@@ -262,7 +262,7 @@ export default {
         },
         /** 
             @description  关闭弹窗
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-19 22:39"
             @params       null
             @return       null

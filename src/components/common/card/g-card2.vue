@@ -1,6 +1,6 @@
 /** 
  * @description        全局卡片
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @updateAuthor       shuxiaokai
  * @create             2020-02-17 15:28
  * @update             2020-02-17 15:28

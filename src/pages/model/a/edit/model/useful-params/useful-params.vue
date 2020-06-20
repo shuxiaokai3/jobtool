@@ -150,7 +150,7 @@ export default {
         //=====================================表格相关====================================//
         /**
             @description  获取表格数据
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-11-12 13:57"
         */
         getData() {
@@ -254,7 +254,7 @@ export default {
         },
         /* 
             @description  关闭弹窗
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-19 22:39"
         */
         closeModel() {

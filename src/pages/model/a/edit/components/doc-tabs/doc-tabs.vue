@@ -1,6 +1,6 @@
 /** 
  * @description        文档tabs切换
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @updateAuthor       shuxiaokai
  * @create             2020-01-13 14:43
  * @update             2020-01-13 14:43

@@ -1,6 +1,6 @@
 /** 
  * @description        公共组件相关内容
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @create             2020-05-31 15:15
  */
 

@@ -2,7 +2,7 @@
 
 /* 
     @description  错误捕获并且上传
-    @autor        shuxiaokai
+    @author        shuxiaokai
     @create       2019-07-07 13:20"
     
     一. 错误类型为uncatchError,一般出现于promise中的异常抛出，常规情况无法捕获，需要在window上面监听unhandledrejection事件进行处理，这类异常只上报相关堆栈信息
@@ -29,7 +29,7 @@ class Logs {
 
     /* 
         @description  封装http错误上报信息
-        @autor        shuxiaokai
+        @author        shuxiaokai
         @create       2019-07-29 15:45"
     */
     async addHttpErrorPayload(err, time, route) {
@@ -76,7 +76,7 @@ class Logs {
 
     /* 
         @description  添加代码错误上报信息
-        @autor        shuxiaokai
+        @author        shuxiaokai
         @create       2019-07-29 16:28"
     */
     addCodeErrorPayload(err, vm) {
@@ -105,7 +105,7 @@ class Logs {
 
     /* 
         @description  未捕获异常拦截(通常出现在promise中的抛错)
-        @autor        shuxiaokai
+        @author        shuxiaokai
         @create       2019-07-09 14:10"
     */
     initUnHandledRejection() {
@@ -135,7 +135,7 @@ class Logs {
 
     /* 
         @description  http错误拦截,拦截http状态码不为200的错误
-        @autor        shuxiaokai
+        @author        shuxiaokai
         @create       2019-07-08 16:42"
     */
     httpCatch(err, time, vm) {
@@ -158,7 +158,7 @@ class Logs {
 
     /* 
         @description  拦截http状态未ok，但是自定义状态码异常的请求
-        @autor        shuxiaokai
+        @author        shuxiaokai
         @create       2019-07-29 11:36"
     */
     async httpFailCatch(err, time, route) {
@@ -179,7 +179,7 @@ class Logs {
 
     /* 
         @description  时间过长请求拦截
-        @autor        shuxiaokai
+        @author        shuxiaokai
         @create       2019-07-08 16:42"
         @params       
         @return       
@@ -202,7 +202,7 @@ class Logs {
     }
     /* 
         @description  代码错误捕获
-        @autor        shuxiaokai
+        @author        shuxiaokai
         @create       2019-07-29 11:21"
         @params       
         @return       
@@ -229,7 +229,7 @@ class Logs {
     }
     /* 
         @description  vue自带warn捕获
-        @autor        shuxiaokai
+        @author        shuxiaokai
         @create       2019-07-07 13:22"
         @params       msg<String> 错误提示信息
         @params       vm<Object> 虚拟dom

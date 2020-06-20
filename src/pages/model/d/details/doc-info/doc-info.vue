@@ -492,7 +492,7 @@ export default {
         },
         /* 
             @description  查看返回参数是否一致
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-11-13 17:54"
             @params       返回参数
         */

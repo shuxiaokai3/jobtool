@@ -253,7 +253,7 @@ export default {
         //=====================================前后台交互====================================//
         /* 
             @description  开启测试
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-29 13:18"
         */
         handleAddTest() {
@@ -313,7 +313,7 @@ export default {
         //=====================================其他操作====================================//
         /* 
             @description  关闭弹窗
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-19 22:39"
             @params       null
             @return       null
@@ -329,7 +329,7 @@ export default {
         },
         /* 
             @description  查看返回参数是否一致
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-11-13 17:54"
             @params       返回参数
         */
@@ -365,7 +365,7 @@ export default {
 
         /* 
             @description  处理请求折叠面板
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-29 18:54"
             @params       
             @return       null

@@ -55,7 +55,7 @@ export default {
         //=====================================表格相关====================================//
         /* 
             @description  获取项目列表
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-20 21:00"
             @params       
             @return       null
@@ -83,7 +83,7 @@ export default {
         },
         /* 
             @description  删除一个项目类型
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-20 20:55"
             @params       _id 项目id
             @return       null
@@ -106,7 +106,7 @@ export default {
         },
         /* 
             @description  关闭弹窗
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-19 22:39"
             @params       null
             @return       null

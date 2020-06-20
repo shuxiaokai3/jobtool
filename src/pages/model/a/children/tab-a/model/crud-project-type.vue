@@ -101,7 +101,7 @@ export default {
         //=====================================新增====================================//
         /** 
          * @description        添加项目类型
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2019-12-30 10:44
          * @update             2019-12-30 10:44
@@ -125,7 +125,7 @@ export default {
         //=====================================查看(表格相关)====================================//
         /** 
          * @description        获取项目列表
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2019-12-30 10:42
          * @update             2019-12-30 10:42
@@ -154,7 +154,7 @@ export default {
         //=====================================修改====================================//
         /** 
          * @description        让当前行处于修改状态
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2019-12-30 13:21
          * @update             2019-12-30 13:21
@@ -166,7 +166,7 @@ export default {
         },
         /** 
          * @description        确认修改当前行
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2019-12-30 13:21
          * @update             2019-12-30 13:21
@@ -183,7 +183,7 @@ export default {
         },
         /** 
          * @description        取消修改
-         * @autor              shuxiaokai
+         * @author             shuxiaokai
          * @updateAuthor       shuxiaokai
          * @create             2019-12-30 13:22
          * @update             2019-12-30 13:22
@@ -196,7 +196,7 @@ export default {
         //=====================================删除====================================//
         /** 
         * @description        删除一个项目类型
-        * @autor              shuxiaokai
+        * @author             shuxiaokai
         * @updateAuthor       shuxiaokai
         * @create             2019-12-30 10:42
         * @update             2019-12-30 10:42
@@ -220,7 +220,7 @@ export default {
         //=====================================其他====================================//
         /** 
         * @description        关闭弹窗
-        * @autor              shuxiaokai
+        * @author             shuxiaokai
         * @updateAuthor       shuxiaokai
         * @create             2019-12-30 10:42
         * @update             2019-12-30 10:42

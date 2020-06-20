@@ -145,7 +145,7 @@ export default {
         //=====================================表格相关====================================//
         /* 
             @description  获取项目列表
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-11-12 13:57"
         */
         getData() {
@@ -212,7 +212,7 @@ export default {
             const params = {};
             params[key] = row[key];
             params._id = row._id;
-            this.axios.put("/api/project/doc_code", params).then(res => {
+            this.axios.put("/api/project/doc_code", params).then(() => {
                 
             }).catch(err => {
                 this.$errorThrow(err, this);
@@ -232,7 +232,7 @@ export default {
         },
         /* 
             @description  新增状态码
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-11-12 13:44"
             @params       null
             @return       null
@@ -259,7 +259,7 @@ export default {
         },
         /* 
             @description  关闭弹窗
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-19 22:39"
             @params       null
             @return       null

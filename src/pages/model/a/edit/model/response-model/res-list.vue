@@ -90,7 +90,7 @@ export default {
         //=====================================数据获取====================================//
         /* 
             @description  获取参数列表
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-11-05 15:21"
         */
         getPresetParamsList() {
@@ -113,7 +113,7 @@ export default {
         },
         /* 
             @description  获取预设参数组详情信息
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-11-05 16:42"
         */
         getPresetParamsInfo(_id) {
@@ -159,7 +159,7 @@ export default {
         },
         /* 
             @description  保存参数组信息
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-11-06 22:09"
         */
         savePresetParamsInfo() {
@@ -184,7 +184,7 @@ export default {
         //=====================================其他操作====================================//
         /* 
             @description  关键字过滤参数组
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-11-05 15:44"
             @params       
             @return       null
@@ -200,7 +200,7 @@ export default {
         },
         /* 
             @description  关闭弹窗
-            @autor        shuxiaokai
+            @author        shuxiaokai
             @create       2019-10-19 22:39"
             @params       null
             @return       null

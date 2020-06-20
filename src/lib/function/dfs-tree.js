@@ -2,7 +2,7 @@
 
 /** 
  * @description        深度优先?遍历树,注意不会遍历原型上面属性和方法
- * @autor              shuxiaokai
+ * @author             shuxiaokai
  * @updateAuthor       shuxiaokai
  * @create             2020-01-31 17:14
  * @update             2020-01-31 17:14
