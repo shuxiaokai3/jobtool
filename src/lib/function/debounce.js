@@ -17,7 +17,7 @@ function debounce(fn, delay = 300, immediate = false) {
     return function() {
         clearInterval(timer);
         timer = setTimeout(() => {
-            fn.call(this);
+            fn.apply(this, arguments);
         }, delay, immediate);
     }
 }
