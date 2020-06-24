@@ -9,7 +9,7 @@
         <!-- 搜索条件 -->
         <div class="search-item d-flex a-center">
             <el-input v-model="projectName" placeholder="搜索项目名称" prefix-icon="el-icon-search" size="small" class="w-200px mr-3" @input="filterProject" clearable></el-input>
-            <el-button size="small" type="success" icon="el-icon-plus" @click="dialogVisible2 = true">新建项目</el-button>
+            <el-button size="small" type="success" icon="el-icon-plus" @click="dialogVisible = true">新建项目</el-button>
         </div> 
         <!-- 项目列表 -->
         <div v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)" class="project-wrap mt-3">
@@ -17,7 +17,7 @@
                 <div class="project-header">
                     <div class="title theme-color text-ellipsis">{{ item.projectName }}</div>
                     <div class="operator">
-                        <div title="编辑">
+                        <div title="编辑" @click="handleOpenEditDialog(item)">
                             <i class="el-icon-edit"></i>
                         </div>
                         <div title="分享">
@@ -50,17 +50,30 @@
                 </div>
             </div>
         </div>
+        <!-- 新增项目弹窗 -->
+        <s-add-project-dialog v-if="dialogVisible" :visible.sync="dialogVisible" @success="getProjectList"></s-add-project-dialog>
+        <s-edit-project-dialog v-if="dialogVisible2" :id="projectId" :visible.sync="dialogVisible2" @success="getProjectList"></s-edit-project-dialog>
     </div>
 </template>
 
 <script>
+import addProjectDialog from "../dialog/add-project"
+import editProjectDialog from "../dialog/edit-project"
 export default {
+    components: {
+        "s-add-project-dialog": addProjectDialog,
+        "s-edit-project-dialog": editProjectDialog,
+    },
     data() {
         return {
+            //=========================================================================//
             projectList: [], //------项目列表
             projectListCopy: [], //--项目列表拷贝用户数据过滤
             projectName: "", //------搜索框项目名称
+            projectId: "", //--------修改项目时候获取项目详情id
             //=====================================其他====================================//
+            dialogVisible: false, //-新增项目弹窗
+            dialogVisible2: false, //修改项目弹窗
             loading: false, //-------数据加载状态
         };
     },
@@ -69,6 +82,7 @@ export default {
     },
     methods: {
         //=====================================获取远程数据==================================//
+        //获取项目列表
         getProjectList() {
             const params = this.formInfo;
             this.loading = true;
@@ -82,6 +96,28 @@ export default {
             });
         },
         //=====================================前后端交互====================================//
+        //删除项目
+        deleteProject(id) {
+            this.$confirm("此操作将永久删除此条记录, 是否继续?", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning"
+            }).then(() => {
+                const params = {
+                    ids: [id]
+                };
+                this.axios.delete("/api/project/delete_project", { data: params }).then(() => {
+                    this.getProjectList();
+                }).catch(err => {
+                    this.$errorThrow(err, this);
+                })
+            }).catch(err => {
+                if (err === "cancel" || err === "close") {
+                    return;
+                }
+                this.$errorThrow(err, this);
+            });
+        },
 
         //=====================================组件间交互====================================//  
         //过滤项目
@@ -90,8 +126,12 @@ export default {
                 return val.projectName.match(new RegExp(this.projectName, "gi"));
             });
         },
+        //打开修改弹窗
+        handleOpenEditDialog(item) {
+            this.dialogVisible2 = true;
+            this.projectId = item._id;
+        },
         //=====================================其他操作=====================================//
-
     }
 };
 </script>
