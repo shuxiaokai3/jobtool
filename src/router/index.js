@@ -22,6 +22,14 @@ const allRoutes = [
         component: () => import("@/pages/modules/apidoc/doc-list/doc-list"),
     },
     {
+        path: "/v1/apidoc/doc-edit",
+        name: "文档工具-文档编辑",
+        meta: {
+            title: "文档编辑"
+        },
+        component: () => import("@/pages/modules/apidoc/doc-edit/doc-edit"),
+    },
+    {
         path: "/v1/b/b",
         name: "项目管理-常用网站列表",
         meta: {
