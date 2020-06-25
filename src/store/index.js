@@ -8,6 +8,7 @@ import components from "./components/components"
 import permission from "./permission/permission"
 import config from "./config/config"
 import layout from "./layout/layout"
+import apidoc from "./apidoc/apidoc"
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
@@ -25,7 +26,8 @@ const store = new Vuex.Store({
         components,
         layout,
         config,
-        permission
+        permission,
+        apidoc
     },
     strict: false
 });
