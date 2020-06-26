@@ -12,7 +12,7 @@
             <el-input v-model="query" class="doc-search" placeholder="支持文档名称，文档url搜索" clearable @input="handleSearchTree"></el-input>
             <div class="tool-icon d-flex j-between mt-1 px-1">
                 <el-tooltip class="item" effect="dark" content="新增文件夹" :open-delay="300">
-                    <svg class="svg-icon" aria-hidden="true">
+                    <svg class="svg-icon" aria-hidden="true" @click="handleOpenAddFolderDialog">
                         <use xlink:href="#iconxinzengwenjian"></use>
                     </svg>                        
                 </el-tooltip>
@@ -50,21 +50,42 @@
                     :expand-on-click-node="false" 
                     :highlight-current="true"
             >
+                <template slot-scope="scope">
+                    <div class="custom-tree-node">
+                        <span v-show="scope.data.item.methods === 'get'" class="label green">get</span>
+                        <span v-show="scope.data.item.methods === 'post'" class="label yellow">post</span>
+                        <span v-show="scope.data.item.methods === 'put'" class="label blue">put</span>
+                        <span v-show="scope.data.item.methods === 'delete'" class="label red">del</span>
+                    </div>
+                </template>
             </el-tree>
         </div>
+        <s-add-folder-dialog :visible.sync="dialogVisible" :pid="docParentId"></s-add-folder-dialog>
     </div>
 </template>
 
 <script>
+import addFolderDialog from "../../dialog/add-folder"
 export default {
+    components: {
+        "s-add-folder-dialog": addFolderDialog
+    },
+    computed: {
+        navTreeData() { //----树形导航数据
+            return this.$store.state.apidoc.banner;
+        }
+    },
     data() {
         return {
-            query: "", //----------导航
-            navTreeData: [], //----树形导航数据
+            //=====================================文档增删改查====================================//
+            query: "", //----------------导航
+            docParentId: "", //----------文档父id
+            //=====================================其他参数====================================//
+            dialogVisible: false, //-----新增文件夹弹窗
         };
     },
-    created() {
-
+    mounted() {
+        this.$store.dispatch("apidoc/getDocBanner", { _id: this.$route.query.id });
     },
     methods: {
         //=====================================获取远程数据==================================//
@@ -74,7 +95,10 @@ export default {
 
         },
         //=====================================组件间交互====================================//  
-        
+        //打开文件新增弹窗
+        handleOpenAddFolderDialog() {
+            this.dialogVisible = true;
+        },
         //=====================================其他操作=====================================//
 
     }
@@ -118,6 +142,32 @@ export default {
     }
     .doc-nav {
         height: calc(100vh - #{size(60)} - #{size(150)});
+        .custom-tree-node {
+            display: flex;
+            align-items: center;
+            height: 30px;
+            width: 100%;
+            .label {
+                display: inline-block;
+                width: 25px;
+            }
+            .node-name {
+                display: inline-block;
+                max-width: 180px;
+            }
+            .bg-active {
+                background: $theme-color;
+                color: #fff;
+            }
+            &.active {
+                .node-more {
+                    display: inline-block;
+                } 
+            }
+            .node-more {
+                display: none;
+            }
+        }
     }
 
 }
