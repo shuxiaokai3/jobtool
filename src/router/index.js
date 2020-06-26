@@ -120,19 +120,14 @@ router.beforeEach((to, from, next) => {
         return;
     }
     if (!hasPermission) { //未获取到路由
-        store.dispatch("getPermission").then(() => {
+        store.dispatch("permission/getPermission").then(() => {
             next();
         }).catch(err => {
             console.error(err);
         }).finally(() => {
-            //=====================================页面缓存处理，编辑页面id改变触发生命周期，id未改变不触发生命周期====================================//
-            if (to.meta && to.meta.couldCache) {
-                store.commit("changeRouterCache", { path: to.path, fullPath: to.fullPath })
-            }
             NProgress.done()
         });
     }
-    store.commit("layout/addTab", { path: to.path, fullPath: to.fullPath, title: to.meta.title }); //添加tabs
     next()
 })
 
