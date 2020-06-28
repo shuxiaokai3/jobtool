@@ -52,7 +52,7 @@ export default {
                         docName: this.formInfo.name,
                         isFolder: true,
                         projectId: this.$route.query.id,
-                        pid: "",
+                        pid: this.pid,
                     };
                     this.axios.post("/api/project/new_doc", params).then((res) => {
                         this.$emit("success", res.data);
@@ -72,6 +72,7 @@ export default {
         //关闭弹窗
         handleClose() {
             this.$emit("update:visible", false);
+            this.$emit("close");
         },
     }
 };
