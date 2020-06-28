@@ -11,6 +11,7 @@ import layout from "@/pages/layout/layout/index"
 import notFound from "@/pages/layout/layout/404/404.vue"
 const axios = api.axios;
 export default {
+    namespaced: true,
     state: {
         userInfo: {}, //-----------用户信息
         routes: [], //-------------路由
@@ -25,10 +26,10 @@ export default {
         //改变用户可访问路由
         changeRoutes(state, payload) {
             const routes = payload;
-            let localRoutes = sessionStorage.getItem("routes") || "[]";
+            let localRoutes = sessionStorage.getItem("permission/routes") || "[]";
             localRoutes = JSON.parse(localRoutes);
             const storeRoutes = unique(localRoutes.concat(routes), "path");
-            sessionStorage.setItem("routes", JSON.stringify(storeRoutes));
+            sessionStorage.setItem("permission/routes", JSON.stringify(storeRoutes));
             state.routes = storeRoutes;
         },  
         // 动态生成路由
@@ -60,6 +61,7 @@ export default {
                     component: notFound
                 }
             ])
+            // console.log(matchedRoutes)
         },
         // 清空全部权限
         clearAllPermission(state) {
@@ -79,16 +81,28 @@ export default {
     actions: {
         async getPermission(context) {
             return new Promise((resolve, reject) => {
-                axios.get("/api/security/user_base_info").then(res => { 
-                    context.commit("changeUserInfo", res.data);
-                    context.commit("changeMenus", res.data.clientBanner);
-                    context.commit("changeRoutes", res.data.clientRoutes);
-                    context.commit("generateRoutes");
-                    resolve(res.data);
-                }).catch(err => {
-                    // console.error(err);
-                    reject(err);
-                })                   
+                let userInfo = sessionStorage.getItem("permission/userInfo");
+                userInfo = JSON.parse(userInfo);
+                if (userInfo) {
+                    setTimeout(() => { //hack
+                        context.commit("changeUserInfo", userInfo);
+                        context.commit("changeMenus", userInfo.clientBanner);
+                        context.commit("changeRoutes", userInfo.clientRoutes);
+                        context.commit("generateRoutes");
+                        resolve(userInfo);                        
+                    })
+                } else {
+                    axios.get("/api/security/user_base_info").then(res => { 
+                        context.commit("changeUserInfo", res.data);
+                        context.commit("changeMenus", res.data.clientBanner);
+                        context.commit("changeRoutes", res.data.clientRoutes);
+                        context.commit("generateRoutes");
+                        resolve(res.data);
+                        sessionStorage.setItem("permission/userInfo", JSON.stringify(res.data));
+                    }).catch(err => {
+                        reject(err);
+                    })                          
+                }
             });
         }
     }

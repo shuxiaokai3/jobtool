@@ -226,7 +226,8 @@ export const fullIncludes = function(arr, arr2) {
     @params {Function?}    可以传入一个函数就行条件判断，函数第一个参数为当前节点信息，存在fn那么判断结果以fn返回值为准
     @return       父节点(如果未找到返回null)
 */
-export const findParentNode = function(id, treeData, fn) {
+export const findParentNode = function(id, treeData, fn, options) {
+    const pathId = options.id || "id";
     let result = null;
     const parent = null;
     if (id == null) {
@@ -234,7 +235,7 @@ export const findParentNode = function(id, treeData, fn) {
     }
     const findPNode = (id, treeData, parent) => {
         treeData.forEach(val => {
-            if ((fn && fn(val) === true) || val.id === id) {
+            if ((fn && fn(val) === true) || val[pathId] === id) {
                 result = parent;
                 return;
             }
@@ -280,14 +281,15 @@ export const findChildrenNodeIds = function(node, props = {}) {
     @params {Function?}    可以传入一个函数就行条件判断，函数第一个参数为当前节点信息，存在fn那么判断结果以fn返回值为准
     @return       节点(如果未找到返回null)
 */
-export const findoNode = function(id, treeData, fn) {
+export const findoNode = function(id, treeData, fn, options) {
+    const pathId = options.id || "id";
     let result = null;
     if (id == null) {
         return null;
     }
     const findNodeId = (id, treeData) => {
         for (let i = 0; i < treeData.length; i++) {
-            if ((fn && fn(treeData[i]) === true) || treeData[i].id === id) {
+            if ((fn && fn(treeData[i]) === true) || treeData[i][pathId] === id) {
                 result = treeData[i];
                 break
             } 

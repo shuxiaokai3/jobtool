@@ -40,6 +40,8 @@ a {
 
 button,
 input,
+div,
+span,
 textarea {
   outline: none;
   padding: 0; }
@@ -129,7 +131,7 @@ pre {
   color: #f8f9fa; }
 
 .gray-200 {
-  color: #e9ecef; }
+  color: #f4f4f4; }
 
 .gray-300 {
   color: #dee2e6; }
@@ -219,7 +221,7 @@ pre {
   background-color: #f8f9fa; }
 
 .bg-gray-200 {
-  background-color: #e9ecef; }
+  background-color: #f4f4f4; }
 
 .bg-gray-300 {
   background-color: #dee2e6; }
@@ -396,7 +398,7 @@ pre {
   border-top: 1px solid #f8f9fa; }
 
 .border-top-gray-200 {
-  border-top: 1px solid #e9ecef; }
+  border-top: 1px solid #f4f4f4; }
 
 .border-top-gray-300 {
   border-top: 1px solid #dee2e6; }
@@ -486,7 +488,7 @@ pre {
   border-bottom: 1px solid #f8f9fa; }
 
 .border-bottom-gray-200 {
-  border-bottom: 1px solid #e9ecef; }
+  border-bottom: 1px solid #f4f4f4; }
 
 .border-bottom-gray-300 {
   border-bottom: 1px solid #dee2e6; }
@@ -576,7 +578,7 @@ pre {
   border-left: 1px solid #f8f9fa; }
 
 .border-left-gray-200 {
-  border-left: 1px solid #e9ecef; }
+  border-left: 1px solid #f4f4f4; }
 
 .border-left-gray-300 {
   border-left: 1px solid #dee2e6; }
@@ -666,7 +668,7 @@ pre {
   border-right: 1px solid #f8f9fa; }
 
 .border-right-gray-200 {
-  border-right: 1px solid #e9ecef; }
+  border-right: 1px solid #f4f4f4; }
 
 .border-right-gray-300 {
   border-right: 1px solid #dee2e6; }
@@ -756,7 +758,7 @@ pre {
   border: 1px solid #f8f9fa; }
 
 .border-gray-200 {
-  border: 1px solid #e9ecef; }
+  border: 1px solid #f4f4f4; }
 
 .border-gray-300 {
   border: 1px solid #dee2e6; }
@@ -3162,10 +3164,10 @@ pre {
   color: #f8f9fa; }
 
 .hover-bg-gray-200:hover {
-  background: #e9ecef; }
+  background: #f4f4f4; }
 
 .hover-gray-200:hover {
-  color: #e9ecef; }
+  color: #f4f4f4; }
 
 .hover-bg-gray-300:hover {
   background: #dee2e6; }
