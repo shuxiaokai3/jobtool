@@ -60,11 +60,11 @@
                 <template slot-scope="scope">
                     <div 
                         class="custom-tree-node"
-                        :class="{'selected': multiSelectNode.includes(scope.data._id)}"
+                        :class="{'selected': multiSelectNode.find(val => val.data._id === scope.data._id)}"
                         tabindex="1"
                         @keydown.prevent="handleKeydown($event, scope.data)"
                         @keyup="handleKeyUp"
-                        @click="handleClickNode($event, scope.data)"
+                        @click="handleClickNode($event, scope)"
                         @mouseover="hoverNodeId = scope.data._id"
                         @mouseout="hoverNodeId = ''"
                     >
@@ -112,7 +112,7 @@
 
 <script>
 import Vue from "vue"
-import { findoNode, findParentNode } from "@/lib/utils"
+import { findoNode, findParentNode, forEachForest } from "@/lib/utils"
 import addFolderDialog from "../../dialog/add-folder"
 import addFileDialog from "../../dialog/add-file"
 import contextmenu from "./components/contextmenu"
@@ -225,14 +225,14 @@ export default {
             this.pressCtrl = false;
         },
         //点击节点
-        handleClickNode(e, data) {
+        handleClickNode(e, { node },) {
             if (this.pressCtrl) {
                 e.stopPropagation();
-                const delIndex = this.multiSelectNode.findIndex(val => val === data._id);
+                const delIndex = this.multiSelectNode.findIndex(val => val._id === node.data._id);
                 if (delIndex !== -1) {
                     this.multiSelectNode.splice(delIndex, 1);
                 } else {
-                    this.multiSelectNode.push(data._id);
+                    this.multiSelectNode.push(node);
                 }
             }
         },
@@ -331,20 +331,25 @@ export default {
         handleSearchTree() {},
         //删除某一项
         handleDeleteItem(data, node) {
-            const deleteId = data._id
+            let deleteId = [];
+            deleteId.push(data._id);
+            if (data.isFolder) { //删除所有子元素
+                forEachForest(data.children, (item) => {
+                    deleteId.push(item);
+                });
+            } 
             this.$confirm(`此操作将永久删除 ${data.docName} 节点, 是否继续?`, "提示", {
                 confirmButtonText: "确定",
                 cancelButtonText: "取消",
                 type: "warning"
             }).then(() => {
-                this.axios.delete("/api/project/doc", { data: { _id: deleteId }}).then(() => {
+                this.axios.delete("/api/project/doc", { data: { projectId: this.$route.query.id, ids: deleteId }}).then(() => {
                     const pNode = node.parent;
-                    console.log(pNode)
                     if (pNode && pNode.level !== 0) {
-                        const nodeIndex = pNode.data.children.findIndex(val => val._id === deleteId);
+                        const nodeIndex = pNode.data.children.findIndex(val => val._id === data._id);
                         pNode.data.children.splice(nodeIndex, 1)
                     } else {
-                        const nodeIndex = this.navTreeData.findIndex(val => val._id === deleteId);
+                        const nodeIndex = this.navTreeData.findIndex(val => val._id === data._id);
                         this.navTreeData.splice(nodeIndex, 1);
                     }
                 }).catch(err => {
@@ -359,20 +364,32 @@ export default {
         },
         //批量删除
         handleDeleteManyItem() {
-            const delIds = this.multiSelectNode; //必须存放在某个变量中，因为鼠标左键会清除已选数据
-            this.$confirm(`确认删除选中的${this.multiSelectNode.length}个节点, 是否继续?`, "提示", {
+            let deleteId = [];
+            const selectNodeCopy = this.multiSelectNode; //点击节点会清空选中数据
+
+            this.multiSelectNode.forEach(val => {
+                deleteId.push(val.data._id);
+                // const currentNode = findoNode(val.data._id, this.navTreeData, null, { id: "_id" });
+                // console.log(currentNode)
+                if (val.data.isFolder) { //删除所有子元素
+                    forEachForest(val.data.children || [], (item) => {
+                        deleteId.push(item._id);
+                    });
+                }                 
+            })
+            this.$confirm(`确认删除选中的${deleteId.length}个节点, 是否继续?`, "提示", {
                 confirmButtonText: "确定",
                 cancelButtonText: "取消",
                 type: "warning"
             }).then(() => {
-                this.axios.delete("/api/project/doc", { data: { _id: delIds }}).then(() => {
-                    this.multiSelectNode.forEach(delNodeId => {
-                        const pNode = findParentNode(delNodeId, this.navTreeData, null, { id: "_id" });
+                this.axios.delete("/api/project/doc", { data: { projectId: this.$route.query.id, ids: deleteId }}).then(() => {
+                    selectNodeCopy.forEach(delNode => {
+                        const pNode = delNode.parent;
                         if (pNode && pNode.level !== 0) { //非根元素
-                            const nodeIndex = pNode.data.children.findIndex(val => val._id === delNodeId);
+                            const nodeIndex = pNode.data.children.findIndex(val => val._id === delNode.data._id);
                             pNode.data.children.splice(nodeIndex, 1)
                         } else { //根元素
-                            const nodeIndex = this.navTreeData.findIndex(val => val._id === delNodeId);
+                            const nodeIndex = this.navTreeData.findIndex(val => val._id === delNode.data._id);
                             this.navTreeData.splice(nodeIndex, 1);
                         }
                     })
