@@ -302,6 +302,66 @@ export const findoNode = function(id, treeData, fn, options) {
     return result;
 };
 
+/**
+    @description  查找上一个兄弟元素
+    @author        shuxiaokai
+    @create       2019-10-23 19:23"
+    @params {String}       节点的id值
+    @params {Array}        需要查找的树形组件
+    @params {Function?}    可以传入一个函数就行条件判断，函数第一个参数为当前节点信息，存在fn那么判断结果以fn返回值为准
+    @return       节点(如果未找到返回null)
+*/
+export const findPreviousSibling = function(id, treeData, fn, options) {
+    const pathId = options.id || "id";
+    let sibling = null;
+    if (id == null) {
+        return null;
+    }
+    const findNodePreviouseNode = (id, treeData) => {
+        for (let i = 0; i < treeData.length; i++) {
+            if ((fn && fn(treeData[i]) === true) || treeData[i][pathId] === id) {
+                sibling = treeData[i - 1] || null;
+                break
+            } 
+            if (treeData[i].children && treeData[i].children.length > 0) {
+                findNodePreviouseNode(id, treeData[i].children);
+            }
+        }
+    }
+    findNodePreviouseNode(id, treeData);
+    return sibling;
+};
+
+/**
+    @description  查找下一个兄弟元素
+    @author        shuxiaokai
+    @create       2019-10-23 19:23"
+    @params {String}       节点的id值
+    @params {Array}        需要查找的树形组件
+    @params {Function?}    可以传入一个函数就行条件判断，函数第一个参数为当前节点信息，存在fn那么判断结果以fn返回值为准
+    @return       节点(如果未找到返回null)
+*/
+export const findNextSibling = function(id, treeData, fn, options) {
+    const pathId = options.id || "id";
+    let sibling = null;
+    if (id == null) {
+        return null;
+    }
+    const findNodeNextNode = (id, treeData) => {
+        for (let i = 0; i < treeData.length; i++) {
+            if ((fn && fn(treeData[i]) === true) || treeData[i][pathId] === id) {
+                sibling = treeData[i + 1] || null;
+                break
+            } 
+            if (treeData[i].children && treeData[i].children.length > 0) {
+                findNodeNextNode(id, treeData[i].children);
+            }
+        }
+    }
+    findNodeNextNode(id, treeData);
+    return sibling;
+};
+
 /* 
     @description  数组对象去重
     @author        shuxiaokai
@@ -355,7 +415,7 @@ export const forEachForest = function(forest, fn, options = {}) {
             }
         }
     }
-    foo(forest, fn, childrenKey);
+    foo(forest || [], fn, childrenKey);
 };
 
 
