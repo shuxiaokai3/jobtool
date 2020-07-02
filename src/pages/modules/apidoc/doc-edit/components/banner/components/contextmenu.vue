@@ -12,6 +12,7 @@
         <div v-show="operations.includes('rename')" class="item-list" @click="handleClickItem('rename')">重命名</div>
         <div v-show="operations.includes('copy')" class="item-list" @click="handleClickItem('copy')">复制接口</div>                    
         <div v-show="operations.includes('delete')" class="item-list" @click="handleClickItem('delete')">删除</div>                    
+        <div v-show="operations.includes('deleteMany')" class="item-list" @click="handleClickItem('deleteMany')">批量删除</div>                    
     </div>
 </template>
 
@@ -62,6 +63,9 @@ export default {
                     break;
                 case "copy":
                     this.$emit("copy")
+                    break;
+                case "deleteMany":
+                    this.$emit("deleteMany")
                     break;
                 default:
                     break;

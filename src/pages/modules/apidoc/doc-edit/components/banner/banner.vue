@@ -41,22 +41,30 @@
             </div>
         </div>
         <!-- 树形文档导航 -->
-        <div class="doc-nav">
+        <div v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)" class="doc-nav">
             <el-tree 
                     ref="docTree"
                     :data="navTreeData" 
-                    node-key="id" 
+                    node-key="_id" 
                     empty-text="点击按钮新增文档"
                     :expand-on-click-node="true" 
-                    @node-contextmenu="handleContextmenu"
+                    draggable
                     :highlight-current="true"
+                    :allow-drop="handleCheckNodeCouldDrop"
+                    @node-contextmenu="handleContextmenu"
+                    @node-drop="handleNodeDropSuccess"
+                    @node-expand="clearContextmenu"
+                    @node-collapse="clearContextmenu"
+                    @node-click="handleNodeClick" 
             >
                 <template slot-scope="scope">
                     <div 
                         class="custom-tree-node"
-                        :class="{'has-hover': hoverNodeId}"
+                        :class="{'selected': multiSelectNode.find(val => val.data._id === scope.data._id)}"
                         tabindex="1"
-                        @keydown="handleKeydown($event, scope.data)"
+                        @keydown.prevent="handleKeydown($event, scope.data)"
+                        @keyup="handleKeyUp"
+                        @click="handleClickNode($event, scope)"
                         @mouseover="hoverNodeId = scope.data._id"
                         @mouseout="hoverNodeId = ''"
                     >
@@ -69,6 +77,21 @@
                             <img v-else :src="require('@/assets/imgs/apidoc/file.png')" width="16px" height="16px"/> 
                             <span v-if="renameNodeId !== scope.data._id" :title="scope.data.docName" class="node-name text-ellipsis ml-1">{{ scope.data.docName }}</span>
                             <input v-else v-model="scope.data.docName" placeholder="不能为空" type="text" class="rename-ipt f-sm ml-1" @blur="handleChangeNodeName(scope.data)" @keydown.enter="handleChangeNodeName(scope.data)">
+                            <el-dropdown 
+                                v-show="hoverNodeId === scope.data._id"
+                                class="node-more ml-auto mr-2"
+                                trigger="click"
+                                @command="(command) => { this.handleSelectDropdown(command, data) }"
+                                @click.native.stop="() =>{}"
+                            >
+                                <span class="el-icon-more"></span>
+                                <el-dropdown-menu slot="dropdown">
+                                    <el-dropdown-item v-if="scope.data.isFolder" command="addFile">新建文档</el-dropdown-item>
+                                    <el-dropdown-item v-if="scope.data.isFolder" command="addTemplate">以模板新建</el-dropdown-item>
+                                    <el-dropdown-item command="rename">重命名</el-dropdown-item>
+                                    <el-dropdown-item command="delete">删除</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </el-dropdown>  
                         </template>
                         <!-- 文件夹渲染 -->
                         <template v-if="scope.data.isFolder">
@@ -104,7 +127,7 @@
 
 <script>
 import Vue from "vue"
-import { findoNode } from "@/lib/utils"
+import { findoNode, forEachForest, findPreviousSibling, findNextSibling, findParentNode } from "@/lib/utils"
 import addFolderDialog from "../../dialog/add-folder"
 import addFileDialog from "../../dialog/add-file"
 import contextmenu from "./components/contextmenu"
@@ -124,23 +147,30 @@ export default {
             query: "", //----------------导航
             docParentId: "", //----------文档父id
             contextmenu: null, //--------右键弹窗
-            renameNodeId: "", //------正在重命名的节点
+            renameNodeId: "", //---------正在重命名的节点
+            pressCtrl: false, //---------是否按住ctrl键
+            multiSelectNode: [], //------按住ctrl+鼠标左键多选节点
             //=====================================其他参数====================================//
             hoverNodeId: "", //----------控制导航节点更多选项显示
             dialogVisible: false, //-----新增文件夹弹窗
             dialogVisible2: false, //----新增文件弹窗
+            loading: false, //-----------左侧树形导航加载
         };
     },
     mounted() {
-        this.$store.dispatch("apidoc/getDocBanner", { _id: this.$route.query.id });
         this.init();
     },
     methods: {
         //=====================================初始化相关====================================//
         init() {
+            this.loading = true;
+            this.$store.dispatch("apidoc/getDocBanner", { _id: this.$route.query.id }).then(() => {
+                this.loading = false;
+            });
             document.documentElement.addEventListener("click", (e) => {
                 e.stopPropagation();
                 this.clearContextmenu();
+                this.multiSelectNode = [];
             })
         },
         //=====================================导航操作==================================//
@@ -148,11 +178,15 @@ export default {
         handleContextmenu(e, data, node) {
             e.stopPropagation();
             this.clearContextmenu(); //清除contextmenu
-            // console.log(data)
             const ContextmenuConstructor = Vue.extend(contextmenu);
             const x = e.clientX; //当前点击位置
             const y = e.clientY; //当前点击位置
-            const operations = data.isFolder ? ["file", "folder", "template", "rename", "delete"] : ["rename", "delete", "copy"]
+            let operations = [];
+            if (this.multiSelectNode.length > 0) {
+                operations = ["deleteMany"];
+            } else {
+                operations = data.isFolder ? ["file", "folder", "template", "rename", "delete"] : ["rename", "delete", "copy"];
+            }
             this.contextmenu = new ContextmenuConstructor({
                 propsData: {
                     operations,
@@ -179,6 +213,10 @@ export default {
             this.contextmenu.$on("delete", () => {
                 this.handleDeleteItem(data, node);
             })
+            this.contextmenu.$on("deleteMany", () => {
+                this.handleDeleteManyItem();
+                // console.log("deleteMany", this.multiSelectNode)
+            })
             this.contextmenu.$on("template", () => {
                 this.addRestFul(data);
             })
@@ -193,42 +231,210 @@ export default {
                 this.$nextTick(() => {
                     document.querySelector(".rename-ipt").focus();                    
                 })
+            } else if (e.code === "ControlLeft" || e.code === "ControlRight") {
+                this.pressCtrl = true;
             }
         }, 
+        //按键放开
+        handleKeyUp() {
+            this.pressCtrl = false;
+        },
+        //点击节点
+        handleClickNode(e, { node },) {
+            if (this.pressCtrl) {
+                e.stopPropagation();
+                const delIndex = this.multiSelectNode.findIndex(val => val._id === node.data._id);
+                if (delIndex !== -1) {
+                    this.multiSelectNode.splice(delIndex, 1);
+                } else {
+                    this.multiSelectNode.push(node);
+                }
+            }
+        },
         //添加文件夹或文档成功回调函数
         handleAddFileAndFolderCb(data) {
             const pNode = findoNode(this.docParentId, this.navTreeData, null, { id: "_id" });
-            if (!pNode) {
-                this.navTreeData.push(data)
-            }else if (data.isFolder) {
-                pNode.children.unshift(data);
-            } else {
-                pNode.children.push(data);
+            if (!pNode) { //插入到根元素
+                if (data.isFolder) { //如果是文件夹则放在第一位
+                    let folderIndex = -1;
+                    for (let i = 0,len = this.navTreeData.length; i < len; i++) {
+                        if (!this.navTreeData[i].isFolder) {
+                            this.navTreeData.splice(i, 0, data);
+                            folderIndex = i;
+                            break;
+                        }
+                    }
+                    if (folderIndex === -1) { //不存在文件则直接添加到末尾
+                        this.navTreeData.push(data);
+                    }
+                } else { //如果是文本
+                    this.navTreeData.push(data);
+                }
+            } else { //插入到文件夹里面
+                if (data.isFolder) { //如果是文件夹则放在第一位
+                    console.log(pNode)
+                    let folderIndex = -1;
+                    for (let i = 0,len = pNode.children.length; i < len; i++) {
+                        if (!pNode.children[i].isFolder) {
+                            pNode.children.splice(i, 0, data);
+                            folderIndex = i;
+                            break;
+                        }
+                    }
+                    if (folderIndex === -1) { //不存在文件则直接添加到末尾
+                        pNode.children.push(data);
+                    }
+                } else { //如果是文本
+                    pNode.children.push(data);
+                }
             }
         },
-        // //添加文档成功回调函数
-        // handleAddFileCb() {
-
-        // },
+        //判断是否允许拖拽
+        handleCheckNodeCouldDrop(draggingNode, dropNode, type) {
+            // console.log(draggingNode.data.isFolder, dropNode.data.isFolder, type)
+            if (!draggingNode.data.isFolder && dropNode.data.isFolder && type !== "inner") { //不允许文件在文件夹前面
+                return type !== "prev";
+            }
+            if (draggingNode.data.isFolder && !dropNode.data.isFolder) {
+                return false;
+            } else if (!dropNode.data.isFolder) { 
+                return type !== "inner";
+            } else {
+                return true
+            }
+        },
+        //拖拽成功时候触发
+        handleNodeDropSuccess(node, dropNode, type) {
+            const params = {
+                _id: node.data._id, //当前节点id
+                pid: "", //父元素
+                sort: 0, //当前节点排序效果
+            };
+            let pData = null;
+            if ((node.level !== dropNode.level) || (node.level === dropNode.level && type === "inner")) { //将节点放入子节点中
+                pData = findParentNode(node.data._id, this.navTreeData, null, {id: "_id"});
+                params.pid = pData ? pData._id : "";
+                while (pData != null) {
+                    pData = findParentNode(pData._id, this.navTreeData, null, {id: "_id"});
+                }
+            } else if (node.level === dropNode.level && type !== "inner") {
+                params.pid = node.data.pid;
+                pData = findParentNode(node.data._id, this.navTreeData, null, {id: "_id"});
+                while (pData != null) {
+                    pData = findParentNode(pData._id, this.navTreeData, null, {id: "_id"});
+                }
+            }
+            if (type === "inner") {
+                params.sort = Date.now();
+            } else {
+                const nextSibling = findNextSibling(node.data._id, this.navTreeData, null, { id: "_id" }) || {};
+                const previousSibling = findPreviousSibling(node.data._id, this.navTreeData, null, { id: "_id" }) || {};
+                const previousSiblingSort = previousSibling.sort || 0;
+                const nextSiblingSort = nextSibling.sort || Date.now();
+                console.log(nextSiblingSort, previousSiblingSort, nextSiblingSort + previousSiblingSort)
+                params.sort = (nextSiblingSort + previousSiblingSort) / 2;                
+                node.data.sort = (nextSiblingSort + previousSiblingSort) / 2;
+            }
+            this.axios.put("/api/project/change_doc_pos", params).then(() => {
+                
+            }).catch(err => {
+                this.$errorThrow(err, this);
+            });
+        },
+        //点击节点
+        handleNodeClick(data, node) {
+            console.log(node)
+            this.clearContextmenu();
+            this.multiSelectNode = [];
+        },
+        //拷贝节点
+        copyDoc(data) {
+            const params = {
+                _id: data._id
+            };
+            this.axios.post("/api/project/copy_doc", params).then(() => {
+                // data.id = res.data._id;
+                // data.label = res.data.docName;
+                // data.nodeType = res.data.isFolder ? "folder" : "file";
+                // if (data.nodeType === "file") {
+                //     this.$store.commit("addTab", {
+                //         projectId: this.$route.query._id,
+                //         id: res.data._id.toString(),
+                //         title: res.data.docName.toString(),
+                //         method: res.data.item.methods,
+                //         nodeType: data.nodeType,
+                //     });
+                //     this.currentFileTab = res.data;
+                //     this.$route.query.docId = res.data._id.toString();
+                // }
+            }).catch(err => {
+                this.$errorThrow(err, this);
+            });
+        },
         //=====================================前后端交互====================================//
         handleSearchTree() {},
         //删除某一项
         handleDeleteItem(data, node) {
-            const deleteId = data._id
+            let deleteId = [];
+            deleteId.push(data._id);
+            if (data.isFolder) { //删除所有子元素
+                forEachForest(data.children, (item) => {
+                    deleteId.push(item);
+                });
+            } 
             this.$confirm(`此操作将永久删除 ${data.docName} 节点, 是否继续?`, "提示", {
                 confirmButtonText: "确定",
                 cancelButtonText: "取消",
                 type: "warning"
             }).then(() => {
-                this.axios.delete("/api/project/doc", { data: { _id: deleteId }}).then(() => {
+                this.axios.delete("/api/project/doc", { data: { projectId: this.$route.query.id, ids: deleteId }}).then(() => {
                     const pNode = node.parent;
                     if (pNode && pNode.level !== 0) {
-                        const nodeIndex = pNode.children.findIndex(val => val._id === deleteId);
-                        pNode.splice(nodeIndex, 1)
+                        const nodeIndex = pNode.data.children.findIndex(val => val._id === data._id);
+                        pNode.data.children.splice(nodeIndex, 1)
                     } else {
-                        const nodeIndex = this.navTreeData.findIndex(val => val._id === deleteId);
+                        const nodeIndex = this.navTreeData.findIndex(val => val._id === data._id);
                         this.navTreeData.splice(nodeIndex, 1);
                     }
+                }).catch(err => {
+                    this.$errorThrow(err, this);
+                });            
+            }).catch((err) => {
+                if (err === "cancel" || err === "close") {
+                    return;
+                }
+                this.$errorThrow(err, this);
+            });
+        },
+        //批量删除
+        handleDeleteManyItem() {
+            let deleteId = [];
+            const selectNodeCopy = this.multiSelectNode; //点击节点会清空选中数据
+
+            this.multiSelectNode.forEach(val => {
+                deleteId.push(val.data._id);
+                if (val.data.isFolder) { //删除所有子元素
+                    forEachForest(val.data.children || [], (item) => {
+                        deleteId.push(item._id);
+                    });
+                }                 
+            })
+            this.$confirm(`确认删除选中的${deleteId.length}个节点, 是否继续?`, "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning"
+            }).then(() => {
+                this.axios.delete("/api/project/doc", { data: { projectId: this.$route.query.id, ids: deleteId }}).then(() => {
+                    selectNodeCopy.forEach(delNode => {
+                        const pNode = delNode.parent;
+                        if (pNode && pNode.level !== 0) { //非根元素
+                            const nodeIndex = pNode.data.children.findIndex(val => val._id === delNode.data._id);
+                            pNode.data.children.splice(nodeIndex, 1)
+                        } else { //根元素
+                            const nodeIndex = this.navTreeData.findIndex(val => val._id === delNode.data._id);
+                            this.navTreeData.splice(nodeIndex, 1);
+                        }
+                    })
                 }).catch(err => {
                     this.$errorThrow(err, this);
                 });            
@@ -271,7 +477,7 @@ export default {
             if (this.contextmenu) {
                 document.body.removeChild(this.contextmenu.$el);
                 this.contextmenu = null;
-            }            
+            }  
         },
     }
 };
@@ -319,6 +525,9 @@ export default {
             align-items: center;
             height: 30px;
             width: 100%;
+            &.selected {
+                background: mix($theme-color, $white, 50%);
+            }
             .label {
                 display: inline-block;
                 width: 25px;
