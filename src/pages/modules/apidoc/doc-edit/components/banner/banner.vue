@@ -127,7 +127,7 @@
 
 <script>
 import Vue from "vue"
-import { findoNode, forEachForest, findPreviousSibling, findNextSibling } from "@/lib/utils"
+import { findoNode, forEachForest, findPreviousSibling, findNextSibling, findParentNode } from "@/lib/utils"
 import addFolderDialog from "../../dialog/add-folder"
 import addFileDialog from "../../dialog/add-file"
 import contextmenu from "./components/contextmenu"
@@ -310,8 +310,20 @@ export default {
                 pid: "", //父元素
                 sort: 0, //当前节点排序效果
             };
-            // console.log(node, node.nextSibling, node.previousSibling, )
-            
+            let pData = null;
+            if ((node.level !== dropNode.level) || (node.level === dropNode.level && type === "inner")) { //将节点放入子节点中
+                pData = findParentNode(node.data._id, this.navTreeData, null, {id: "_id"});
+                params.pid = pData ? pData._id : "";
+                while (pData != null) {
+                    pData = findParentNode(pData._id, this.navTreeData, null, {id: "_id"});
+                }
+            } else if (node.level === dropNode.level && type !== "inner") {
+                params.pid = node.data.pid;
+                pData = findParentNode(node.data._id, this.navTreeData, null, {id: "_id"});
+                while (pData != null) {
+                    pData = findParentNode(pData._id, this.navTreeData, null, {id: "_id"});
+                }
+            }
             if (type === "inner") {
                 params.sort = Date.now();
             } else {
@@ -319,7 +331,9 @@ export default {
                 const previousSibling = findPreviousSibling(node.data._id, this.navTreeData, null, { id: "_id" }) || {};
                 const previousSiblingSort = previousSibling.sort || 0;
                 const nextSiblingSort = nextSibling.sort || Date.now();
-                params.sort = (nextSiblingSort - previousSiblingSort) / 2;                
+                console.log(nextSiblingSort, previousSiblingSort, nextSiblingSort + previousSiblingSort)
+                params.sort = (nextSiblingSort + previousSiblingSort) / 2;                
+                node.data.sort = (nextSiblingSort + previousSiblingSort) / 2;
             }
             this.axios.put("/api/project/change_doc_pos", params).then(() => {
                 
