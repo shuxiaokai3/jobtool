@@ -7,14 +7,19 @@
 <template>
     <div class="doc-edit">
         <s-banner></s-banner>
+        <div class="doc-wrap">
+            <s-navs></s-navs>
+        </div>
     </div>
 </template>
 
 <script>
 import banner from "./components/banner/banner"
+import navs from "./components/navs/navs"
 export default {
     components: {
-        "s-banner": banner
+        "s-banner": banner,
+        "s-navs": navs
     },
     data() {
         return {
@@ -42,5 +47,12 @@ export default {
 <style lang="scss">
 .doc-edit {
     height: calc(100vh - 60px);
+    display: flex;
+    .banner {
+        flex: 0 0 auto;
+    }
+    .doc-wrap {
+        width: calc(100vw - #{size(300)});
+    }
 }
 </style>
