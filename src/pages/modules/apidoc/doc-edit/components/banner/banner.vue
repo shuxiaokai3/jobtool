@@ -331,7 +331,6 @@ export default {
                 const previousSibling = findPreviousSibling(node.data._id, this.navTreeData, null, { id: "_id" }) || {};
                 const previousSiblingSort = previousSibling.sort || 0;
                 const nextSiblingSort = nextSibling.sort || Date.now();
-                console.log(nextSiblingSort, previousSiblingSort, nextSiblingSort + previousSiblingSort)
                 params.sort = (nextSiblingSort + previousSiblingSort) / 2;                
                 node.data.sort = (nextSiblingSort + previousSiblingSort) / 2;
             }
@@ -344,8 +343,16 @@ export default {
         //点击节点
         handleNodeClick(data, node) {
             console.log(node)
+            if (!node.data.isFolder) { //文件夹不做处理
+                this.$store.commit("apidoc/addTab", node.data);
+                this.$store.commit("apidoc/changeCurrentSelectDoc", {
+                    projectId: this.$route.query.id,
+                    activeNode: node.data
+                });
+            }
             this.clearContextmenu();
             this.multiSelectNode = [];
+
         },
         //拷贝节点
         copyDoc(data) {
