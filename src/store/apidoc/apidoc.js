@@ -46,15 +46,26 @@ export default {
         },
 
         //更新当前被选中的文档(不能未folder)
-        changeCurrentSelectDoc(state, payload) {
+        changeCurrentTab(state, payload) {
             const { projectId, activeNode } = payload;
             const isInProject = state.activeDoc[projectId]; //当前项目是否存在tabs
             if (!isInProject) {
                 Vue.set(state.activeDoc, projectId, {});
             }
             state.activeDoc[projectId] = activeNode;
-            localStorage.setItem("apidoc/activeDoc", JSON.stringify(state.activeDoc))
+            localStorage.setItem("apidoc/activeTab", JSON.stringify(state.activeDoc))
         },
+        //根据位置删除
+        deleteTabByPosition(state, payload) {
+            const { projectId, start, num } = payload;
+            if (state.tabs[projectId]) {
+                state.tabs[projectId].splice(start, num);
+            }
+            localStorage.setItem("apidoc/editTabs", JSON.stringify(state.tabs))
+        },
+
+
+
         //改变当前file信息
         changeCurrentFileTab(state, payload) {
             const { projectId, id, title, method, nodeType } = payload;
@@ -108,14 +119,7 @@ export default {
                 // localStorage.setItem("tabs", JSON.stringify(state.tabs[projectId]));   
             }
         },
-        //根据起始位置删除
-        deleteTabByPosition(state, payload) {
-            const { projectId, start, num } = payload;
-            if (state.tabs[projectId]) {
-                state.tabs[projectId].splice(start, num);
-            }
-            localStorage.setItem("editDocTabs", JSON.stringify(state.tabs))
-        },
+
     },
     actions: {
         async getDocBanner(context, payload) {
