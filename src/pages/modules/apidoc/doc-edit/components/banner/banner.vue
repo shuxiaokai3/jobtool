@@ -345,7 +345,7 @@ export default {
             console.log(node)
             if (!node.data.isFolder) { //文件夹不做处理
                 this.$store.commit("apidoc/addTab", node.data);
-                this.$store.commit("apidoc/changeCurrentSelectDoc", {
+                this.$store.commit("apidoc/changeCurrentTab", {
                     projectId: this.$route.query.id,
                     activeNode: node.data
                 });

@@ -57,7 +57,6 @@ export default {
                 });
             }
         },
-        
         currentSelectDoc() {
             return this.$store.state.apidoc.activeDoc[this.$route.query.id];
         }
@@ -81,37 +80,56 @@ export default {
             //获取本地tabs信息
             const projectId = this.$route.query.id;
             const tabs = localStorage.getItem("apidoc/editTabs") ? JSON.parse(localStorage.getItem("apidoc/editTabs")) : {};
-            const locatActiveDoc = localStorage.getItem("apidoc/activeDoc") ? JSON.parse(localStorage.getItem("apidoc/activeDoc")) : {};
+            const locatActiveDoc = localStorage.getItem("apidoc/activeTab") ? JSON.parse(localStorage.getItem("apidoc/activeTab")) : {};
             const currentProjectTabs = tabs[projectId] || [];
             const activeDoc = locatActiveDoc[projectId] || [];
             this.$store.commit("apidoc/updateAllTabs", {
                 projectId,
                 tabs: currentProjectTabs
             });
-            this.$store.commit("apidoc/changeCurrentSelectDoc", {
+            this.$store.commit("apidoc/changeCurrentTab", {
                 projectId,
                 activeNode: activeDoc
             });
         },
         //=====================================tabs操作====================================//
-        //关闭当前标签
-        handleCloseCurrent(item) {
-            this.$store.commit("deleteTab", {
-                projectId: this.$route.query.id,
-                id: item.id
-            });
-        },
         //选择当前标签
         selectCurrentTab(item) {
-            this.$store.commit("apidoc/changeCurrentSelectDoc", {
+            this.$store.commit("apidoc/changeCurrentTab", {
                 projectId: this.$route.query.id,
                 activeNode: item,
             });
         },
+
+        //关闭当前标签
+        handleCloseCurrent(item, index) {
+            this.$store.commit("apidoc/deleteTabByPosition", {
+                projectId: this.$route.query.id,
+                start: index,
+                num: 1
+            });
+
+            if (item._id === this.currentSelectDoc._id) { //如果删除的是当前选择的doc
+                if (!this.tabs[index]) { //删除位置不存在节点则下一个元素作为选中的tab
+                    if (this.tabs[index - 1]) { //选择上一个元素作为
+                        this.$store.commit("apidoc/changeCurrentTab", {
+                            projectId: this.$route.query.id,
+                            activeNode: this.tabs[index - 1],
+                        });
+                    }
+                } else {
+                    this.$store.commit("apidoc/changeCurrentTab", {
+                        projectId: this.$route.query.id,
+                        activeNode: this.tabs[index],
+                    });
+                }
+            } 
+        },
+
         //关闭右侧
         handleCloseRight(item, index) {
             if (this.tabs.length !== 1) {
-                this.$store.commit("deleteTabByPosition", {
+                this.$store.commit("apidoc/deleteTabByPosition", {
                     projectId: this.$route.query.id,
                     start: index + 1,
                     num: this.tabs.length - index - 1
@@ -239,40 +257,8 @@ export default {
                 display: flex;
                 align-items: center;
             }
-
-            &:first-of-type {
-                &::before {
-                    content: "";
-                    display: inline-block;
-                    height: 50%;
-                    position: absolute;
-                    transform: translate(0, -50%);
-                    left: 0;
-                    top: 50%;
-                    width: 1px;
-                    background: #aaa;
-                }
-            }
-            &::after {
-                content: "";
-                display: inline-block;
-                height: 50%;
-                position: absolute;
-                transform: translate(0, -50%);
-                right: 0;
-                top: 50%;
-                width: 1px;
-                background: #aaa;
-            }
             &.active {
                 background: #f0f3fa;
-                margin-left: -1px;
-                &::after {
-                    width: 0;
-                }
-                &::before {
-                    width: 0;
-                }
             }
         }
     }
