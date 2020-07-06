@@ -100,7 +100,6 @@ export default {
                 activeNode: item,
             });
         },
-
         //关闭当前标签
         handleCloseCurrent(item, index) {
             this.$store.commit("apidoc/deleteTabByPosition", {
@@ -108,7 +107,6 @@ export default {
                 start: index,
                 num: 1
             });
-
             if (item._id === this.currentSelectDoc._id) { //如果删除的是当前选择的doc
                 if (!this.tabs[index]) { //删除位置不存在节点则下一个元素作为选中的tab
                     if (this.tabs[index - 1]) { //选择上一个元素作为
@@ -125,42 +123,55 @@ export default {
                 }
             } 
         },
-
         //关闭右侧
         handleCloseRight(item, index) {
+            if (this.tabs.length !== 1) { //只剩一个tab删除无意义不做处理
+                this.$store.commit("apidoc/deleteTabByPosition", {
+                    projectId: this.$route.query.id,
+                    start: index + 1,
+                    num: this.tabs.length - index - 1
+                });
+                if (!this.tabs.find(val => val._id === this.currentSelectDoc._id)) { //关闭右侧后若在tabs里面无法找到选中节点，则取最后一个节点为选中节点
+                    this.$store.commit("apidoc/changeCurrentTab", {
+                        projectId: this.$route.query.id,
+                        activeNode: this.tabs[this.tabs.length - 1],
+                    });
+                }
+            }
+        },
+        //关闭左侧
+        handleCloseLeft(item, index) {
+            if (this.tabs.length !== 1) { //只剩一个tab删除无意义不做处理
+                this.$store.commit("apidoc/deleteTabByPosition", {
+                    projectId: this.$route.query.id, 
+                    start: 0,
+                    num: index
+                });
+                if (!this.tabs.find(val => val._id === this.currentSelectDoc._id)) { //关闭左侧后若在tabs里面无法找到选中节点，则取第一个节点为选中节点
+                    this.$store.commit("apidoc/changeCurrentTab", {
+                        projectId: this.$route.query.id,
+                        activeNode: this.tabs[0],
+                    });
+                }
+            }
+        },
+        //关闭其他标签
+        handleCloseOther(item, index) {
             if (this.tabs.length !== 1) {
                 this.$store.commit("apidoc/deleteTabByPosition", {
                     projectId: this.$route.query.id,
                     start: index + 1,
                     num: this.tabs.length - index - 1
                 });
-            }
-        },
-        //关闭左侧
-        handleCloseLeft(item, index) {
-            if (this.tabs.length !== 1) {
-                this.$store.commit("deleteTabByPosition", {
-                    projectId: this.$route.query.id, 
-                    start: 0,
-                    num: index
-                });
-            }
-            this.$store.commit("changeCurrentTab", item);
-        },
-        //关闭其他标签
-        handleCloseOther(item, index) {
-            if (this.tabs.length !== 1) {
-                this.$store.commit("deleteTabByPosition", {
-                    projectId: this.$route.query.id,
-                    start: index + 1,
-                    num: this.tabs.length - index - 1
-                });
-                this.$store.commit("deleteTabByPosition", {
+                this.$store.commit("apidoc/deleteTabByPosition", {
                     projectId: this.$route.query.id,
                     start: 0,
                     num: index 
                 });
-                this.$store.commit("changeCurrentTab", item);
+                this.$store.commit("apidoc/changeCurrentTab", {
+                    projectId: this.$route.query.id,
+                    activeNode: this.tabs[0],
+                });
             }
         },
         //右键菜单

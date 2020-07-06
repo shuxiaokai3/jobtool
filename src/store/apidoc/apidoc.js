@@ -3,7 +3,7 @@
  * @author              shuxiaokai
  * @create             2020-06-25 11:25
  */
-import Vue from "Vue"
+import Vue from "vue"
 import http from "@/api/api.js"
 const axios = http.axios;
 
@@ -63,8 +63,22 @@ export default {
             }
             localStorage.setItem("apidoc/editTabs", JSON.stringify(state.tabs))
         },
-
-
+        //根据id删除
+        deleteTabById(state, payload) {
+            const { projectId, deleteIds } = payload;
+            if (state.tabs[projectId]) {
+                const deleteIndexArr = [];
+                state.tabs[projectId].forEach((val, index) => {
+                    if (deleteIds.includes(val._id)) {
+                        deleteIndexArr.push(index);
+                    }
+                })
+                deleteIndexArr.forEach(index => {
+                    state.tabs[projectId].splice(index, 1);
+                })
+                
+            }
+        },
 
         //改变当前file信息
         changeCurrentFileTab(state, payload) {
