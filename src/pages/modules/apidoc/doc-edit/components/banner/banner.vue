@@ -62,7 +62,7 @@
                         class="custom-tree-node"
                         :class="{'selected': multiSelectNode.find(val => val.data._id === scope.data._id)}"
                         tabindex="1"
-                        @keydown.prevent="handleKeydown($event, scope.data)"
+                        @keydown="handleKeydown($event, scope.data)"
                         @keyup="handleKeyUp"
                         @click="handleClickNode($event, scope)"
                         @mouseover="hoverNodeId = scope.data._id"
@@ -232,6 +232,7 @@ export default {
         },   
         //处理节点上面keydown快捷方式(例如f2重命名)
         handleKeydown(e, data) {
+            console.log(2222)
             if (e.code === "F2") {
                 this.$set(data, "_docName", data.docName); //文档名称备份,防止修改名称用户名称填空导致异常
                 this.renameNodeId = data._id;
@@ -483,9 +484,12 @@ export default {
         },
         //重命名某个节点
         handleChangeNodeName(data) {
-            console.log(data.docName, data._docName, data)
+            this.renameNodeId = "";
             if (data.docName.trim() === "") {
                 data.docName = data._docName;
+                return;
+            }
+            if (data.docName === data._docName) {
                 return;
             }
             const params = {
