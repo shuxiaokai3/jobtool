@@ -139,6 +139,12 @@ export default {
     computed: {
         navTreeData() { //----树形导航数据
             return this.$store.state.apidoc.banner;
+        },
+        tabs() { //-----------全部tabs
+            return this.$store.state.apidoc.tabs[this.$route.query.id];
+        },
+        currentSelectDoc() { //当前选中的文档
+            return this.$store.state.apidoc.activeDoc[this.$route.query.id];
         }
     },
     data() {
@@ -288,6 +294,13 @@ export default {
                     pNode.children.push(data);
                 }
             }
+            if (!data.isFolder) { //文件夹不做处理
+                this.$store.commit("apidoc/addTab", data);
+                this.$store.commit("apidoc/changeCurrentTab", {
+                    projectId: this.$route.query.id,
+                    activeNode: data
+                });
+            }
         },
         //判断是否允许拖拽
         handleCheckNodeCouldDrop(draggingNode, dropNode, type) {
@@ -383,7 +396,7 @@ export default {
         //删除某一项
         handleDeleteItem(data, node) {
             let deleteId = [];
-            deleteId.push(data._id);
+            deleteId.push(data._id); //删除自己
             if (data.isFolder) { //删除所有子元素
                 forEachForest(data.children, (item) => {
                     deleteId.push(item);
@@ -403,6 +416,7 @@ export default {
                         const nodeIndex = this.navTreeData.findIndex(val => val._id === data._id);
                         this.navTreeData.splice(nodeIndex, 1);
                     }
+                    this.handleDeleteTabsById();
                 }).catch(err => {
                     this.$errorThrow(err, this);
                 });            
@@ -441,6 +455,7 @@ export default {
                             const nodeIndex = this.navTreeData.findIndex(val => val._id === delNode.data._id);
                             this.navTreeData.splice(nodeIndex, 1);
                         }
+                        this.handleDeleteTabsById();
                     })
                 }).catch(err => {
                     this.$errorThrow(err, this);
@@ -451,6 +466,19 @@ export default {
                 }
                 this.$errorThrow(err, this);
             });
+        },
+        //根据id删除tab
+        handleDeleteTabsById(deleteIds) {
+            this.$store.commit("apidoc/deleteTabById", {
+                projectId: this.$route.query.id,
+                deleteIds: deleteIds
+            });
+            if (!this.tabs.find(val => val._id === this.currentSelectDoc._id)) { //关闭左侧后若在tabs里面无法找到选中节点，则取第一个节点为选中节点
+                this.$store.commit("apidoc/changeCurrentTab", {
+                    projectId: this.$route.query.id,
+                    activeNode: this.tabs[this.tabs.length - 1],
+                });
+            }
         },
         //重命名某个节点
         handleChangeNodeName(data) {
