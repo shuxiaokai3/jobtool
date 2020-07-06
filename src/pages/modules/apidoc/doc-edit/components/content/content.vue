@@ -1,29 +1,17 @@
 /*
     创建者：shuxiaokai
-    创建时间：2020-06-24 20:24
-    模块名称：文档编辑界面
+    创建时间：2020-07-06 17:57
+    模块名称：文档书写区域区域
     备注：xxxx
 */
 <template>
-    <div class="doc-edit">
-        <s-banner></s-banner>
-        <div class="doc-wrap">
-            <s-navs></s-navs>
-            <s-content></s-content>
-        </div>
+    <div>
+        sadsad 
     </div>
 </template>
 
 <script>
-import banner from "./components/banner/banner"
-import navs from "./components/navs/navs"
-import content from "./components/content/content"
 export default {
-    components: {
-        "s-banner": banner,
-        "s-navs": navs,
-        "s-content": content,
-    },
     data() {
         return {
 
@@ -48,14 +36,5 @@ export default {
 
 
 <style lang="scss">
-.doc-edit {
-    height: calc(100vh - 60px);
-    display: flex;
-    .banner {
-        flex: 0 0 auto;
-    }
-    .doc-wrap {
-        width: calc(100vw - #{size(300)});
-    }
-}
+
 </style>
