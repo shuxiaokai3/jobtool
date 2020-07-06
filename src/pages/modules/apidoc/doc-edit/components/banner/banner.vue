@@ -233,6 +233,7 @@ export default {
         //处理节点上面keydown快捷方式(例如f2重命名)
         handleKeydown(e, data) {
             if (e.code === "F2") {
+                this.$set(data, "_docName", data.docName); //文档名称备份,防止修改名称用户名称填空导致异常
                 this.renameNodeId = data._id;
                 this.$nextTick(() => {
                     document.querySelector(".rename-ipt").focus();                    
@@ -482,6 +483,7 @@ export default {
         },
         //重命名某个节点
         handleChangeNodeName(data) {
+            console.log(data.docName, data._docName, data)
             if (data.docName.trim() === "") {
                 data.docName = data._docName;
                 return;
