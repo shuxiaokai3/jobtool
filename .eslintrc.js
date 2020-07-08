@@ -11,6 +11,13 @@ module.exports = {
     parser: 'babel-eslint'
   },
   rules: {
+	"vue/html-indent": ["error", 4, {
+		"attribute": 2,
+		"baseIndent": 1,
+		"closeBracket": 0,
+		"alignAttributesVertically": true,
+		"ignores": []
+	}],
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
 	'indent': [2, 4],//强制为4格缩进
