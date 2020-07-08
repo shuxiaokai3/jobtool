@@ -42,10 +42,10 @@
                 <div class="project-bottom d-flex">
                     <div>
                         <span class="f-sm">接口数:</span>
-                        <span class="teal">{{ item.num }}</span>
+                        <span class="teal">{{ item.docNum }}</span>
                     </div>
                     <div class="ml-auto">
-                        <el-button type="primary" size="mini" @click="enterToProject(item._id, item.projectName)">进入</el-button>
+                        <el-button type="primary" size="mini" @click="jumpToProject(item._id, item.projectName)">进入</el-button>
                     </div>
                 </div>
             </div>
@@ -118,7 +118,6 @@ export default {
                 this.$errorThrow(err, this);
             });
         },
-
         //=====================================组件间交互====================================//  
         //过滤项目
         filterProject() {
@@ -130,6 +129,15 @@ export default {
         handleOpenEditDialog(item) {
             this.dialogVisible2 = true;
             this.projectId = item._id;
+        },
+        //跳转至界面详情
+        jumpToProject(id) {
+            this.$router.push({
+                path: "/v1/apidoc/doc-edit",
+                query: {
+                    id
+                },
+            });
         },
         //=====================================其他操作=====================================//
     }

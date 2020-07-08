@@ -48,7 +48,7 @@
                     node-key="_id" 
                     empty-text="点击按钮新增文档"
                     :expand-on-click-node="true" 
-                    draggable
+                    :draggable="enableDrag"
                     :highlight-current="true"
                     :allow-drop="handleCheckNodeCouldDrop"
                     @node-contextmenu="handleContextmenu"
@@ -59,14 +59,14 @@
             >
                 <template slot-scope="scope">
                     <div 
-                        class="custom-tree-node"
-                        :class="{'selected': multiSelectNode.find(val => val.data._id === scope.data._id)}"
-                        tabindex="1"
-                        @keydown.prevent="handleKeydown($event, scope.data)"
-                        @keyup="handleKeyUp"
-                        @click="handleClickNode($event, scope)"
-                        @mouseover="hoverNodeId = scope.data._id"
-                        @mouseout="hoverNodeId = ''"
+                            class="custom-tree-node"
+                            :class="{'selected': multiSelectNode.find(val => val.data._id === scope.data._id)}"
+                            tabindex="1"
+                            @keydown="handleKeydown($event, scope.data)"
+                            @keyup="handleKeyUp"
+                            @click="handleClickNode($event, scope)"
+                            @mouseover="hoverNodeId = scope.data._id"
+                            @mouseout="hoverNodeId = ''"
                     >
                         <!-- file渲染 -->
                         <template v-if="!scope.data.isFolder">
@@ -78,11 +78,11 @@
                             <span v-if="renameNodeId !== scope.data._id" :title="scope.data.docName" class="node-name text-ellipsis ml-1">{{ scope.data.docName }}</span>
                             <input v-else v-model="scope.data.docName" placeholder="不能为空" type="text" class="rename-ipt f-sm ml-1" @blur="handleChangeNodeName(scope.data)" @keydown.enter="handleChangeNodeName(scope.data)">
                             <el-dropdown 
-                                v-show="hoverNodeId === scope.data._id"
-                                class="node-more ml-auto mr-2"
-                                trigger="click"
-                                @command="(command) => { this.handleSelectDropdown(command, data) }"
-                                @click.native.stop="() =>{}"
+                                    v-show="hoverNodeId === scope.data._id"
+                                    class="node-more ml-auto mr-2"
+                                    trigger="click"
+                                    @command="(command) => { this.handleSelectDropdown(command, data) }"
+                                    @click.native.stop="() =>{}"
                             >
                                 <span class="el-icon-more"></span>
                                 <el-dropdown-menu slot="dropdown">
@@ -99,11 +99,11 @@
                             <span v-if="renameNodeId !== scope.data._id" :title="scope.data.docName" class="node-name text-ellipsis ml-1">{{ scope.data.docName }}</span>
                             <input v-else v-model="scope.data.docName" placeholder="不能为空" type="text" class="rename-ipt f-sm ml-1" @blur="handleChangeNodeName(scope.data)" @keydown.enter="handleChangeNodeName(scope.data)">
                             <el-dropdown 
-                                v-show="hoverNodeId === scope.data._id"
-                                class="node-more ml-auto mr-2"
-                                trigger="click"
-                                @command="(command) => { this.handleSelectDropdown(command, data) }"
-                                @click.native.stop="() =>{}"
+                                    v-show="hoverNodeId === scope.data._id"
+                                    class="node-more ml-auto mr-2"
+                                    trigger="click"
+                                    @command="(command) => { this.handleSelectDropdown(command, data) }"
+                                    @click.native.stop="() =>{}"
                             >
                                 <span class="el-icon-more"></span>
                                 <el-dropdown-menu slot="dropdown">
@@ -139,6 +139,12 @@ export default {
     computed: {
         navTreeData() { //----树形导航数据
             return this.$store.state.apidoc.banner;
+        },
+        tabs() { //-----------全部tabs
+            return this.$store.state.apidoc.tabs[this.$route.query.id];
+        },
+        currentSelectDoc() { //当前选中的文档
+            return this.$store.state.apidoc.activeDoc[this.$route.query.id];
         }
     },
     data() {
@@ -150,6 +156,7 @@ export default {
             renameNodeId: "", //---------正在重命名的节点
             pressCtrl: false, //---------是否按住ctrl键
             multiSelectNode: [], //------按住ctrl+鼠标左键多选节点
+            enableDrag: true, //---------是否允许文档被拖拽
             //=====================================其他参数====================================//
             hoverNodeId: "", //----------控制导航节点更多选项显示
             dialogVisible: false, //-----新增文件夹弹窗
@@ -207,7 +214,8 @@ export default {
                 this.$set(data, "_docName", data.docName); //文档名称备份,防止修改名称用户名称填空导致异常
                 this.renameNodeId = data._id;
                 this.$nextTick(() => {
-                    document.querySelector(".rename-ipt").focus();                    
+                    document.querySelector(".rename-ipt").focus();
+                    this.enableDrag = false;                    
                 })
             })
             this.contextmenu.$on("delete", () => {
@@ -227,9 +235,11 @@ export default {
         //处理节点上面keydown快捷方式(例如f2重命名)
         handleKeydown(e, data) {
             if (e.code === "F2") {
+                this.$set(data, "_docName", data.docName); //文档名称备份,防止修改名称用户名称填空导致异常
                 this.renameNodeId = data._id;
                 this.$nextTick(() => {
-                    document.querySelector(".rename-ipt").focus();                    
+                    document.querySelector(".rename-ipt").focus();
+                    this.enableDrag = false;                    
                 })
             } else if (e.code === "ControlLeft" || e.code === "ControlRight") {
                 this.pressCtrl = true;
@@ -288,6 +298,13 @@ export default {
                     pNode.children.push(data);
                 }
             }
+            if (!data.isFolder) { //文件夹不做处理
+                this.$store.commit("apidoc/addTab", data);
+                this.$store.commit("apidoc/changeCurrentTab", {
+                    projectId: this.$route.query.id,
+                    activeNode: data
+                });
+            }
         },
         //判断是否允许拖拽
         handleCheckNodeCouldDrop(draggingNode, dropNode, type) {
@@ -331,7 +348,6 @@ export default {
                 const previousSibling = findPreviousSibling(node.data._id, this.navTreeData, null, { id: "_id" }) || {};
                 const previousSiblingSort = previousSibling.sort || 0;
                 const nextSiblingSort = nextSibling.sort || Date.now();
-                console.log(nextSiblingSort, previousSiblingSort, nextSiblingSort + previousSiblingSort)
                 params.sort = (nextSiblingSort + previousSiblingSort) / 2;                
                 node.data.sort = (nextSiblingSort + previousSiblingSort) / 2;
             }
@@ -344,8 +360,16 @@ export default {
         //点击节点
         handleNodeClick(data, node) {
             console.log(node)
+            if (!node.data.isFolder) { //文件夹不做处理
+                this.$store.commit("apidoc/addTab", node.data);
+                this.$store.commit("apidoc/changeCurrentTab", {
+                    projectId: this.$route.query.id,
+                    activeNode: node.data
+                });
+            }
             this.clearContextmenu();
             this.multiSelectNode = [];
+
         },
         //拷贝节点
         copyDoc(data) {
@@ -376,7 +400,7 @@ export default {
         //删除某一项
         handleDeleteItem(data, node) {
             let deleteId = [];
-            deleteId.push(data._id);
+            deleteId.push(data._id); //删除自己
             if (data.isFolder) { //删除所有子元素
                 forEachForest(data.children, (item) => {
                     deleteId.push(item);
@@ -396,6 +420,7 @@ export default {
                         const nodeIndex = this.navTreeData.findIndex(val => val._id === data._id);
                         this.navTreeData.splice(nodeIndex, 1);
                     }
+                    this.handleDeleteTabsById();
                 }).catch(err => {
                     this.$errorThrow(err, this);
                 });            
@@ -434,6 +459,7 @@ export default {
                             const nodeIndex = this.navTreeData.findIndex(val => val._id === delNode.data._id);
                             this.navTreeData.splice(nodeIndex, 1);
                         }
+                        this.handleDeleteTabsById();
                     })
                 }).catch(err => {
                     this.$errorThrow(err, this);
@@ -445,10 +471,28 @@ export default {
                 this.$errorThrow(err, this);
             });
         },
+        //根据id删除tab
+        handleDeleteTabsById(deleteIds) {
+            this.$store.commit("apidoc/deleteTabById", {
+                projectId: this.$route.query.id,
+                deleteIds: deleteIds
+            });
+            if (!this.tabs.find(val => val._id === this.currentSelectDoc._id)) { //关闭左侧后若在tabs里面无法找到选中节点，则取第一个节点为选中节点
+                this.$store.commit("apidoc/changeCurrentTab", {
+                    projectId: this.$route.query.id,
+                    activeNode: this.tabs[this.tabs.length - 1],
+                });
+            }
+        },
         //重命名某个节点
         handleChangeNodeName(data) {
+            this.renameNodeId = "";
+            this.enableDrag = true; //改名以后允许节点拖拽
             if (data.docName.trim() === "") {
                 data.docName = data._docName;
+                return;
+            }
+            if (data.docName === data._docName) {
                 return;
             }
             const params = {
@@ -456,6 +500,17 @@ export default {
                 docName: data.docName
             };
             this.axios.put("/api/project/change_doc_info", params).then(() => {
+                this.$store.commit("apidoc/changeTabInfoById", {
+                    _id: data._id,
+                    projectId: this.$route.query.id,
+                    docName: data.docName
+                });
+                if (this.currentSelectDoc._id === data._id) {
+                    this.$store.commit("apidoc/changeCurrentTabById", {
+                        projectId: this.$route.query.id,
+                        docName: data.docName
+                    });
+                }
             }).catch(err => {
                 data.docName = data._docName; //修改出错后回复文档名称
                 this.$errorThrow(err, this);
@@ -535,6 +590,7 @@ export default {
             .node-name {
                 display: inline-block;
                 max-width: 180px;
+                border: 2px solid transparent;
             }
         }
     }
