@@ -9,18 +9,18 @@
         <div class="my-tabs d-flex hidden-sm-and-down">
             <draggable id="tabList" v-model="tabs" animation="150" class="tab-list">
                 <div 
-                    v-for="(item, index) in tabs"
-                    :key="index"
-                    :title="item.docName"
-                    :class="{active: currentSelectDoc && currentSelectDoc._id === item._id}"
-                    class="item d-flex a-center"
-                    :data-index="index"
-                    @click="selectCurrentTab(item)"
-                    @contextmenu="handleRightClick($event, item, index)"
+                        v-for="(item, index) in tabs"
+                        :key="index"
+                        :title="item.docName"
+                        :class="{active: currentSelectDoc && currentSelectDoc._id === item._id}"
+                        class="item d-flex a-center"
+                        :data-index="index"
+                        @click="selectCurrentTab(item)"
+                        @contextmenu="handleRightClick($event, item, index)"
                 >
                     <span 
-                        :class="{ green: item.item.methods === 'get', yellow: item.item.methods === 'post', blue: item.item.methods === 'put', red: item.item.methods === 'delete'}"
-                        class="mr-2"
+                            :class="{ green: item.item.methods === 'get', yellow: item.item.methods === 'post', blue: item.item.methods === 'put', red: item.item.methods === 'delete'}"
+                            class="mr-2"
                     >
                         {{ item.item.methods.toUpperCase() }}
                     </span>

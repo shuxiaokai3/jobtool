@@ -7,7 +7,7 @@
 <template>
     <div class="content">
         <!-- 请求区域 -->
-        <div class="request">
+        <div class="request mb-5">
             <div class="config w-50">
                 <div class="d-flex mb-2">
                     <el-input v-model="request.url.path" placeholder="请输入内容" size="small" @blur="checkUrlRule">
@@ -33,8 +33,7 @@
             <div class="result">
             </div>
         </div>
-        <s-params-tree></s-params-tree>
-
+        <s-params-tree :tree-data="request.requestParams"></s-params-tree>
     </div>
 </template>
 

@@ -59,14 +59,14 @@
             >
                 <template slot-scope="scope">
                     <div 
-                        class="custom-tree-node"
-                        :class="{'selected': multiSelectNode.find(val => val.data._id === scope.data._id)}"
-                        tabindex="1"
-                        @keydown="handleKeydown($event, scope.data)"
-                        @keyup="handleKeyUp"
-                        @click="handleClickNode($event, scope)"
-                        @mouseover="hoverNodeId = scope.data._id"
-                        @mouseout="hoverNodeId = ''"
+                            class="custom-tree-node"
+                            :class="{'selected': multiSelectNode.find(val => val.data._id === scope.data._id)}"
+                            tabindex="1"
+                            @keydown="handleKeydown($event, scope.data)"
+                            @keyup="handleKeyUp"
+                            @click="handleClickNode($event, scope)"
+                            @mouseover="hoverNodeId = scope.data._id"
+                            @mouseout="hoverNodeId = ''"
                     >
                         <!-- file渲染 -->
                         <template v-if="!scope.data.isFolder">
@@ -78,11 +78,11 @@
                             <span v-if="renameNodeId !== scope.data._id" :title="scope.data.docName" class="node-name text-ellipsis ml-1">{{ scope.data.docName }}</span>
                             <input v-else v-model="scope.data.docName" placeholder="不能为空" type="text" class="rename-ipt f-sm ml-1" @blur="handleChangeNodeName(scope.data)" @keydown.enter="handleChangeNodeName(scope.data)">
                             <el-dropdown 
-                                v-show="hoverNodeId === scope.data._id"
-                                class="node-more ml-auto mr-2"
-                                trigger="click"
-                                @command="(command) => { this.handleSelectDropdown(command, data) }"
-                                @click.native.stop="() =>{}"
+                                    v-show="hoverNodeId === scope.data._id"
+                                    class="node-more ml-auto mr-2"
+                                    trigger="click"
+                                    @command="(command) => { this.handleSelectDropdown(command, data) }"
+                                    @click.native.stop="() =>{}"
                             >
                                 <span class="el-icon-more"></span>
                                 <el-dropdown-menu slot="dropdown">
@@ -99,11 +99,11 @@
                             <span v-if="renameNodeId !== scope.data._id" :title="scope.data.docName" class="node-name text-ellipsis ml-1">{{ scope.data.docName }}</span>
                             <input v-else v-model="scope.data.docName" placeholder="不能为空" type="text" class="rename-ipt f-sm ml-1" @blur="handleChangeNodeName(scope.data)" @keydown.enter="handleChangeNodeName(scope.data)">
                             <el-dropdown 
-                                v-show="hoverNodeId === scope.data._id"
-                                class="node-more ml-auto mr-2"
-                                trigger="click"
-                                @command="(command) => { this.handleSelectDropdown(command, data) }"
-                                @click.native.stop="() =>{}"
+                                    v-show="hoverNodeId === scope.data._id"
+                                    class="node-more ml-auto mr-2"
+                                    trigger="click"
+                                    @command="(command) => { this.handleSelectDropdown(command, data) }"
+                                    @click.native.stop="() =>{}"
                             >
                                 <span class="el-icon-more"></span>
                                 <el-dropdown-menu slot="dropdown">
