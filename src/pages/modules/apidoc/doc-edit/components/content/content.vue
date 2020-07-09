@@ -8,6 +8,8 @@
     <div class="content">
         <!-- 请求区域 -->
         <div class="request mb-5">
+            <!-- 接口描述 -->
+            <div class="edit-title f-bg mb-2" contenteditable @input="handleChangeTitle($event)" @blur="handleTitleBlur($event)">{{ request._description }}</div>
             <div class="config w-50">
                 <div class="d-flex mb-2">
                     <el-input v-model="request.url.path" placeholder="请输入内容" size="small" @blur="checkUrlRule">
@@ -21,10 +23,6 @@
                         </div>
                     </el-input> 
                     <el-button type="success" size="small">发送请求</el-button>
-                </div>
-                <div class="d-flex a-center">
-                    <span class="flex0">接口描述：</span>
-                    <el-input v-model="request.description" size="small" placeholder="请输入接口描述" class="w-100" maxlength="255" clearable></el-input>
                 </div>
                 <div>
                     
@@ -82,7 +80,8 @@ export default {
                         children: [], //---------子参数
                     }
                 ], //----------------------------请求头信息
-                description: "", //--------------请求描述
+                description: "在这里输入文档描述", //--------------请求描述
+                _description: "在这里输入文档描述", //-------------请求描述拷贝
             },
         };
     },
@@ -111,6 +110,20 @@ export default {
                 this.request.url.path = this.request.url.path.slice(1);
             }
         },
+        //改变title
+        handleChangeTitle(e) {
+            console.log(e)
+            this.request.description = e.target.innerText
+        },
+        //改变blur
+        handleTitleBlur(e) {
+            if (this.request.description.trim() === "") {
+                this.request.description = this.request._description;
+                e.target.innerText = this.request.description;
+            } else {
+                this.request._description = e.target.innerText;
+            }
+        },
         //=====================================其他操作=====================================//
 
     }
@@ -123,7 +136,7 @@ export default {
 .content {
     padding: size(20);
     .request {
-        display: flex;
+        // display: flex;
         width: 80%;
         .request-input {
             display: flex;
@@ -133,7 +146,13 @@ export default {
                 width: 100px;
             }
         }
-        .config {}
+        .edit-title {
+            padding: size(10);
+            border: 1px solid transparent;
+            &:hover {
+                border: 1px dashed $gray-500;
+            }        
+        }
     }
 }
 </style>
