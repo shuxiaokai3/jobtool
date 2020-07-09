@@ -5,7 +5,7 @@
     备注：xxxx
 */
 <template>
-    <s-card2 title="请求参数" class="collapse-wrap">
+    <s-card2 :title="title" collapse :fold="fold" class="collapse-wrap">
         <div class="params-edit">
             <el-tree 
                     :data="treeData" 
@@ -17,7 +17,7 @@
             >
                 <template slot-scope="scope">
                     <div class="custom-tree-node">
-                        <el-button type="text" title="添加嵌套数据" icon="el-icon-plus" :disabled="enableNest" @click="addNestTreeData(scope.data)"></el-button>
+                        <el-button type="text" :title="disableTitleTip" icon="el-icon-plus" :disabled="plain" @click="addNestTreeData(scope.data)"></el-button>
                         <el-button class="mr-2" title="删除当前项" type="text" icon="el-icon-close" @click="deleteTreeData(scope)"></el-button>
                         <div class="w-20 mr-2 d-flex a-center">
                             <s-v-input 
@@ -29,12 +29,12 @@
                                     @blur="handleCheckKey(scope)">
                             </s-v-input>
                         </div>
-                        <el-select v-model="scope.data.type" placeholder="类型" size="mini" class="w-10 mr-2" @change="handleChangeParamsType(scope.data)">
+                        <el-select v-model="scope.data.type" :disabled="plain" :title="disableTypeTip" placeholder="类型" size="mini" class="w-10 mr-2" @change="handleChangeParamsType(scope.data)">
                             <el-option label="String" value="string"></el-option>
-                            <el-option label="Number" value="number"></el-option>
-                            <el-option label="Boolean" value="boolean"></el-option>
-                            <el-option label="Object" value="object"></el-option>
-                            <el-option label="List | Array" value="array"></el-option>
+                            <el-option :disabled="plain" label="Number" value="number"></el-option>
+                            <el-option :disabled="plain" label="Boolean" value="boolean"></el-option>
+                            <el-option :disabled="plain" label="Object" value="object"></el-option>
+                            <el-option :disabled="plain" label="List | Array" value="array"></el-option>
                         </el-select>
                         <el-select v-if="scope.data.type === 'boolean'" v-model="scope.data.value" placeholder="请选择" size="mini" class="w-25 mr-2">
                             <el-option label="true" value="true"></el-option>
@@ -74,15 +74,23 @@
 import uuid from "uuid/v4"
 export default {
     props: {
+        title: { //-------------标题
+            type: String,
+            default: ""
+        },
         treeData: { //----------树形结构数据
             type: Array,
             default() {
                 return [];
             }
         },
-        enableNest: { //--------是否允许嵌套参数
+        plain: { //-------------是否为扁平数据，扁平数据不允许嵌套并且数据类型只能为string
             type: Boolean,
-            default: true
+            default: false
+        },
+        fold: { //--------------默认是否折叠
+            type: Boolean,
+            default: false
         },
     },
     data() {
@@ -96,6 +104,22 @@ export default {
                 message: "此项必填",
             }
         };
+    },
+    computed: {
+        disableTitleTip() {
+            if (!this.plain) {
+                return "点击添加嵌套数据"
+            } else {
+                return "当前类型只允许扁平数据，不允许存在复杂数据"
+            }
+        },
+        disableTypeTip() {
+            if (this.plain) {
+                return "get请求或者header的值只允许为string"
+            } else {
+                return ""
+            }
+        }
     },
     created() {
 
@@ -113,6 +137,7 @@ export default {
             const parentNode = node.parent;
             const parentData = node.parent.data;
             if (parentNode.level === 0) { //根节点直接往数据里面push，非根节点往children里push
+                console.log(parentData)
                 const deleteIndex = parentData.findIndex(val => val.id === data.id)
                 if (parentData.length - 1 === deleteIndex) { //不允许删除最后一个元素
                     return
