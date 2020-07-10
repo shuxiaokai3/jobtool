@@ -18,15 +18,27 @@
                 <template slot-scope="scope">
                     <div class="custom-tree-node">
                         <el-button type="text" :title="disableTitleTip" icon="el-icon-plus" :disabled="plain" @click="addNestTreeData(scope.data)"></el-button>
-                        <el-button class="mr-2" title="删除当前项" type="text" icon="el-icon-close" @click="deleteTreeData(scope)"></el-button>
+                        <el-button 
+                                class="mr-2"
+                                :disabled="!scope.node.nextSibling && scope.node.level === 1"
+                                :title="`${(!scope.node.nextSibling && scope.node.level === 1) ? '此项不允许删除' : '删除当前项'}`"
+                                type="text"
+                                icon="el-icon-close"
+                                @click="deleteTreeData(scope)">
+                        </el-button>
                         <div class="w-20 mr-2 d-flex a-center">
                             <s-v-input 
                                     v-model="scope.data.key" 
-                                    size="mini" :tip="keyTip"
+                                    size="mini"
+                                    :tip="keyTip"
                                     :error="scope.data._keyError"
                                     placeholder="参数名称，例如：age name job"
                                     @input="addNewLine(scope)"
-                                    @blur="handleCheckKey(scope)">
+                                    @blur="handleCheckKey(scope)"
+                            >
+                                <el-popover slot="tip" placement="top-start" trigger="hover" content="_id">
+                                    <span slot="reference" class="theme-color ml-2">白名单</span>
+                                </el-popover>
                             </s-v-input>
                         </div>
                         <el-select v-model="scope.data.type" :disabled="plain" :title="disableTypeTip" placeholder="类型" size="mini" class="w-10 mr-2" @change="handleChangeParamsType(scope.data)">
@@ -97,7 +109,7 @@ export default {
         return {
             activeCollapse: "1",
             keyTip: {
-                message: "必填，字母，数字并且必须为驼峰命名",
+                message: "字母,数字,驼峰命名",
                 reference: "http://baidu.com"
             },
             requiredTip: {
@@ -125,6 +137,7 @@ export default {
 
     },
     methods: {
+        //=====================================参数操作====================================//
         //添加嵌套数据
         addNestTreeData(data) {
             if (data.children == null) {
@@ -134,17 +147,22 @@ export default {
         },
         //删除数据
         deleteTreeData({ node, data }) {
+            console.log(node)
             const parentNode = node.parent;
             const parentData = node.parent.data;
-            if (parentNode.level === 0) { //根节点直接往数据里面push，非根节点往children里push
-                console.log(parentData)
-                const deleteIndex = parentData.findIndex(val => val.id === data.id)
+            if (parentNode.level === 0) { //根节点直接删除，非根节点在children里删除
+                console.log(parentData);
+                const deleteIndex = parentData.findIndex(val => val.id === data.id);
                 if (parentData.length - 1 === deleteIndex) { //不允许删除最后一个元素
-                    return
+                    return;
                 }
-                parentData.splice(deleteIndex, 1)
+                parentData.splice(deleteIndex, 1);
             } else {
-                const deleteIndex = parentData.children.findIndex(val => val.id === data.id)
+                const deleteIndex = parentData.children.findIndex(val => val.id === data.id);
+                // if (parentData.children.length > 1 && deleteIndex === parentData.children.length - 1) { //子元素大于1的时候最后一个数据不允许被删除
+                //     return;
+                // } else {
+                //     }
                 parentData.children.splice(deleteIndex, 1)
             }
         },
@@ -186,7 +204,7 @@ export default {
             if (parentNode.level === 0 && parentData.length === 1) { //根元素第一个可以不必校验因为参数可以不必填
                 return;
             }
-            if (nodeIndex !== parentData.length - 1) { //只要不是最后一个值都需要坐数据校验 
+            if (nodeIndex !== parentData.length - 1) { //只要不是最后一个值都需要做数据校验 
                 if (data.key.trim() === "") { //非空校验
                     this.$set(data, "_keyError", true)
                 } else if (!data.key.match(/^[a-zA-Z0-9]*$/)) { //字母数据
