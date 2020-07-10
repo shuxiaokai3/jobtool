@@ -7,30 +7,52 @@
 <template>
     <div class="edit-content">
         <!-- 请求区域 -->
-        <div class="request mb-5">
-            <!-- 接口描述 -->
-            <div class="edit-title w-50 f-bg mb-2" contenteditable @input="handleChangeTitle($event)" @blur="handleTitleBlur($event)">{{ request._description }}</div>
+        <div class="request mb-2">
             <div class="config w-50">
-                <div class="d-flex mb-2">
-                    <el-input v-model="request.url.path" placeholder="只需要输入接口地址，前面不需要加域名，加了会被忽略" size="small" @blur="checkUrlRule" @keyup.enter.native="checkUrlRule">
-                        <div slot="prepend" class="request-input">
-                            <el-select v-model="request.methods">
-                                <el-option value="get" label="get"></el-option>
-                                <el-option value="post" label="post"></el-option>
-                                <el-option value="put" label="put"></el-option>
-                                <el-option value="delete" label="delete"></el-option>
-                            </el-select>
-                        </div>
-                    </el-input> 
-                    <el-button type="success" size="small" @click="sendRequest">发送请求</el-button>
+                <!-- 接口描述 -->
+                <div class="edit-title w-100 f-bg mb-2" contenteditable @input="handleChangeTitle($event)" @blur="handleTitleBlur($event)">{{ request._description }}</div>
+                <!-- 域名 -->
+                <div class="mb-2">
+                    <el-radio-group v-model="request.url.host" size="mini">
+                        <el-popover placement="top-start" trigger="hover" :close-delay="0" content="http://127.0.0.1:7004">
+                            <el-radio slot="reference" label="http://127.0.0.1:7004" border>本地</el-radio>
+                        </el-popover>
+                        <el-popover v-for="(item, index) in hostEnum" :key="index" :close-delay="0" placement="top-start" trigger="hover" :content="item.url">
+                            <el-radio slot="reference" :label="item.url" border>{{ item.name }}</el-radio>
+                        </el-popover>
+                    </el-radio-group>
+                    <el-button type="text" size="small" @click="dialogVisible = true;">域名维护</el-button>
                 </div>
+                <div class="d-flex a-center w-100">
+                    <!-- 接口 -->
+                    <div class="d-flex w-100">
+                        <s-v-input 
+                                v-model="request.url.path"
+                                placeholder="只需要输入接口地址，前面不需要加域名，加了会被忽略"
+                                size="small"
+                                @blur="checkUrlRule"
+                                @keyup.enter.native="checkUrlRule"
+                        >
+                            <div slot="prepend" class="request-input">
+                                <el-select v-model="request.methods" @change="handleChangeRequestMethods">
+                                    <el-option value="get" label="get"></el-option>
+                                    <el-option value="post" label="post"></el-option>
+                                    <el-option value="put" label="put"></el-option>
+                                    <el-option value="delete" label="delete"></el-option>
+                                </el-select>
+                            </div>                        
+                        </s-v-input>
+                        <el-button type="success" size="small" @click="sendRequest">发送请求</el-button>
+                    </div>
+                </div>                
+                <pre class="w-100">{{ request.url.host }}{{ request.url.path }}</pre>
             </div>
-            <div class="result">
-            </div>
+
         </div>
-        <s-params-tree :tree-data="request.requestParams" title="请求参数" plain></s-params-tree>
+        <s-params-tree :tree-data="request.requestParams" title="请求参数" :plain="request.methods === 'get'"></s-params-tree>
         <s-params-tree :tree-data="request.responseParams" title="响应参数"></s-params-tree>
         <s-params-tree :tree-data="request.header" title="请求头" plain fold></s-params-tree>
+        <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible" @close="getHostEnum"></s-host-manage>
     </div>
 </template>
 
@@ -38,9 +60,12 @@
 import paramsTree from "./components/params-tree"
 import uuid from "uuid/v4"
 import qs from "qs"
+import { dfsForest } from "@/lib/utils"
+import hostManage from "./dialog/host-manage"
 export default {
     components: {
-        "s-params-tree": paramsTree
+        "s-params-tree": paramsTree,
+        "s-host-manage": hostManage
     },
     data() {
         return {
@@ -48,7 +73,7 @@ export default {
             request: {
                 methods: "get", //---------------请求方式
                 url: {
-                    host: "", //-----------------主机(服务器)地址
+                    host: "http://127.0.0.1:7004", //-----------------主机(服务器)地址
                     path: "", //-----------------接口路径
                 }, //----------------------------请求地址信息
                 requestParams: [
@@ -84,12 +109,28 @@ export default {
                 description: "在这里输入文档描述", //--------------请求描述
                 _description: "在这里输入文档描述", //-------------请求描述拷贝
             },
+            //=====================================域名相关====================================//
+            hostEnum: [], //---------------------域名列表
+            dialogVisible: false, //-------------域名维护弹窗
+            //=====================================其他参数====================================//
         };
     },
     created() {
-
+        this.getHostEnum(); //获取host枚举值
     },
     methods: {
+        //=====================================基础数据请求====================================//
+        //获取host枚举值
+        getHostEnum() {
+            const params = {
+                projectId: this.$route.query.id,
+            };
+            this.axios.get("/api/project/doc_service", { params }).then(res => {
+                this.hostEnum = res.data;
+            }).catch(err => {
+                console.error(err);
+            })
+        },
         //=====================================请求url处理====================================//  
         //验证请求url格式是否正确
         checkUrlRule() {
@@ -141,6 +182,14 @@ export default {
             }
             this.request.url.path = this.request.url.path.replace(/\?.*$/, "");
         },
+        //改变请求方法
+        handleChangeRequestMethods(val) {
+            if (val === "get") { //get请求需要清空嵌套数据
+                this.request.requestParams.forEach(params => {
+                    params.children = [];
+                })
+            }
+        },
         //=====================================title编辑处理====================================//
         //改变title
         handleChangeTitle(e) {
@@ -159,7 +208,43 @@ export default {
         //发送请求
         sendRequest() {
             console.log(JSON.parse(JSON.stringify(this.request)))
-        }
+            const validParams = this.validateParams();
+            if (!validParams) {
+                this.$message.error("xxx");
+            }
+        },
+        //检查参数是否完备
+        validateParams() {
+            let isValidRequest = true;
+            //=====================================检查参数是否必填或者按照规范填写====================================//
+            dfsForest(this.request.requestParams, {
+                rCondition(value) {
+                    return value.children;
+                },
+                rKey: "children",
+                hooks: (data, index, pData) => {
+                    if (pData.length - 1 === index) { //最后一个数据不做处理
+                        return;
+                    }
+                    if (data.key.trim() === "") { //非空校验
+                        this.$set(data, "_keyError", true);
+                        isValidRequest = false;
+                    } else if (!data.key.match(/^[a-zA-Z0-9]*$/)) { //字母数据
+                        this.$set(data, "_keyError", true);
+                        isValidRequest = false;
+                    }       
+                    if (data.value.trim() === "") {
+                        this.$set(data, "_valueError", true);
+                        isValidRequest = false;
+                    }
+                    if (data.description.trim() === "") {
+                        this.$set(data, "_descriptionError", true);
+                        isValidRequest = false;
+                    }
+                }
+            });
+            return isValidRequest;
+        },
         //=====================================其他操作=====================================//
 
     }
@@ -170,7 +255,7 @@ export default {
 
 <style lang="scss">
 .edit-content {
-    padding: size(20);
+    padding: size(10) size(20);
     .request {
         // display: flex;
         width: 80%;
@@ -188,6 +273,10 @@ export default {
                 border: 1px dashed $gray-500;
             }        
         }
+        .el-radio {
+            margin-right: size(10);
+        }
     }
+    
 }
 </style>
