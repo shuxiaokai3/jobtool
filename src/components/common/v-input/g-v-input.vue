@@ -6,10 +6,15 @@
 */
 <template>
     <div class="v-input" :class="{'valid-error': error}">
-        <el-input :value="value" v-bind="$attrs"  v-on="$listeners" @input="handleInput"></el-input>
+        <el-input :value="value" v-bind="$attrs"  v-on="$listeners" @input="handleInput">
+            <template slot="prepend">
+                <slot name="prepend"/>
+            </template>
+        </el-input>
         <span v-show="error" class="error-tip">
-            <span>{{ tip.message }}</span>
+            <span>{{ tip.message ? tip.message : tip }}</span>
             <span v-show="this.tip.reference" class="theme-color ml-2" @click="handleJumpToStander">查看规范</span>
+            <slot name="tip" />
         </span>
     </div>
 </template>
@@ -22,7 +27,7 @@ export default {
             default: ""
         },
         tip: { //-------------错误提示信息
-            type: Object,
+            type: [Object, String],
             default() {
                 return {};
             }
@@ -75,7 +80,7 @@ export default {
         text-indent: size(12);
         font-size: size(12);
         position: absolute;
-        bottom: size(-14);
+        top: size(30);
         line-height: size(12);
         left: 0;
         color: $orange;
