@@ -6,14 +6,13 @@
 */
 <template>
     <div class="s-collaps mb-1">
-        <div class="header mb-1" @click="isActive = !isActive">
+        <div class="header" @click="isActive = !isActive">
             <span :class="{'el-icon-caret-bottom': isActive, 'el-icon-caret-right': !isActive}"></span>
-            <span>{{ title }}</span>
+            <span class="ml-1">{{ title }}</span>
         </div>
-        <div class="pl-2" :class="{'h-0': !isActive}">
+        <div v-show="isActive" class="pl-5 gray-700">
             <slot />            
         </div>
-
     </div>
 </template>
 
@@ -57,6 +56,13 @@ export default {
 .s-collaps {
     .header {
         cursor: pointer;
+        height: size(25);
+        display: flex;
+        align-items: center;;
+        user-select: none;
+        &:hover {
+            background: mix($theme-color, $white, 10%);
+        }
     }
     .h-0 {
         height: 0;
