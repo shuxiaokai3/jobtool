@@ -41,10 +41,10 @@
                                 </el-popover>
                             </s-v-input>
                         </div>
-                        <el-select v-model="scope.data.type" :disabled="plain" :title="disableTypeTip" placeholder="类型" size="mini" class="w-10 mr-2" @change="handleChangeParamsType(scope.data)">
-                            <el-option label="String" value="string"></el-option>
-                            <el-option :disabled="plain" label="Number" value="number"></el-option>
-                            <el-option :disabled="plain" label="Boolean" value="boolean"></el-option>
+                        <el-select v-model="scope.data.type" :disabled="plain" :title="disableTypeTip" placeholder="类型" size="mini" class="mr-2" @change="handleChangeParamsType(scope.data)">
+                            <el-option :disabled="scope.data.children && scope.data.children.length > 0" label="String" value="string"></el-option>
+                            <el-option :disabled="plain || (scope.data.children && scope.data.children.length > 0)" label="Number" value="number"></el-option>
+                            <el-option :disabled="plain || (scope.data.children && scope.data.children.length > 0)" label="Boolean" value="boolean"></el-option>
                             <el-option :disabled="plain" label="Object" value="object"></el-option>
                             <el-option :disabled="plain" label="List | Array" value="array"></el-option>
                         </el-select>
@@ -143,7 +143,15 @@ export default {
             if (data.children == null) {
                 this.$set(data, "children", [])
             }
-            data.children.push(this.generateParams())
+            data.children.push(this.generateParams());
+            data.value = "";
+            this.$set(data, "_valueError", false);
+            this.$set(data, "_valuePlaceholder", "对象和数组不必填写参数值");
+            if (data.type === "object" || data.type === "array") {
+                return
+            } else { //默认设置为object
+                data.type = "object"
+            }
         },
         //删除数据
         deleteTreeData({ node, data }) {
