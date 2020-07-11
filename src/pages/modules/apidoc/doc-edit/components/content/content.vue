@@ -5,13 +5,11 @@
     备注：xxxx
 */
 <template>
-    <div class="edit-content">
-        <!-- 请求区域 -->
-        <div class="request mb-2">
-            <div class="config w-50">
-                <!-- 接口描述 -->
+    <div class="edit-content d-flex">
+        <div class="border-right-teal w-65">
+            <!-- 基本配置 -->
+            <div class="request">
                 <div class="edit-title w-100 f-bg mb-2" contenteditable @input="handleChangeTitle($event)" @blur="handleTitleBlur($event)">{{ request._description }}</div>
-                <!-- 域名 -->
                 <div class="mb-2">
                     <el-radio-group v-model="request.url.host" size="mini">
                         <el-popover placement="top-start" trigger="hover" :close-delay="0" content="http://127.0.0.1:7004">
@@ -47,25 +45,32 @@
                 </div>                
                 <pre class="w-100">{{ request.url.host }}{{ request.url.path }}</pre>
             </div>
-
+            <!-- 请求参数 -->
+            <div>
+                <s-params-tree :tree-data="request.requestParams" title="请求参数" :plain="request.methods === 'get'"></s-params-tree>
+                <s-params-tree :tree-data="request.responseParams" title="响应参数"></s-params-tree>
+                <s-params-tree :tree-data="request.header" title="请求头" plain fold></s-params-tree>            
+            </div>            
         </div>
-        <s-params-tree :tree-data="request.requestParams" title="请求参数" :plain="request.methods === 'get'"></s-params-tree>
-        <s-params-tree :tree-data="request.responseParams" title="响应参数"></s-params-tree>
-        <s-params-tree :tree-data="request.header" title="请求头" plain fold></s-params-tree>
+        <div class="w-35 flex1">
+            <s-response :request-data="request"></s-response>
+        </div>
         <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible" @close="getHostEnum"></s-host-manage>
     </div>
 </template>
 
 <script>
 import paramsTree from "./components/params-tree"
+import response from "./components/response"
+import hostManage from "./dialog/host-manage"
+import { dfsForest } from "@/lib/utils"
 import uuid from "uuid/v4"
 import qs from "qs"
-import { dfsForest } from "@/lib/utils"
-import hostManage from "./dialog/host-manage"
 export default {
     components: {
         "s-params-tree": paramsTree,
-        "s-host-manage": hostManage
+        "s-host-manage": hostManage,
+        "s-response": response,
     },
     data() {
         return {
@@ -223,6 +228,7 @@ export default {
                 },
                 rKey: "children",
                 hooks: (data, index, pData) => {
+                    const isComplex = (data.type === "object" || data.type === "array");
                     if (pData.length - 1 === index) { //最后一个数据不做处理
                         return;
                     }
@@ -233,7 +239,7 @@ export default {
                         this.$set(data, "_keyError", true);
                         isValidRequest = false;
                     }       
-                    if (data.value.trim() === "") {
+                    if (!isComplex && data.value.trim() === "") {
                         this.$set(data, "_valueError", true);
                         isValidRequest = false;
                     }
@@ -257,8 +263,6 @@ export default {
 .edit-content {
     padding: size(10) size(20);
     .request {
-        // display: flex;
-        width: 80%;
         .request-input {
             display: flex;
             align-items: center;
