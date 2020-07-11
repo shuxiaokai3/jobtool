@@ -164,7 +164,7 @@ $border-direction: (
     }
     .my-#{$i} {
         margin-top: size($i * 5);
-        bottom: size($i * 5);
+        margin-bottom: size($i * 5);
     }
     .px-#{$i} {
         padding-left: size($i * 5);
