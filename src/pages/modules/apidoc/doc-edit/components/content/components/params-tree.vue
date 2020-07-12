@@ -58,7 +58,7 @@
                                 title="对象和数组不必填写参数值"
                                 v-model="scope.data.value"
                                 size="mini"
-                                :tip="requiredTip"
+                                :tip="valueTip"
                                 :error="scope.data._valueError"
                                 class="w-25 mr-2"
                                 :placeholder="`${scope.data._valuePlaceholder || '参数值,例如：20 张三'}`"
@@ -112,8 +112,11 @@ export default {
                 message: "字母,数字,驼峰命名",
                 reference: "http://baidu.com"
             },
+            valueTip: {
+                message: "不能为空并且类型必须为数字",
+            },
             requiredTip: {
-                message: "此项必填",
+                message: "不能为空",
             }
         };
     },
@@ -235,9 +238,13 @@ export default {
             }
             if (nodeIndex !== parentData.length - 1) { //只要不是最后一个值都需要坐数据校验 
                 if (data.value.trim() === "") { //非空校验
-                    this.$set(data, "_valueError", true)
+                    this.valueTip.message = "不能为空"
+                    this.$set(data, "_valueError", true);
+                } else if (data.type === "number" && !data.value.match(/^-?(0\.\d+|[1-9]+\.\d+|[1-9]\d{0,20})$/)) { //纯数字校验
+                    this.valueTip.message = "不能为空，并且值必须为数字"
+                    this.$set(data, "_valueError", true);
                 } else {
-                    this.$set(data, "_valueError", false)
+                    this.$set(data, "_valueError", false);
                 }                
             } 
         },
