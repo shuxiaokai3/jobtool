@@ -32,7 +32,9 @@
                                     size="mini"
                                     :tip="keyTip"
                                     :error="scope.data._keyError"
-                                    placeholder="参数名称，例如：age name job"
+                                    :disabled="scope.node.parent.data.type === 'array'"
+                                    :title="`${scope.node.parent.data.type === 'array' ?  '父元素为list不必填写参数名称' : '参数名称，例如：age name job'}`"
+                                    :placeholder="`${scope.node.parent.data.type === 'array' ?  '父元素为list不必填写参数名称' : '参数名称，例如：age name job'}`"
                                     @input="addNewLine(scope)"
                                     @blur="handleCheckKey(scope)"
                             >
@@ -84,6 +86,7 @@
 
 <script>
 import uuid from "uuid/v4"
+import { dfsForest } from "@/lib/utils"
 export default {
     props: {
         title: { //-------------标题
@@ -198,7 +201,19 @@ export default {
             if (data.type === "boolean") {
                 data.value = "true";
             }
+
             if (data.type === "object" || data.type === "array") {
+                if (data.type === "array") { //清空子元素所有参数名称
+                    dfsForest(data.children, {
+                        rCondition(value) {
+                            return value.children;
+                        },
+                        rKey: "children",
+                        hooks: (data) => {
+                            data.key = "";
+                        }
+                    });
+                }
                 data.value = "";
                 this.$set(data, "_valueError", false);
                 this.$set(data, "_valuePlaceholder", "对象和数组不必填写参数值");
