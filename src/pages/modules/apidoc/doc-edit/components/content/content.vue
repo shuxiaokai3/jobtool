@@ -8,7 +8,7 @@
     <div class="edit-content d-flex">
         <div class="border-right-teal w-65">
             <!-- 基本配置 -->
-            <div class="request">
+            <div class="request mb-2">
                 <div class="edit-title w-100 f-bg mb-2" contenteditable @input="handleChangeTitle($event)" @blur="handleTitleBlur($event)">{{ request._description }}</div>
                 <div class="mb-2">
                     <el-radio-group v-model="request.url.host" size="mini">
@@ -63,7 +63,7 @@
 import paramsTree from "./components/params-tree"
 import response from "./components/response"
 import hostManage from "./dialog/host-manage"
-import { dfsForest } from "@/lib/utils"
+import { dfsForest, findParentNode } from "@/lib/utils"
 import uuid from "uuid/v4"
 import qs from "qs"
 export default {
@@ -83,6 +83,7 @@ export default {
                 }, //----------------------------请求地址信息
                 requestParams: [
                     {
+                        id: uuid(),
                         key: "", //--------------请求参数键
                         value: "", //------------请求参数值
                         type: "string", //-------------请求参数值类型
@@ -93,6 +94,7 @@ export default {
                 ],
                 responseParams: [
                     {
+                        id: uuid(),
                         key: "", //--------------请求参数键
                         value: "", //------------请求参数值
                         type: "string", //-------------请求参数值类型
@@ -103,6 +105,7 @@ export default {
                 ],
                 header: [
                     {
+                        id: uuid(),
                         key: "", //--------------请求头键
                         value: "", //------------请求头值
                         type: "string", //-------请求头值类型
@@ -222,7 +225,7 @@ export default {
         validateParams() {
             let isValidRequest = true;
             //=====================================检查参数是否必填或者按照规范填写====================================//
-            dfsForest(this.request.requestParams, {
+            dfsForest(this.request.responseParams, {
                 rCondition(value) {
                     return value.children;
                 },
@@ -232,10 +235,13 @@ export default {
                     if (pData.length - 1 === index) { //最后一个数据不做处理
                         return;
                     }
-                    if (data.key.trim() === "") { //非空校验
+                    // console.log(data, pData, 9999)
+                    const p = findParentNode(data.id, this.request.responseParams);
+                    const isParentArray = (p && p.type === "array");
+                    if (!isParentArray && data.key.trim() === "") { //非空校验
                         this.$set(data, "_keyError", true);
                         isValidRequest = false;
-                    } else if (!data.key.match(/^[a-zA-Z0-9]*$/)) { //字母数据
+                    } else if (!isParentArray && !data.key.match(/^[a-zA-Z0-9]*$/)) { //字母数据
                         this.$set(data, "_keyError", true);
                         isValidRequest = false;
                     }       
