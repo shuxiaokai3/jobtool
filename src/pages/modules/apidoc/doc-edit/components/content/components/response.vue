@@ -31,11 +31,11 @@
         <s-collapse title="请求参数">
             <pre class="request-params">{{ requestParams }}</pre>
         </s-collapse>
+        <pre>{{ requesStringParams.str }}</pre>
     </div>
 </template>
 
 <script>
-import { getType, dfsForest } from "@/lib/utils"
 // import { BaseConfig } from "@/config.default"
 export default {
     props: {
@@ -47,16 +47,21 @@ export default {
         },
     },
     computed: {
-        // 请求参数
+        //请求参数(对象类型)
         requestParams() {
-            const plainData = JSON.parse(JSON.stringify(this.requestData.responseParams)); //扁平数据
+            const plainData = JSON.parse(JSON.stringify(this.requestData.responseParams)); //扁平数据拷贝
             const result = this.convertPlainParamsToTreeData(plainData);
+            return result;
+        },
+        //请求参数字符串类型
+        requesStringParams() {
+            const plainData = JSON.parse(JSON.stringify(this.requestData.responseParams)); //扁平数据拷贝
+            const result = this.convertPlainParamsToStringTreeData(plainData);
             return result;
         },
     },
     data() {
         return {
-
         };
     },
     created() {
@@ -68,17 +73,16 @@ export default {
         //=====================================前后端交互====================================//
 
         //=====================================组件间交互====================================//  
+        //将扁平数据转换为树形结构数据
         convertPlainParamsToTreeData(plainData) {
-            // console.log(plainData)
             const result = {};
-            const result2 = "";
-            const foo = (plainData, result, result2) => {
+            const foo = (plainData, result) => {
                 for(let i = 0,len = plainData.length; i < len; i++) {
                     const key = plainData[i].key.trim();
                     const value = plainData[i].value;
                     const type = plainData[i].type;
                     const resultIsArray = Array.isArray(result);
-                    const desc = plainData[i].description;
+                    // const desc = plainData[i].description;
                     const isComplex = (type === "object" || type === "array");
                     let arrTypeResultLength = 0; //数组类型值长度，用于数组里面嵌套对象时候对象取值
                     if (isComplex && key === "") { //复杂数据必须填写参数名称
@@ -96,24 +100,126 @@ export default {
                             resultIsArray ? result.push(result[key] = (value === "true" ? true : false)) : (result[key] = (value === "true" ? true : false));
                             break;
                         case "object":
-                            resultIsArray ? (arrTypeResultLength = result.push({})) : result[key] = {};
+                            resultIsArray ? (arrTypeResultLength = result.push({})) : (result[key] = {});
                             if (plainData[i].children && plainData[i].children.length > 0) {
-                                foo(plainData[i].children, result[arrTypeResultLength - 1], result2);
+                                foo(plainData[i].children, resultIsArray ? (result[arrTypeResultLength - 1]) : result[key]);
                             }
                             break;
                         case "array":
                             result[key] = [];
                             if (plainData[i].children && plainData[i].children.length > 0) {
-                                foo(plainData[i].children, result[key], result2);
+                                foo(plainData[i].children, result[key]);
                             }
                             break;
                         default: //字符串或其他类型类型不做处理
+                            // console.log(result, key)
                             resultIsArray ? result.push(value) : (result[key] = value);
                             break;
                     }
                 }
             }
-            foo(plainData, result, result2);
+            foo(plainData, result);
+            return result;
+        },
+        //将扁平数据转换为树形结构字符串数据
+        convertPlainParamsToStringTreeData(plainData) {
+            const result = {
+                str: ""
+            };
+            const createIndent = (level) => { //缩进级别
+                const indent = 4;
+                return " ".repeat(level * indent);
+            }; 
+            const createDash = (length) => { //创建短横线
+                if (length < 0) length = 0; 
+                return "-".repeat(length);
+            }; 
+
+            const foo = (plainData, level, inArray) => {
+                let resultStr = "";
+                for(let i = 0,len = plainData.length; i < len; i++) {
+                    const key = plainData[i].key.trim();
+                    let value = plainData[i].value;
+                    const type = plainData[i].type;
+                    const desc = plainData[i].description;
+                    const required = plainData[i].required;
+                    const isComplex = (type === "object" || type === "array");
+                    if (isComplex && key === "") { //复杂数据必须填写参数名称
+                        continue;
+                    }
+                    if (!isComplex && (key === "" || value === "")) { //非复杂数据需要填写参数名称才可以显示
+                        continue
+                    }
+                    /*eslint-disable indent*/ 
+                    switch (type) {
+                        case "number": { //数字类型需要转换为数字，转换前所有值都为字符串
+                            const keyLength = inArray ? -2 : key.length; //-2是两个"占据的位置
+                            const currentLength = 40 - level * 4 - 3 - keyLength - value.length;
+                            resultStr += `${createIndent(level)}${inArray ? "" : key + ": "}${Number(value)}, //${createDash(currentLength)}${desc}${required ? " (必填)" : ""}\n`;
+                            result.str += `${createIndent(level)}${inArray ? "" : key + ": "}${Number(value)}, //${createDash(currentLength)}${desc}${required ? " (必填)" : ""}\n`;
+                            break;
+                        }
+                        case "boolean": {
+                            const keyLength = inArray ? -2 : key.length; //-2是两个"占据的位置
+                            const currentLength = 40 - level * 4 - 3 - keyLength - value.length;
+                            resultStr += `${createIndent(level)}${inArray ? "" : key + ": "}${value}, //${createDash(currentLength)}${desc}${required ? " (必填)" : ""}\n`;
+                            result.str += `${createIndent(level)}${inArray ? "" : key + ": "}${value}, //${createDash(currentLength)}${desc}${required ? " (必填)" : ""}\n`;
+                            break;                            
+                        }
+                        case "object": {
+                            const keyLength = inArray ? -2 : key.length; //-2是两个"占据的位置
+                            const currentLength = 40 - level * 4 - 3 - keyLength;
+                            if (plainData[i].children && plainData[i].children.length > 0) {
+                                if (level === 0) {
+                                    result.str += `${createIndent(level)}${inArray ? "" : key + ": "}{ //${createDash(currentLength)}${desc}\n${foo(plainData[i].children, level + 1)}}`;
+                                } else {
+                                    resultStr = `${createIndent(level)}${inArray ? "" : key + ": "}{ //${createDash(currentLength)}${desc}\n${foo(plainData[i].children, level + 1)}${createIndent(level)}}\n`;
+                                }
+                            } else {
+                                if (level === 0) {
+                                    result.str += `${createIndent(level)}${inArray ? "" : key + ": "}{ //${createDash(currentLength)}${desc}\n}, \n`;
+                                } else {
+                                    resultStr = `${createIndent(level)}${inArray ? "" : key + ": "}{ //${createDash(currentLength)}${desc}\n}, \n`;
+                                }
+                            }
+                            break;                            
+                        }
+                        case "array": {
+                            const currentLength = 40 - level * 4 - 3 - key.length;
+                            if (plainData[i].children && plainData[i].children.length > 0) {
+                                if (level === 0) {
+                                    result.str += `${createIndent(level)}${key}: [ //${createDash(currentLength)}${desc}\n${foo(plainData[i].children, level + 1, true)}]`;
+                                } else {
+                                    resultStr = `${createIndent(level)}${key}: [ //${createDash(currentLength)}${desc}\n${foo(plainData[i].children, level + 1, true)}${createIndent(level)}]\n`;
+                                }
+                            } else {
+                                if (level === 0) {
+                                    result.str += `${createIndent(level)}${key}: [ //${createDash(currentLength)}${desc}\n], \n`;
+                                } else {
+                                    resultStr = `${createIndent(level)}${key}: [ //${createDash(currentLength)}${desc}\n], \n`;
+                                }
+                            }
+                            break;                            
+                        }
+                        default: { //字符串或其他类型类型不做处理
+                            const keyLength = inArray ? -2 : key.length; //-2是两个"占据的位置
+                            let currentLength = 0;
+                            if (value.length > 15) { //字符串长度超过15个字符的做截取操作
+                                value = value.slice(0, 15) + "...";
+                                currentLength = 40 - level * 4 - 3 - keyLength - value.length - 2 - 3;
+                            } else {
+                                currentLength = 40 - level * 4 - 3 - keyLength - value.length - 2;
+                            }
+                            resultStr += `${createIndent(level)}${inArray ? "" : key + ": "}"${value}", //${createDash(currentLength)}${desc}${required ? " (必填)" : ""}\n`;
+                            result.str += `${createIndent(level)}${inArray ? "" : key + ": "}"${value}", //${createDash(currentLength)}${desc}${required ? " (必填)" : ""}\n`;
+                            break;
+                        }
+                    }
+                }
+                return resultStr;
+            }
+            foo(plainData, 0, false);
+            // console.log(result)
             return result;
         },
         //=====================================其他操作=====================================//
