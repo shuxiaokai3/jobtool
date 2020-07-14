@@ -21,7 +21,7 @@
         </s-collapse>
         <s-collapse title="请求头">
             <template v-if="requestData.header.length > 1">
-                <div v-for="(item, index) in requestData.header" :key="index" class="d-flex a-center my-2">
+                <div v-for="(item, index) in requestData.header" :key="index" class="d-flex a-center mt">
                     <span v-if="item.key" class="flex0">{{ item.key }}：</span>
                     <span class="f-xs text-ellipsis" :title="item.value">{{ item.value }}</span>
                 </div>
@@ -29,9 +29,12 @@
             <div v-else class="f-xs gray-500">暂无数据</div>
         </s-collapse>
         <s-collapse title="请求参数">
-            <pre class="request-params">{{ requestParams }}</pre>
+            <!-- <pre class="request-params">{{ requestParams }}</pre> -->
+            <pre>{{ requesStringParams.str }}</pre>
         </s-collapse>
-        <pre>{{ requesStringParams.str }}</pre>
+        <s-collapse title="返回结果">
+            <pre>{{ responseData }}</pre>
+        </s-collapse>
     </div>
 </template>
 
@@ -49,29 +52,54 @@ export default {
     computed: {
         //请求参数(对象类型)
         requestParams() {
+            const plainData = JSON.parse(JSON.stringify(this.requestData.requestParams)); //扁平数据拷贝
+            const result = this.convertPlainParamsToTreeData(plainData);
+            return result;
+        },
+        //请求头(对象类型)
+        headerParams() {
+            const plainData = JSON.parse(JSON.stringify(this.requestData.header)); //扁平数据拷贝
+            const result = this.convertPlainParamsToTreeData(plainData);
+            return result;
+        },
+        //返回参数(对象类型)
+        responseParams() {
             const plainData = JSON.parse(JSON.stringify(this.requestData.responseParams)); //扁平数据拷贝
             const result = this.convertPlainParamsToTreeData(plainData);
             return result;
         },
         //请求参数字符串类型
         requesStringParams() {
-            const plainData = JSON.parse(JSON.stringify(this.requestData.responseParams)); //扁平数据拷贝
+            const plainData = JSON.parse(JSON.stringify(this.requestData.requestParams)); //扁平数据拷贝
             const result = this.convertPlainParamsToStringTreeData(plainData);
             return result;
         },
     },
     data() {
         return {
+            responseData: null, //返回结果对象
         };
     },
     created() {
 
     },
     methods: {
-        //=====================================获取远程数据==================================//
-
         //=====================================前后端交互====================================//
-
+        sendRequest() {
+            const params = {
+                url: this.requestData.url.host + this.requestData.url.path,
+                method: this.requestData.methods,
+                header: this.headerParams,
+                requestParams: this.requestParams,
+            };
+            this.axios.post("/proxy", params).then((res) => {
+                this.responseData = res.data;
+            }).catch(err => {
+                console.error(err);
+            }).finally(() => {
+                this.loading = false;
+            });
+        },
         //=====================================组件间交互====================================//  
         //将扁平数据转换为树形结构数据
         convertPlainParamsToTreeData(plainData) {
@@ -85,9 +113,9 @@ export default {
                     // const desc = plainData[i].description;
                     const isComplex = (type === "object" || type === "array");
                     let arrTypeResultLength = 0; //数组类型值长度，用于数组里面嵌套对象时候对象取值
-                    if (isComplex && key === "") { //复杂数据必须填写参数名称
-                        continue;
-                    }
+                    // if (isComplex && key === "") { //复杂数据必须填写参数名称
+                    //     continue;
+                    // }
                     if (!isComplex && (key === "" || value === "")) { //非复杂数据需要填写参数名称才可以显示
                         continue
                     }
@@ -144,10 +172,10 @@ export default {
                     const desc = plainData[i].description;
                     const required = plainData[i].required;
                     const isComplex = (type === "object" || type === "array");
-                    if (isComplex && key === "") { //复杂数据必须填写参数名称
-                        continue;
-                    }
-                    if (!isComplex && (key === "" || value === "")) { //非复杂数据需要填写参数名称才可以显示
+                    // if (isComplex && key === "") { //复杂数据必须填写参数名称
+                    //     continue;
+                    // }
+                    if (!isComplex && (value === "")) { //非复杂数据需要填写参数名称才可以显示
                         continue
                     }
                     /*eslint-disable indent*/ 
@@ -171,9 +199,9 @@ export default {
                             const currentLength = 40 - level * 4 - 3 - keyLength;
                             if (plainData[i].children && plainData[i].children.length > 0) {
                                 if (level === 0) {
-                                    result.str += `${createIndent(level)}${inArray ? "" : key + ": "}{ //${createDash(currentLength)}${desc}\n${foo(plainData[i].children, level + 1)}}`;
+                                    result.str += `${createIndent(level)}${inArray ? "" : key + ": "}{ //${createDash(currentLength)}${desc}\n${foo(plainData[i].children, level + 1, false)}}`;
                                 } else {
-                                    resultStr = `${createIndent(level)}${inArray ? "" : key + ": "}{ //${createDash(currentLength)}${desc}\n${foo(plainData[i].children, level + 1)}${createIndent(level)}}\n`;
+                                    resultStr = `${createIndent(level)}${inArray ? "" : key + ": "}{ //${createDash(currentLength)}${desc}\n${foo(plainData[i].children, level + 1, false)}${createIndent(level)}}\n`;
                                 }
                             } else {
                                 if (level === 0) {
@@ -219,7 +247,6 @@ export default {
                 return resultStr;
             }
             foo(plainData, 0, false);
-            // console.log(result)
             return result;
         },
         //=====================================其他操作=====================================//
