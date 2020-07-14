@@ -74,7 +74,7 @@
                                 :tip="requiredTip"
                                 :error="scope.data._descriptionError"
                                 class="w-40 ml-2"
-                                placeholder="参数描述"
+                                placeholder="参数描述与备注"
                                 @blur="handleCheckDescription(scope)">
                         </s-v-input>
                     </div>
@@ -161,11 +161,9 @@ export default {
         },
         //删除数据
         deleteTreeData({ node, data }) {
-            console.log(node)
             const parentNode = node.parent;
             const parentData = node.parent.data;
             if (parentNode.level === 0) { //根节点直接删除，非根节点在children里删除
-                console.log(parentData);
                 const deleteIndex = parentData.findIndex(val => val.id === data.id);
                 if (parentData.length - 1 === deleteIndex) { //不允许删除最后一个元素
                     return;
@@ -203,7 +201,7 @@ export default {
             }
 
             if (data.type === "object" || data.type === "array") {
-                if (data.type === "array") { //清空子元素所有参数名称
+                if (data.type === "array" && data.children && data.children.length > 0) { //清空子元素所有参数名称
                     dfsForest(data.children, {
                         rCondition(value) {
                             return value.children;
