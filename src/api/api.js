@@ -117,6 +117,12 @@ export default {
                             return Promise.reject(new Error("暂无权限"));
                         case 4010: //编译错误
                             break;
+                        case 6001: //代理服务器 http状态码非200
+                            break;
+                        case 6002: //代理服务器 http状态码200
+                            break;
+                        case 6003: //代理服务器错误
+                            break;
                         default:
                             Vue.prototype.$httpFailCatch(res, timer2, router.currentRoute)
                             Vue.prototype.$confirm(res.data.msg ? res.data.msg : "操作失败", "提示", {
