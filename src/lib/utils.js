@@ -226,7 +226,7 @@ export const fullIncludes = function(arr, arr2) {
     @params {Function?}    可以传入一个函数就行条件判断，函数第一个参数为当前节点信息，存在fn那么判断结果以fn返回值为准
     @return       父节点(如果未找到返回null)
 */
-export const findParentNode = function(id, treeData, fn, options) {
+export const findParentNode = function(id, treeData, fn, options = {}) {
     const pathId = options.id || "id";
     let result = null;
     const parent = null;
@@ -471,6 +471,7 @@ export const dfsForest = (forestData, config) => {
     if (!rKey) {
         throw new Error("必须指定满足递归条件后需要继续递归的字段");
     }
+
     //开始递归
     const foo = (forestData, rCondition, hooks, rKey) => {
         for (let i = 0, len = forestData.length; i < len; i++) {
