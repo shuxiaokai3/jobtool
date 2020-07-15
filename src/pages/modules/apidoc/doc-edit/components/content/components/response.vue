@@ -10,7 +10,7 @@
             <div>
                 <div class="my-2">
                     <span>请求地址：</span>
-                    <span class="f-xs">{{ requestData.url.host ? requestData.url.host : host }}</span>
+                    <span class="f-xs">{{ requestData.url.host }}</span>
                     <span class="f-xs">{{ requestData.url.path }}</span>
                 </div>
                 <div class="my-2">

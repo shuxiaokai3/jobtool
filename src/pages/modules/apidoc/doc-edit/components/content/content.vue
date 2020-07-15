@@ -6,14 +6,14 @@
 */
 <template>
     <div class="edit-content d-flex">
-        <div class="border-right-teal w-65">
+        <div v-loading="loading2" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)" class="border-right-teal w-65">
             <!-- 基本配置 -->
             <div class="request mb-2">
                 <div class="edit-title w-100 f-bg mb-2" contenteditable @input="handleChangeTitle($event)" @blur="handleTitleBlur($event)">{{ request._description }}</div>
                 <div class="mb-2">
                     <el-radio-group v-model="request.url.host" size="mini">
-                        <el-popover placement="top-start" trigger="hover" :close-delay="0" content="http://127.0.0.1:7004">
-                            <el-radio slot="reference" label="http://127.0.0.1:7004" border>本地</el-radio>
+                        <el-popover placement="top-start" trigger="hover" :close-delay="0" :content="origin">
+                            <el-radio slot="reference" :label="origin" border>本地</el-radio>
                         </el-popover>
                         <el-popover v-for="(item, index) in hostEnum" :key="index" :close-delay="0" placement="top-start" trigger="hover" :content="item.url">
                             <el-radio slot="reference" :label="item.url" border>{{ item.name }}</el-radio>
@@ -41,6 +41,7 @@
                             </div>                        
                         </s-v-input>
                         <el-button type="success" size="small" @click="sendRequest">发送请求</el-button>
+                        <el-button :loading="loading" type="primary" size="small" @click="saveRequest">保存接口</el-button>
                     </div>
                 </div>                
                 <pre class="w-100">{{ request.url.host }}{{ request.url.path }}</pre>
@@ -60,12 +61,14 @@
 </template>
 
 <script>
+import axios from "axios" 
 import paramsTree from "./components/params-tree"
 import response from "./components/response"
 import hostManage from "./dialog/host-manage"
 import { dfsForest, findParentNode } from "@/lib/utils"
 import uuid from "uuid/v4"
 import qs from "qs"
+const CancelToken = axios.CancelToken;
 export default {
     components: {
         "s-params-tree": paramsTree,
@@ -78,7 +81,7 @@ export default {
             request: {
                 methods: "get", //---------------请求方式
                 url: {
-                    host: "http://127.0.0.1:7004", //-----------------主机(服务器)地址
+                    host: "", //-----------------主机(服务器)地址
                     path: "", //-----------------接口路径
                 }, //----------------------------请求地址信息
                 requestParams: [
@@ -115,18 +118,78 @@ export default {
                     }
                 ], //----------------------------请求头信息
                 description: "在这里输入文档描述", //--------------请求描述
-                _description: "在这里输入文档描述", //-------------请求描述拷贝
+                _description: "", //-------------请求描述拷贝
             },
+            origin: location.origin,
             //=====================================域名相关====================================//
             hostEnum: [], //---------------------域名列表
             dialogVisible: false, //-------------域名维护弹窗
             //=====================================其他参数====================================//
+            cancel: [], //-----------------------需要取消的接口
+            loading: false, //-------------------保存接口
+            loading2: false, //------------------获取文档详情接口
         };
     },
-    created() {
+    computed: {
+        currentSelectDoc() {
+            return this.$store.state.apidoc.activeDoc[this.$route.query.id];
+        }
+    },
+    watch: {
+        currentSelectDoc: {
+            handler(val) {
+                if (val) {
+                    this.getDocDetail();
+                }
+            },
+            deep: true
+        }
+    },
+    mounted() {
         this.getHostEnum(); //获取host枚举值
     },
     methods: {
+        //=====================================获取数据====================================//
+        //获取文档详情
+        getDocDetail() {
+            const params = {
+                _id: this.currentSelectDoc._id
+            };
+            if (this.cancel.length > 0) {
+                this.cancel.forEach(c => {
+                    c();
+                })
+            }
+            this.loading2 = true;
+            this.axios.get("/api/project/doc_detail", {
+                params,
+                cancelToken: new CancelToken((c) => {
+                    this.cancel.push(c);
+                })
+            }).then(res => {
+                Object.assign(this.request, res.data.item);
+                if (this.request.requestParams.length === 0) this.request.requestParams.push(this.generateParams());
+                if (this.request.responseParams.length === 0) this.request.responseParams.push(this.generateParams());
+                if (this.request.header.length === 0) this.request.header.push(this.generateParams());
+                if (this.request.url.host === "") this.request.url.host = location.origin;
+                this.request._description = res.data.item.description || "在这里输入文档描述";
+            }).catch(err => {
+                this.$errorThrow(err, this);
+            }).finally(() => {
+                this.loading2 = false;
+            });
+        },
+        generateParams() {
+            return {
+                id: uuid(),
+                key: "", //--------------请求头键
+                value: "", //------------请求头值
+                type: "string", //-------请求头值类型
+                description: "", //------描述
+                required: true, //-------是否必填
+                children: [], //---------子参数
+            };
+        },
         //=====================================基础数据请求====================================//
         //获取host枚举值
         getHostEnum() {
@@ -256,6 +319,40 @@ export default {
                 }
             });
             return isValidRequest;
+        },
+        //=====================================保存接口====================================//
+        saveRequest() {
+            console.log(JSON.parse(JSON.stringify(this.request)))
+            const validParams = this.validateParams();
+            if (validParams) {
+                const params = {
+                    _id: this.currentSelectDoc._id,
+                    projectId: this.$route.query.id,
+                    item: {
+                        methods: this.request.methods,
+                        url: {
+                            host: this.request.url.host, 
+                            path: this.request.url.path, 
+                        },
+                        requestParams: this.request.requestParams,
+                        responseParams: this.request.responseParams,
+                        header: this.request.header, 
+                        description: this.request.description, 
+                    }
+                };
+                this.loading = true;
+                this.axios.post("/api/project/fill_doc", params).then(() => {
+                    this.$store.commit("changeTabInfo", {
+                        projectId: this.$route.query.id,
+                        tabId: this.currentSelectDoc._id,
+                        method: this.request.methods,
+                    })
+                }).catch(err => {
+                    this.$errorThrow(err, this);
+                }).finally(() => {
+                    this.loading = false;
+                }); 
+            }
         },
         //=====================================其他操作=====================================//
 
