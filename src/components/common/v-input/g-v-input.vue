@@ -72,7 +72,7 @@ export default {
     position: relative;
     &.valid-error {
         .el-input__inner {
-            animation: flash 2s;
+            animation: flash 2s infinite alternate;
             border-bottom: 1px solid $red!important;
         }
     }
@@ -88,7 +88,7 @@ export default {
     @keyframes flash {
         0% {
             opacity: 1;
-            background: mix($orange, $white, 10%);
+            background: mix($orange, $white, 30%);
         }
         100% {
             background: $white;
