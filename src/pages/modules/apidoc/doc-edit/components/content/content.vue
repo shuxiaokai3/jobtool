@@ -9,7 +9,7 @@
         <div v-loading="loading2" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)" class="border-right-teal w-65">
             <!-- 基本配置 -->
             <div class="request mb-2">
-                <div class="edit-title w-100 f-bg mb-2" contenteditable @input="handleChangeTitle($event)" @blur="handleTitleBlur($event)">{{ request._description }}</div>
+                <div class="edit-title w-100 f-bg mb-2" contenteditable @input="handleChangeTitle($event)" @blur="handleTitleBlur($event)" @focus="handleTitleFocus">{{ request._description }}</div>
                 <div class="mb-2">
                     <el-radio-group v-model="request.url.host" size="mini">
                         <el-popover placement="top-start" trigger="hover" :close-delay="0" :content="origin">
@@ -275,6 +275,14 @@ export default {
                 this.request._description = e.target.innerText;
             }
         },
+        //focus 全选title
+        handleTitleFocus(e) {
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            const range = document.createRange();
+            range.selectNodeContents(e.target);
+            selection.addRange(range);
+        },
         //=====================================发送请求====================================//
         //发送请求
         sendRequest() {
@@ -377,6 +385,7 @@ export default {
         }
         .edit-title {
             padding: size(5) size(10);
+            height: size(38);
             border: 1px solid transparent;
             &:hover {
                 border: 1px dashed $gray-500;
