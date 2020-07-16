@@ -53,7 +53,7 @@
             </div>            
         </div>
         <div class="w-35 flex1">
-            <s-response :request-data="request"></s-response>
+            <s-response ref="response" :request-data="request"></s-response>
         </div>
         <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible" @close="getHostEnum"></s-host-manage>
     </div>
@@ -219,6 +219,8 @@ export default {
             const validParams = this.validateParams();
             if (!validParams) {
                 this.$message.error("xxx");
+            } else {
+                this.$refs["response"].sendRequest();
             }
         },
         //检查参数是否完备
