@@ -26,6 +26,7 @@
                     <div class="d-flex w-100">
                         <s-v-input 
                                 v-model="request.url.path"
+                                :error="request.url.path.trim() === '' && urlInvalid"
                                 placeholder="只需要输入接口地址，前面不需要加域名，加了会被忽略"
                                 size="small"
                                 @blur="checkUrlRule"
@@ -125,6 +126,7 @@ export default {
             hostEnum: [], //---------------------域名列表
             dialogVisible: false, //-------------域名维护弹窗
             //=====================================其他参数====================================//
+            urlInvalid: false, //----------------url是否合法
             cancel: [], //-----------------------需要取消的接口
             loading: false, //-------------------保存接口
             loading2: false, //------------------获取文档详情接口
@@ -140,9 +142,11 @@ export default {
     },
     watch: {
         currentSelectDoc: {
-            handler(val) {
+            handler(val, oldVal) {
                 if (val) {
-                    this.getDocDetail();
+                    if (!oldVal || val._id !== oldVal._id) {
+                        this.getDocDetail();
+                    }
                 }
             },
             deep: true
@@ -236,7 +240,9 @@ export default {
         //=====================================请求url处理====================================//  
         //验证请求url格式是否正确
         checkUrlRule() {
+            this.urlInvalid = false;
             if (this.request.url.path.trim() === "") { //为空不做处理
+                this.urlInvalid = true;
                 return;
             }
             if (this.request.methods === "get") { //只允许get请求将查询参数转换为请求参数
@@ -328,6 +334,10 @@ export default {
         //检查参数是否完备
         validateParams() {
             let isValidRequest = true;
+            if (this.request.url.path.trim() === "") { //请求url未填写
+                this.urlInvalid = true;
+                isValidRequest = false;
+            }
             //=====================================检查参数是否必填或者按照规范填写====================================//
             dfsForest(this.request.responseParams, {
                 rCondition(value) {
