@@ -67,6 +67,7 @@ export default {
             if (state.tabs[projectId]) {
                 const deleteIndexArr = [];
                 state.tabs[projectId].forEach((val, index) => {
+                    console.log(222, val, deleteIds)
                     if (deleteIds.includes(val._id)) {
                         deleteIndexArr.push(index);
                     }
@@ -74,8 +75,8 @@ export default {
                 deleteIndexArr.forEach(index => {
                     state.tabs[projectId].splice(index, 1);
                 })
-                
             }
+            localStorage.setItem("apidoc/editTabs", JSON.stringify(state.tabs))
         },
         //=====================================当前选中的tab====================================//
         //更新当前被选中的文档(不能未folder)
