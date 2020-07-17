@@ -33,13 +33,14 @@
             <pre>{{ requesStringParams.str }}</pre>
         </s-collapse>
         <s-collapse title="返回结果">
-            <pre>{{ responseData }}</pre>
+            <pre class="res-data">{{ responseData }}</pre>
         </s-collapse>
     </div>
 </template>
 
 <script>
 // import { BaseConfig } from "@/config.default"
+
 export default {
     props: {
         requestData: {
@@ -258,5 +259,9 @@ export default {
 
 
 <style lang="scss">
-
+.response {
+    .res-data {
+        max-height: size(300);
+    }
+}
 </style>
