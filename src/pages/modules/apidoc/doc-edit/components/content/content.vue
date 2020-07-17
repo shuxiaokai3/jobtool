@@ -131,9 +131,12 @@ export default {
         };
     },
     computed: {
-        currentSelectDoc() {
+        currentSelectDoc() { //当前选中的doc
             return this.$store.state.apidoc.activeDoc[this.$route.query.id];
-        }
+        },
+        tabs() { //-----------全部tabs
+            return this.$store.state.apidoc.tabs[this.$route.query.id];
+        },
     },
     watch: {
         currentSelectDoc: {
@@ -167,6 +170,10 @@ export default {
                     this.cancel.push(c);
                 })
             }).then(res => {
+                if (res.data === null) {
+                    this.confirmInvalidDoc();
+                    return;
+                }
                 Object.assign(this.request, res.data.item);
                 if (this.request.requestParams.length === 0) this.request.requestParams.push(this.generateParams());
                 if (this.request.responseParams.length === 0) this.request.responseParams.push(this.generateParams());
@@ -177,6 +184,30 @@ export default {
                 this.$errorThrow(err, this);
             }).finally(() => {
                 this.loading2 = false;
+            });
+        },
+        //接口不存在提醒用户，可能是同时操作的用户删掉了这个接口导致接口不存在
+        confirmInvalidDoc() {
+            this.$confirm("当前接口不存在，可能已经被删除!", "提示", {
+                confirmButtonText: "关闭接口",
+                cancelButtonText: "取消",
+                type: "warning"
+            }).then(() => {
+                this.$store.commit("apidoc/deleteTabById", {
+                    projectId: this.$route.query.id,
+                    deleteIds: [this.currentSelectDoc._id]
+                });
+                if (!this.tabs.find(val => val._id === this.currentSelectDoc._id)) { //关闭左侧后若在tabs里面无法找到选中节点，则取第一个节点为选中节点
+                    this.$store.commit("apidoc/changeCurrentTab", {
+                        projectId: this.$route.query.id,
+                        activeNode: this.tabs[this.tabs.length - 1],
+                    });
+                }
+            }).catch(err => {
+                if (err === "cancel" || err === "close") {
+                    return;
+                }
+                this.$errorThrow(err, this);
             });
         },
         generateParams() {
