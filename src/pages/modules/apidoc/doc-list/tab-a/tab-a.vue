@@ -33,11 +33,11 @@
                 </div>
                 <div class="d-flex j-end a-center gray-500 mt-2">
                     <span>最新更新:</span>
-                    <span title="最新更新">{{ new Date(item.updatedAt).toLocaleDateString() }}</span>&nbsp;&nbsp;
+                    <span>{{ new Date(item.updatedAt).toLocaleDateString() }}</span>&nbsp;&nbsp;
                 </div>
                 <div class="d-flex j-end a-center gray-500">
                     <span>创建者:</span>
-                    <span title="创建者">{{ item.owner.name }}</span>&nbsp;&nbsp;
+                    <span>{{ item.owner.name }}</span>&nbsp;&nbsp;
                 </div>
                 <div class="project-bottom d-flex">
                     <div>
