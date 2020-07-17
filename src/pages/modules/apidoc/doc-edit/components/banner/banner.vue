@@ -49,7 +49,6 @@
                     empty-text="点击按钮新增文档"
                     :expand-on-click-node="true" 
                     :draggable="enableDrag"
-                    :highlight-current="true"
                     :allow-drop="handleCheckNodeCouldDrop"
                     @node-contextmenu="handleContextmenu"
                     @node-drop="handleNodeDropSuccess"
@@ -60,7 +59,7 @@
                 <template slot-scope="scope">
                     <div 
                             class="custom-tree-node"
-                            :class="{'selected': multiSelectNode.find(val => val.data._id === scope.data._id)}"
+                            :class="{'selected': multiSelectNode.find(val => val.data._id === scope.data._id), 'active': currentSelectDoc._id === scope.data._id}"
                             tabindex="1"
                             @keydown="handleKeydown($event, scope.data)"
                             @keyup="handleKeyUp"
@@ -81,13 +80,14 @@
                                     v-show="hoverNodeId === scope.data._id"
                                     class="node-more ml-auto mr-2"
                                     trigger="click"
-                                    @command="(command) => { this.handleSelectDropdown(command, data) }"
+                                    @command="(command) => { handleSelectDropdown(command, scope.data, scope.node) }"
                                     @click.native.stop="() =>{}"
                             >
                                 <span class="el-icon-more"></span>
                                 <el-dropdown-menu slot="dropdown">
                                     <el-dropdown-item v-if="scope.data.isFolder" command="addFile">新建文档</el-dropdown-item>
                                     <el-dropdown-item v-if="scope.data.isFolder" command="addTemplate">以模板新建</el-dropdown-item>
+                                    <el-dropdown-item v-if="!scope.data.isFolder" command="copy">复制接口</el-dropdown-item>
                                     <el-dropdown-item command="rename">重命名</el-dropdown-item>
                                     <el-dropdown-item command="delete">删除</el-dropdown-item>
                                 </el-dropdown-menu>
@@ -102,7 +102,7 @@
                                     v-show="hoverNodeId === scope.data._id"
                                     class="node-more ml-auto mr-2"
                                     trigger="click"
-                                    @command="(command) => { this.handleSelectDropdown(command, data) }"
+                                    @command="(command) => { handleSelectDropdown(command, scope.data, scope.node) }"
                                     @click.native.stop="() =>{}"
                             >
                                 <span class="el-icon-more"></span>
@@ -181,6 +181,39 @@ export default {
             })
         },
         //=====================================导航操作==================================//
+        //文档下拉框选择 重命名，删除，新增...
+        handleSelectDropdown(command, data, node) {
+            /*eslint-disable indent*/
+            switch (command) {
+                case "addFile":
+                    this.docParentId = data._id;
+                    this.handleOpenAddFileDialog();
+                    break;
+                case "addFolder":
+                    this.docParentId = data._id;
+                    this.handleOpenAddFolderDialog();
+                    break;
+                case "rename":
+                    this.$set(data, "_docName", data.docName); //文档名称备份,防止修改名称用户名称填空导致异常
+                    this.renameNodeId = data._id;
+                    this.$nextTick(() => {
+                        document.querySelector(".rename-ipt").focus();
+                        this.enableDrag = false;                    
+                    })
+                    break;
+                case "delete":
+                    this.handleDeleteItem(data, node);
+                    break;
+                case "addTemplate":
+                    this.addRestFul(data);
+                    break;
+                case "copy":
+                    this.copyDoc(data);
+                    break;
+                default:
+                    break;
+            }
+        },
         //创建鼠标右键dom元素
         handleContextmenu(e, data, node) {
             e.stopPropagation();
@@ -359,7 +392,6 @@ export default {
         },
         //点击节点
         handleNodeClick(data, node) {
-            console.log(node)
             if (!node.data.isFolder) { //文件夹不做处理
                 this.$store.commit("apidoc/addTab", node.data);
                 this.$store.commit("apidoc/changeCurrentTab", {
@@ -547,6 +579,9 @@ export default {
     border-right: 1px solid $gray-400;
     display: flex;
     flex-direction: column;
+    .el-tree-node__content:hover {
+        background: none;
+    }
     .tool {
         position: relative;
         padding: 0 size(20);
@@ -580,8 +615,14 @@ export default {
             align-items: center;
             height: 30px;
             width: 100%;
+            &:hover {
+                background: mix($theme-color, $white, 10%);
+            }
             &.selected {
                 background: mix($theme-color, $white, 50%);
+            }
+            &.active {
+                background: mix($theme-color, $white, 10%);
             }
             .label {
                 display: inline-block;

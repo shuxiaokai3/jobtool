@@ -12,8 +12,8 @@
             </template>
         </el-input>
         <span v-show="error" class="error-tip">
-            <span>{{ tip.message ? tip.message : tip }}</span>
-            <span v-show="this.tip.reference" class="theme-color ml-2" @click="handleJumpToStander">查看规范</span>
+            <span v-if="tip">{{ tip.message ? tip.message : tip }}</span>
+            <span v-show="tip && tip.reference" class="theme-color ml-2" @click="handleJumpToStander">查看规范</span>
             <slot name="tip" />
         </span>
     </div>
@@ -29,7 +29,7 @@ export default {
         tip: { //-------------错误提示信息
             type: [Object, String],
             default() {
-                return {};
+                return null;
             }
         },
         error: { //-----------是否错误
