@@ -420,7 +420,7 @@ export default {
                         const nodeIndex = this.navTreeData.findIndex(val => val._id === data._id);
                         this.navTreeData.splice(nodeIndex, 1);
                     }
-                    this.handleDeleteTabsById();
+                    this.handleDeleteTabsById(deleteId);
                 }).catch(err => {
                     this.$errorThrow(err, this);
                 });            
@@ -459,7 +459,7 @@ export default {
                             const nodeIndex = this.navTreeData.findIndex(val => val._id === delNode.data._id);
                             this.navTreeData.splice(nodeIndex, 1);
                         }
-                        this.handleDeleteTabsById();
+                        this.handleDeleteTabsById(deleteId);
                     })
                 }).catch(err => {
                     this.$errorThrow(err, this);
