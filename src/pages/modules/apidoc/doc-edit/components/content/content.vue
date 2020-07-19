@@ -159,6 +159,9 @@ export default {
         //=====================================获取数据====================================//
         //获取文档详情
         getDocDetail() {
+            if (!this.currentSelectDoc._id) { //没有id不请求数据
+                return
+            }
             const params = {
                 _id: this.currentSelectDoc._id
             };
