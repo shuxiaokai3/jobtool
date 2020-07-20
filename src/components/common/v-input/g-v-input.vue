@@ -23,7 +23,7 @@
 export default {
     props: {
         value: { //-----------v-model的值
-            type: String,
+            type: [String, Number],
             default: ""
         },
         tip: { //-------------错误提示信息
