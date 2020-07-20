@@ -5,7 +5,7 @@
     备注：xxxx
 */
 <template>
-    <div class="edit-content d-flex">
+    <div v-if="tabs && tabs.length > 0" class="edit-content d-flex">
         <div v-loading="loading2" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)" class="border-right-teal w-65">
             <!-- 基本配置 -->
             <div class="request mb-2">
@@ -58,6 +58,9 @@
             <s-response ref="response" :request-data="request"></s-response>
         </div>
         <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible" @close="getHostEnum"></s-host-manage>
+    </div>
+    <div v-else>
+        sadsad
     </div>
 </template>
 
@@ -159,7 +162,7 @@ export default {
         //=====================================获取数据====================================//
         //获取文档详情
         getDocDetail() {
-            if (!this.currentSelectDoc._id) { //没有id不请求数据
+            if (!this.currentSelectDoc || !this.currentSelectDoc._id) { //没有id不请求数据
                 return
             }
             const params = {
