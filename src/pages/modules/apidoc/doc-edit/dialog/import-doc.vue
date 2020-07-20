@@ -16,7 +16,7 @@
             <div class="el-upload__tip" slot="tip">只支持postman 2.1版本json</div>
         </el-upload>
         <div slot="footer">
-            <el-button size="mini" type="primary" @click="handleSubmit">确定</el-button>
+            <el-button :loading="loading" size="mini" type="primary" @click="handleSubmit">确定</el-button>
             <el-button size="mini" type="warning" @click="handleClose">取消</el-button>
         </div>
     </s-dialog>
@@ -34,7 +34,8 @@ export default {
     },
     data() {
         return {
-            docs: [], //导入的文档列表
+            docs: [], //-----------导入的文档列表
+            loading: false, //-----导入第三方加载效果
         };
     },
     created() {
@@ -81,7 +82,7 @@ export default {
                         });
                         result.push(doc)
                     } else { //否则为文档
-                        // console.log(value.request)
+                        console.log(value.request)
                         this.generateDoc(doc, {
                             docName: value.name,
                             projectId: this.$route.query.id,
@@ -102,10 +103,7 @@ export default {
                             }
                         });
                         //将query转换为请求参数,注意一个请求参数既存在query又存在body将被认定为不规范数据，处理策略全部转换为查询参数
-                        value.request && value.request.query && value.request.query.forEach(val => { //requestParams
-                            if (val.docName.match(/计划草稿列表/)) {
-                                console.log(val, 2222)
-                            }
+                        value?.request?.url?.query?.forEach(val => { //requestParams
                             if (val.key) {
                                 doc.item.requestParams.push({
                                     key: val.key,
@@ -247,10 +245,14 @@ export default {
         },
         //=====================================组件间交互====================================//  
         handleSubmit() {
+            this.loading = true;
             this.axios.post("/api/project/doc_multi", { docs: this.docs }).then(() => {
-                
+                this.$emit("success");
+                this.handleClose();
             }).catch(err => {
                 this.$errorThrow(err, this);
+            }).finally(() => {
+                this.loading = false;
             });
         },
         //=====================================其他操作=====================================//
