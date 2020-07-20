@@ -167,7 +167,7 @@ export default {
             const foo = (plainData, level, inArray) => {
                 let resultStr = "";
                 for(let i = 0,len = plainData.length; i < len; i++) {
-                    const key = plainData[i].key.trim();
+                    const key = plainData[i].key.toString().trim();
                     let value = plainData[i].value;
                     const type = plainData[i].type;
                     const desc = plainData[i].description;
