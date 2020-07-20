@@ -82,7 +82,7 @@ export default {
             const tabs = localStorage.getItem("apidoc/editTabs") ? JSON.parse(localStorage.getItem("apidoc/editTabs")) : {};
             const locatActiveDoc = localStorage.getItem("apidoc/activeTab") ? JSON.parse(localStorage.getItem("apidoc/activeTab")) : {};
             const currentProjectTabs = tabs[projectId] || [];
-            const activeDoc = locatActiveDoc[projectId] || [];
+            const activeDoc = locatActiveDoc[projectId] || {};
             this.$store.commit("apidoc/updateAllTabs", {
                 projectId,
                 tabs: currentProjectTabs

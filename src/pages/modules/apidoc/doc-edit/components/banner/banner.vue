@@ -31,12 +31,17 @@
                         <use xlink:href="#iconpreview"></use>
                     </svg>               
                 </el-tooltip>
-                <el-tooltip class="item" effect="dark" content="导出" :open-delay="300">
+                <el-tooltip class="item" effect="dark" content="导出为word" :open-delay="300">
                     <s-download url="/api/project/doc_word" :params="{ projectId: $route.query._id }">
                         <svg class="svg-icon" aria-hidden="true">
                             <use xlink:href="#icondaochu"></use>
                         </svg>                    
                     </s-download>
+                </el-tooltip>
+                <el-tooltip class="item" effect="dark" content="导入" :open-delay="300">
+                    <svg class="svg-icon" aria-hidden="true" @click="dialogVisible3 = true">
+                        <use xlink:href="#icondaoru"></use>
+                    </svg>
                 </el-tooltip>
             </div>
         </div>
@@ -59,7 +64,7 @@
                 <template slot-scope="scope">
                     <div 
                             class="custom-tree-node"
-                            :class="{'selected': multiSelectNode.find(val => val.data._id === scope.data._id), 'active': currentSelectDoc._id === scope.data._id}"
+                            :class="{'selected': multiSelectNode.find(val => val.data._id === scope.data._id), 'active': currentSelectDoc && currentSelectDoc._id === scope.data._id}"
                             tabindex="1"
                             @keydown="handleKeydown($event, scope.data)"
                             @keyup="handleKeyUp"
@@ -122,6 +127,7 @@
         <!-- 弹窗 -->
         <s-add-folder-dialog v-if="dialogVisible" :visible.sync="dialogVisible" :pid="docParentId" @success="handleAddFileAndFolderCb"></s-add-folder-dialog>
         <s-add-file-dialog v-if="dialogVisible2" :visible.sync="dialogVisible2" :pid="docParentId" @success="handleAddFileAndFolderCb"></s-add-file-dialog>
+        <s-import-doc-dialog v-if="dialogVisible3" :visible.sync="dialogVisible3"></s-import-doc-dialog>
     </div>
 </template>
 
@@ -130,11 +136,13 @@ import Vue from "vue"
 import { findoNode, forEachForest, findPreviousSibling, findNextSibling, findParentNode } from "@/lib/utils"
 import addFolderDialog from "../../dialog/add-folder"
 import addFileDialog from "../../dialog/add-file"
+import importDoc from "../../dialog/import-doc"
 import contextmenu from "./components/contextmenu"
 export default {
     components: {
         "s-add-folder-dialog": addFolderDialog,
         "s-add-file-dialog": addFileDialog,
+        "s-import-doc-dialog": importDoc,
     },
     computed: {
         navTreeData() { //----树形导航数据
@@ -161,6 +169,7 @@ export default {
             hoverNodeId: "", //----------控制导航节点更多选项显示
             dialogVisible: false, //-----新增文件夹弹窗
             dialogVisible2: false, //----新增文件弹窗
+            dialogVisible3: false, //----导入第三方文档弹窗
             loading: false, //-----------左侧树形导航加载
         };
     },
@@ -579,6 +588,9 @@ export default {
     border-right: 1px solid $gray-400;
     display: flex;
     flex-direction: column;
+    .el-tree-node__content {
+        height: size(30);
+    }
     .el-tree-node__content:hover {
         background: none;
     }
@@ -618,11 +630,12 @@ export default {
             &:hover {
                 background: mix($theme-color, $white, 10%);
             }
-            &.selected {
-                background: mix($theme-color, $white, 50%);
-            }
             &.active {
                 background: mix($theme-color, $white, 10%);
+            }
+            //selected放在后面覆盖掉active样式
+            &.selected {
+                background: mix($theme-color, $white, 50%);
             }
             .label {
                 display: inline-block;
