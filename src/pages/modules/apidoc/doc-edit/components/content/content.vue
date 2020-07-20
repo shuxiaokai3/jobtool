@@ -185,10 +185,22 @@ export default {
                     return;
                 }
                 Object.assign(this.request, res.data.item);
-                if (this.request.requestParams.length === 0) this.request.requestParams.push(this.generateParams());
-                if (this.request.responseParams.length === 0) this.request.responseParams.push(this.generateParams());
-                if (this.request.header.length === 0) this.request.header.push(this.generateParams());
+                const reqParams = this.request.requestParams;
+                const resParams = this.request.responseParams;
+                const headerParams = this.request.header;
+                const reqParamsLen = this.request.requestParams.length;
+                const resParamsLen = this.request.responseParams.length;
+                const headerParamsLen = this.request.header.length;
+                const reqLastItemIsEmpty = (reqParams[reqParamsLen - 1] && reqParams[reqParamsLen - 1].key === "" && reqParams[reqParamsLen - 1].value === "");
+                const resLastItemIsEmpty = (resParams[resParamsLen - 1] && resParams[resParamsLen - 1].key === "" && resParams[resParamsLen - 1].value === "");
+                const headerLastItemIsEmpty = (headerParams[headerParamsLen - 1] && headerParams[headerParamsLen - 1].key === "" && headerParams[headerParamsLen - 1].value === "");
+                if (reqParamsLen === 0 || !reqLastItemIsEmpty) this.request.requestParams.push(this.generateParams());
+                if (resParamsLen === 0 || !resLastItemIsEmpty) this.request.responseParams.push(this.generateParams());
+                if (headerParamsLen === 0 || !headerLastItemIsEmpty) this.request.header.push(this.generateParams());
                 if (this.request.url.host === "") this.request.url.host = location.origin;
+              
+
+
                 this.request._description = res.data.item.description || "在这里输入文档描述";
             }).catch(err => {
                 this.$errorThrow(err, this);
