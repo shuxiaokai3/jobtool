@@ -5,15 +5,29 @@
     备注：xxxx
 */
 <template>
-    <s-dialog title="导入第三方文档" :isShow="visible" @close="handleClose">
+    <s-dialog title="导入第三方文档" :isShow="visible" class="import-doc" @close="handleClose">
+        <div class="mb-5">
+            <span>文档类型：</span>
+            <el-radio-group v-model="formInfo.type">
+                <el-radio label="postman">postman 2.1</el-radio>
+            </el-radio-group>            
+        </div>
+        <div class="mb-5">
+            <span>导入方式：</span>
+            <el-radio-group v-model="formInfo.cover" size="mini">
+                <el-radio-button :label="true">覆盖方式</el-radio-button>
+                <el-radio-button :label="false">追加方式</el-radio-button>
+            </el-radio-group>            
+        </div>
         <el-upload
                 class="w-100"
+                :limit="1"
                 drag
                 action=""
+                :before-upload="handleBeforeUpload"
                 :http-request="requestHook">
             <i class="el-icon-upload"></i>
             <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-            <div class="el-upload__tip" slot="tip">只支持postman 2.1版本json</div>
         </el-upload>
         <div slot="footer">
             <el-button :loading="loading" size="mini" type="primary" @click="handleSubmit">确定</el-button>
@@ -34,6 +48,10 @@ export default {
     },
     data() {
         return {
+            formInfo: {
+                type: "postman",
+                cover: true
+            }, //-------项目信息
             docs: [], //-----------导入的文档列表
             loading: false, //-----导入第三方加载效果
         };
@@ -42,14 +60,22 @@ export default {
         
     },
     methods: {
-        requestHook(e) {
-            console.log(2222, e.file)
-            e.file.text().then(jsonText => {
-                // console.log(JSON.parse(jsonText))
-                this.convertPostmanData(JSON.parse(jsonText));
-            })
+
+
+        //=====================================图片上传====================================//
+        handleBeforeUpload(file) {
+            const isJson = file.type === "application/json";
+            const isLt300kb = file.size / 1024 < 300;
+            if (!isJson) {
+                this.$message.error("只能上传json文件");
+            }
+            if (!isLt300kb) {
+                this.$message.error("文件大小不超过300kb");
+            }
+            return isJson && isLt300kb;
         },
-        //
+        //=====================================数据转换====================================//
+        //转换postman数据为标准格式
         convertPostmanData(data) {
             const result = [];
             const docs = data.item;
@@ -82,7 +108,6 @@ export default {
                         });
                         result.push(doc)
                     } else { //否则为文档
-                        console.log(value.request)
                         this.generateDoc(doc, {
                             docName: value.name,
                             projectId: this.$route.query.id,
@@ -130,7 +155,6 @@ export default {
                 rKey: "item"
             });
             this.docs = result;
-            console.log(result)
         },
         
         //将对象转换为扁平数据
@@ -243,10 +267,16 @@ export default {
             doc.item.methods = config.methods;
             doc.item.description = config.docName;
         },
+        requestHook(e) {
+            console.log(2222, e.file)
+            e.file.text().then(jsonText => {
+                this.convertPostmanData(JSON.parse(jsonText));
+            })
+        },
         //=====================================组件间交互====================================//  
         handleSubmit() {
             this.loading = true;
-            this.axios.post("/api/project/doc_multi", { docs: this.docs }).then(() => {
+            this.axios.post("/api/project/doc_multi", { docs: this.docs, projectId: this.$route.query.id }).then(() => {
                 this.$emit("success");
                 this.handleClose();
             }).catch(err => {
@@ -266,5 +296,12 @@ export default {
 
 
 <style lang="scss">
-
+.import-doc {
+    .el-upload {
+        width: 100%;
+    }
+    .el-upload-dragger {
+        width: 100%;
+    }
+}
 </style>
