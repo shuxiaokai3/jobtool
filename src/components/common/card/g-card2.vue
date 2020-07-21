@@ -52,6 +52,12 @@ export default {
             default: false
         },
     },
+    watch: {
+        fold(val) {
+            console.log(val)
+            this.showContent = !this.fold;
+        }
+    },
     data() {
         return {
             showContent: true
