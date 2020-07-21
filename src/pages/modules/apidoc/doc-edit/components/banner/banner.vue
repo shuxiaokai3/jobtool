@@ -52,6 +52,7 @@
                     :data="navTreeData" 
                     node-key="_id" 
                     empty-text="点击按钮新增文档"
+                    :default-expanded-keys="defaultExpandedKeys"
                     :expand-on-click-node="true" 
                     :draggable="enableDrag"
                     :allow-drop="handleCheckNodeCouldDrop"
@@ -155,6 +156,16 @@ export default {
             return this.$store.state.apidoc.activeDoc[this.$route.query.id];
         }
     },
+    watch: {
+        currentSelectDoc: {
+            handler(val) {
+                if (val && val._id) {
+                    this.defaultExpandedKeys.splice(0, 1, val._id);
+                }
+            },
+            deep: true
+        }
+    },
     data() {
         return {
             //=====================================文档增删改查====================================//
@@ -165,6 +176,7 @@ export default {
             pressCtrl: false, //---------是否按住ctrl键
             multiSelectNode: [], //------按住ctrl+鼠标左键多选节点
             enableDrag: true, //---------是否允许文档被拖拽
+            defaultExpandedKeys: [], //--默认展开的文档key值
             //=====================================其他参数====================================//
             hoverNodeId: "", //----------控制导航节点更多选项显示
             dialogVisible: false, //-----新增文件夹弹窗
@@ -324,7 +336,7 @@ export default {
                 }
             } else { //插入到文件夹里面
                 if (data.isFolder) { //如果是文件夹则放在第一位
-                    console.log(pNode)
+                    this.defaultExpandedKeys.push(data._id)
                     let folderIndex = -1;
                     for (let i = 0,len = pNode.children.length; i < len; i++) {
                         if (!pNode.children[i].isFolder) {
@@ -622,6 +634,7 @@ export default {
     }
     .doc-nav {
         height: calc(100vh - #{size(60)} - #{size(150)});
+        overflow: auto;
         .custom-tree-node {
             display: flex;
             align-items: center;

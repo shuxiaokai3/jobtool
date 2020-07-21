@@ -31,7 +31,14 @@ export default {
             }
             const hasTab = state.tabs[projectId].find(val => val._id === _id);
             if (!hasTab) {
-                state.tabs[projectId].push(docInfo);
+                if (state.tabs[projectId].length === 7) { //7这个值是预估的不准确
+                    state.tabs[projectId].unshift(docInfo);
+                } else if (state.tabs[projectId].length > 7) {
+                    state.tabs[projectId][0] = docInfo;
+                } else {
+                    state.tabs[projectId].push(docInfo);
+                }
+                
                 localStorage.setItem("apidoc/editTabs", JSON.stringify(state.tabs))
             }
         },
@@ -67,7 +74,6 @@ export default {
             if (state.tabs[projectId]) {
                 const deleteIndexArr = [];
                 state.tabs[projectId].forEach((val, index) => {
-                    console.log(222, val, deleteIds)
                     if (deleteIds.includes(val._id)) {
                         deleteIndexArr.push(index);
                     }
