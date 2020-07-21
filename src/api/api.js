@@ -33,20 +33,20 @@ export default {
     install: function(Vue) {
         let timer = Date.now(); //统计接口用时
         let timer2 = Date.now(); //统计接口用时
-        const allRequestList = []; //所有请求存放数组，用于取消某些特定请求
+        //const allRequestList = []; //所有请求存放数组，用于取消某些特定请求
         let isExpireRequest = false;
         //===============================axiosInstance请求钩子==========================================//
         axiosInstance.interceptors.request.use(
             config => {
                 timer = Date.now();
-                config.cancelToken = new axios.CancelToken((c) => {
-                    allRequestList.push(
-                        {
-                            url: config.url,
-                            cancelFn: c
-                        }
-                    );
-                });
+                // config.cancelToken = new axios.CancelToken((c) => {
+                //     allRequestList.push(
+                //         {
+                //             url: config.url,
+                //             cancelFn: c
+                //         }
+                //     );
+                // });
                 config.headers["x-csrf-token"] = jsCookie.get("csrfToken");
                 return config
             },
@@ -116,6 +116,12 @@ export default {
                             }
                             return Promise.reject(new Error("暂无权限"));
                         case 4010: //编译错误
+                            break;
+                        case 6001: //代理服务器 http状态码非200
+                            break;
+                        case 6002: //代理服务器 http状态码200
+                            break;
+                        case 6003: //代理服务器错误
                             break;
                         default:
                             Vue.prototype.$httpFailCatch(res, timer2, router.currentRoute)

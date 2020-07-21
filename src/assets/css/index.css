@@ -985,7 +985,7 @@ pre {
 
 .my-1 {
   margin-top: 5px;
-  bottom: 5px; }
+  margin-bottom: 5px; }
 
 .px-1 {
   padding-left: 5px;
@@ -1001,7 +1001,7 @@ pre {
 
 .my-2 {
   margin-top: 10px;
-  bottom: 10px; }
+  margin-bottom: 10px; }
 
 .px-2 {
   padding-left: 10px;
@@ -1017,7 +1017,7 @@ pre {
 
 .my-3 {
   margin-top: 15px;
-  bottom: 15px; }
+  margin-bottom: 15px; }
 
 .px-3 {
   padding-left: 15px;
@@ -1033,7 +1033,7 @@ pre {
 
 .my-4 {
   margin-top: 20px;
-  bottom: 20px; }
+  margin-bottom: 20px; }
 
 .px-4 {
   padding-left: 20px;
@@ -1049,7 +1049,7 @@ pre {
 
 .my-5 {
   margin-top: 25px;
-  bottom: 25px; }
+  margin-bottom: 25px; }
 
 .px-5 {
   padding-left: 25px;

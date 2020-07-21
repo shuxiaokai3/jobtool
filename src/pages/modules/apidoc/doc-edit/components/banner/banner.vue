@@ -31,12 +31,17 @@
                         <use xlink:href="#iconpreview"></use>
                     </svg>               
                 </el-tooltip>
-                <el-tooltip class="item" effect="dark" content="导出" :open-delay="300">
+                <el-tooltip class="item" effect="dark" content="导出为word" :open-delay="300">
                     <s-download url="/api/project/doc_word" :params="{ projectId: $route.query._id }">
                         <svg class="svg-icon" aria-hidden="true">
                             <use xlink:href="#icondaochu"></use>
                         </svg>                    
                     </s-download>
+                </el-tooltip>
+                <el-tooltip class="item" effect="dark" content="导入" :open-delay="300">
+                    <svg class="svg-icon" aria-hidden="true" @click="dialogVisible3 = true">
+                        <use xlink:href="#icondaoru"></use>
+                    </svg>
                 </el-tooltip>
             </div>
         </div>
@@ -47,9 +52,9 @@
                     :data="navTreeData" 
                     node-key="_id" 
                     empty-text="点击按钮新增文档"
+                    :default-expanded-keys="defaultExpandedKeys"
                     :expand-on-click-node="true" 
                     :draggable="enableDrag"
-                    :highlight-current="true"
                     :allow-drop="handleCheckNodeCouldDrop"
                     @node-contextmenu="handleContextmenu"
                     @node-drop="handleNodeDropSuccess"
@@ -60,7 +65,7 @@
                 <template slot-scope="scope">
                     <div 
                             class="custom-tree-node"
-                            :class="{'selected': multiSelectNode.find(val => val.data._id === scope.data._id)}"
+                            :class="{'selected': multiSelectNode.find(val => val.data._id === scope.data._id), 'active': currentSelectDoc && currentSelectDoc._id === scope.data._id}"
                             tabindex="1"
                             @keydown="handleKeydown($event, scope.data)"
                             @keyup="handleKeyUp"
@@ -81,13 +86,14 @@
                                     v-show="hoverNodeId === scope.data._id"
                                     class="node-more ml-auto mr-2"
                                     trigger="click"
-                                    @command="(command) => { this.handleSelectDropdown(command, data) }"
+                                    @command="(command) => { handleSelectDropdown(command, scope.data, scope.node) }"
                                     @click.native.stop="() =>{}"
                             >
                                 <span class="el-icon-more"></span>
                                 <el-dropdown-menu slot="dropdown">
                                     <el-dropdown-item v-if="scope.data.isFolder" command="addFile">新建文档</el-dropdown-item>
                                     <el-dropdown-item v-if="scope.data.isFolder" command="addTemplate">以模板新建</el-dropdown-item>
+                                    <el-dropdown-item v-if="!scope.data.isFolder" command="copy">复制接口</el-dropdown-item>
                                     <el-dropdown-item command="rename">重命名</el-dropdown-item>
                                     <el-dropdown-item command="delete">删除</el-dropdown-item>
                                 </el-dropdown-menu>
@@ -102,7 +108,7 @@
                                     v-show="hoverNodeId === scope.data._id"
                                     class="node-more ml-auto mr-2"
                                     trigger="click"
-                                    @command="(command) => { this.handleSelectDropdown(command, data) }"
+                                    @command="(command) => { handleSelectDropdown(command, scope.data, scope.node) }"
                                     @click.native.stop="() =>{}"
                             >
                                 <span class="el-icon-more"></span>
@@ -122,6 +128,7 @@
         <!-- 弹窗 -->
         <s-add-folder-dialog v-if="dialogVisible" :visible.sync="dialogVisible" :pid="docParentId" @success="handleAddFileAndFolderCb"></s-add-folder-dialog>
         <s-add-file-dialog v-if="dialogVisible2" :visible.sync="dialogVisible2" :pid="docParentId" @success="handleAddFileAndFolderCb"></s-add-file-dialog>
+        <s-import-doc-dialog v-if="dialogVisible3" :visible.sync="dialogVisible3" @success="init"></s-import-doc-dialog>
     </div>
 </template>
 
@@ -130,11 +137,13 @@ import Vue from "vue"
 import { findoNode, forEachForest, findPreviousSibling, findNextSibling, findParentNode } from "@/lib/utils"
 import addFolderDialog from "../../dialog/add-folder"
 import addFileDialog from "../../dialog/add-file"
+import importDoc from "../../dialog/import-doc"
 import contextmenu from "./components/contextmenu"
 export default {
     components: {
         "s-add-folder-dialog": addFolderDialog,
         "s-add-file-dialog": addFileDialog,
+        "s-import-doc-dialog": importDoc,
     },
     computed: {
         navTreeData() { //----树形导航数据
@@ -147,6 +156,16 @@ export default {
             return this.$store.state.apidoc.activeDoc[this.$route.query.id];
         }
     },
+    watch: {
+        currentSelectDoc: {
+            handler(val) {
+                if (val && val._id) {
+                    this.defaultExpandedKeys.splice(0, 1, val._id);
+                }
+            },
+            deep: true
+        }
+    },
     data() {
         return {
             //=====================================文档增删改查====================================//
@@ -157,10 +176,12 @@ export default {
             pressCtrl: false, //---------是否按住ctrl键
             multiSelectNode: [], //------按住ctrl+鼠标左键多选节点
             enableDrag: true, //---------是否允许文档被拖拽
+            defaultExpandedKeys: [], //--默认展开的文档key值
             //=====================================其他参数====================================//
             hoverNodeId: "", //----------控制导航节点更多选项显示
             dialogVisible: false, //-----新增文件夹弹窗
             dialogVisible2: false, //----新增文件弹窗
+            dialogVisible3: false, //----导入第三方文档弹窗
             loading: false, //-----------左侧树形导航加载
         };
     },
@@ -181,6 +202,39 @@ export default {
             })
         },
         //=====================================导航操作==================================//
+        //文档下拉框选择 重命名，删除，新增...
+        handleSelectDropdown(command, data, node) {
+            /*eslint-disable indent*/
+            switch (command) {
+                case "addFile":
+                    this.docParentId = data._id;
+                    this.handleOpenAddFileDialog();
+                    break;
+                case "addFolder":
+                    this.docParentId = data._id;
+                    this.handleOpenAddFolderDialog();
+                    break;
+                case "rename":
+                    this.$set(data, "_docName", data.docName); //文档名称备份,防止修改名称用户名称填空导致异常
+                    this.renameNodeId = data._id;
+                    this.$nextTick(() => {
+                        document.querySelector(".rename-ipt").focus();
+                        this.enableDrag = false;                    
+                    })
+                    break;
+                case "delete":
+                    this.handleDeleteItem(data, node);
+                    break;
+                case "addTemplate":
+                    this.addRestFul(data);
+                    break;
+                case "copy":
+                    this.copyDoc(data);
+                    break;
+                default:
+                    break;
+            }
+        },
         //创建鼠标右键dom元素
         handleContextmenu(e, data, node) {
             e.stopPropagation();
@@ -282,7 +336,7 @@ export default {
                 }
             } else { //插入到文件夹里面
                 if (data.isFolder) { //如果是文件夹则放在第一位
-                    console.log(pNode)
+                    this.defaultExpandedKeys.push(data._id)
                     let folderIndex = -1;
                     for (let i = 0,len = pNode.children.length; i < len; i++) {
                         if (!pNode.children[i].isFolder) {
@@ -359,7 +413,6 @@ export default {
         },
         //点击节点
         handleNodeClick(data, node) {
-            console.log(node)
             if (!node.data.isFolder) { //文件夹不做处理
                 this.$store.commit("apidoc/addTab", node.data);
                 this.$store.commit("apidoc/changeCurrentTab", {
@@ -420,7 +473,7 @@ export default {
                         const nodeIndex = this.navTreeData.findIndex(val => val._id === data._id);
                         this.navTreeData.splice(nodeIndex, 1);
                     }
-                    this.handleDeleteTabsById();
+                    this.handleDeleteTabsById(deleteId);
                 }).catch(err => {
                     this.$errorThrow(err, this);
                 });            
@@ -459,7 +512,7 @@ export default {
                             const nodeIndex = this.navTreeData.findIndex(val => val._id === delNode.data._id);
                             this.navTreeData.splice(nodeIndex, 1);
                         }
-                        this.handleDeleteTabsById();
+                        this.handleDeleteTabsById(deleteId);
                     })
                 }).catch(err => {
                     this.$errorThrow(err, this);
@@ -547,6 +600,12 @@ export default {
     border-right: 1px solid $gray-400;
     display: flex;
     flex-direction: column;
+    .el-tree-node__content {
+        height: size(30);
+    }
+    .el-tree-node__content:hover {
+        background: none;
+    }
     .tool {
         position: relative;
         padding: 0 size(20);
@@ -575,11 +634,19 @@ export default {
     }
     .doc-nav {
         height: calc(100vh - #{size(60)} - #{size(150)});
+        overflow: auto;
         .custom-tree-node {
             display: flex;
             align-items: center;
             height: 30px;
             width: 100%;
+            &:hover {
+                background: mix($theme-color, $white, 10%);
+            }
+            &.active {
+                background: mix($theme-color, $white, 10%);
+            }
+            //selected放在后面覆盖掉active样式
             &.selected {
                 background: mix($theme-color, $white, 50%);
             }

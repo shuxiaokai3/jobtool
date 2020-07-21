@@ -7,9 +7,13 @@
 <template>
     <div class="tabs">
         <div class="my-tabs d-flex hidden-sm-and-down">
-            <draggable id="tabList" v-model="tabs" animation="150" class="tab-list">
+            <div class="btn left" @click="moveLeft">
+                <i class="el-icon-arrow-left"></i>
+            </div>
+            <draggable ref="tabWrap" id="tabList" v-model="tabs" animation="150" class="tab-list">
                 <div 
                         v-for="(item, index) in tabs"
+                        ref="tabItem"
                         :key="index"
                         :title="item.docName"
                         :class="{active: currentSelectDoc && currentSelectDoc._id === item._id}"
@@ -18,16 +22,17 @@
                         @click="selectCurrentTab(item)"
                         @contextmenu="handleRightClick($event, item, index)"
                 >
-                    <span 
-                            :class="{ green: item.item.methods === 'get', yellow: item.item.methods === 'post', blue: item.item.methods === 'put', red: item.item.methods === 'delete'}"
-                            class="mr-2"
-                    >
-                        {{ item.item.methods.toUpperCase() }}
-                    </span>
+                    <span v-if="item.item.methods === 'get'" class="green mr-2">GET</span>
+                    <span v-if="item.item.methods === 'post'" class="yellow mr-2">POST</span>
+                    <span v-if="item.item.methods === 'put'" class="blue mr-2">PUT</span>
+                    <span v-if="item.item.methods === 'delete'" class="red mr-2">DEL</span>
                     <span class="item-text">{{ item.docName }}</span>
                     <i class="iconfont el-icon-close close" @click.stop="handleCloseCurrent(item, index)"></i>
                 </div>
             </draggable>
+            <div class="btn right" @click="moveRight">
+                <i class="el-icon-arrow-right"></i>
+            </div>
         </div>
     </div>
 </template>
@@ -43,6 +48,7 @@ export default {
         return {
             mouseContext: null, //tab右键弹框
             //======================================其他参数===================================//
+            enableMove: true, //是否允许tab移动，动画未完成不允许下一步操作
         };
     },
     computed: {
@@ -82,7 +88,7 @@ export default {
             const tabs = localStorage.getItem("apidoc/editTabs") ? JSON.parse(localStorage.getItem("apidoc/editTabs")) : {};
             const locatActiveDoc = localStorage.getItem("apidoc/activeTab") ? JSON.parse(localStorage.getItem("apidoc/activeTab")) : {};
             const currentProjectTabs = tabs[projectId] || [];
-            const activeDoc = locatActiveDoc[projectId] || [];
+            const activeDoc = locatActiveDoc[projectId] || {};
             this.$store.commit("apidoc/updateAllTabs", {
                 projectId,
                 tabs: currentProjectTabs
@@ -91,6 +97,11 @@ export default {
                 projectId,
                 activeNode: activeDoc
             });
+            //绑定tabs移动事件
+            const wrap = this.$refs["tabWrap"].$el;
+            wrap.addEventListener("transitionend", () => {
+                this.enableMove = true;
+            })
         },
         //=====================================tabs操作====================================//
         //选择当前标签
@@ -205,6 +216,45 @@ export default {
                 this.handleCloseOther(item, index);
             })
         },
+        //往左移动
+        moveLeft() {
+            if (this.tabs.length === 0) {
+                return;
+            }
+            const wrap = this.$refs["tabWrap"].$el;
+            const item = this.$refs["tabItem"] ? this.$refs["tabItem"][0] : null;
+            const wrapStyle = window.getComputedStyle(wrap)
+            const itemRect = item.getBoundingClientRect();
+            if (!this.enableMove) {
+                return;
+            }
+            if (parseFloat(wrapStyle.left) > 0) {
+                return;
+            }
+            wrap.style.left = parseFloat(wrapStyle.left) + itemRect.width + "px";
+            this.enableMove = false;
+        },
+        //往右移动
+        moveRight() {
+            if (this.tabs.length === 0) {
+                return;
+            }
+            const wrap = this.$refs["tabWrap"].$el;
+            const item = this.$refs["tabItem"] ? this.$refs["tabItem"][0] : null;
+            const itemLen = this.$refs["tabItem"] ? this.$refs["tabItem"].length : 0;
+            const wrapRect = wrap.getBoundingClientRect();
+            const wrapStyle = window.getComputedStyle(wrap)
+            const itemRect = item.getBoundingClientRect();
+            
+            if (!this.enableMove) {
+                return;
+            }
+            if (parseFloat(wrapStyle.left) < wrapRect.width - (itemLen - 1) * itemRect.width) {
+                return;
+            }
+            wrap.style.left = parseFloat(wrapStyle.left) - itemRect.width + "px";
+            this.enableMove = false;
+        }
     }
 };
 </script>
@@ -212,12 +262,75 @@ export default {
 <style lang="scss">
 .tabs {
     width: 100%;
-    height: 40px;
+    height: size(40);
     background: #eee;
     display: flex;
     .my-tabs {
         width: 90%;
         min-width: 300px;
+        // width: 300px;
+        overflow-x: hidden;
+        overflow-y: hidden;
+        position: relative;
+        .btn {
+            flex: 0 0 auto;
+            height: size(40);
+            width: size(25);
+            position: relative;
+            z-index: $zIndex-tabs;
+            background: $gray-200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: $box-shadow-base;
+            position: absolute;
+            &.left {
+                left: 0;
+            }
+            &.right {
+                right: 0;
+            }
+        }
+        .tab-list {
+            width: calc(100% - #{size(50)});
+            line-height: 40px;
+            height: 40px;
+            display: flex;
+            color: #5f6368;
+            white-space: nowrap;
+            position: absolute;
+            left: size(25);
+            transition: left .1s;
+            .item {
+                position: relative;
+                font-size: 12px;
+                flex: 0 0 auto;
+                width: 200px;
+                cursor: default;
+                padding: 0 1rem;
+                border-right: 1px solid $gray-400;
+                .item-text {
+                    display: inline-block;
+                    max-width: 70%;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                background: rgb(222, 225, 230);
+                &:hover {
+                    background: #e2e2e2;
+                }
+                .iconfont {
+                    font-size: 16px;
+                    display: flex;
+                    align-items: center;
+                }
+                &.active {
+                    background: #f0f3fa;
+                }
+            }
+        }
     }
     .close {
         cursor: pointer;
@@ -236,42 +349,6 @@ export default {
             background: #ccc;
         }
     }
-    .tab-list {
-        width: 100%;
-        line-height: 40px;
-        height: 40px;
-        display: flex;
-        color: #5f6368;
-        overflow-x: hidden;
-        overflow-y: hidden;
-        white-space: nowrap;
-        .item {
-            position: relative;
-            font-size: 12px;
-            flex: 1 1 20%;
-            max-width: 200px;
-            cursor: default;
-            padding: 0 1rem;
-            .item-text {
-                display: inline-block;
-                max-width: 70%;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-            background: rgb(222, 225, 230);
-            &:hover {
-                background: #e2e2e2;
-            }
-            .iconfont {
-                font-size: 16px;
-                display: flex;
-                align-items: center;
-            }
-            &.active {
-                background: #f0f3fa;
-            }
-        }
-    }
+
 }
 </style>
