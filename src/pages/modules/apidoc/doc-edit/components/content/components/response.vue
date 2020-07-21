@@ -94,7 +94,13 @@ export default {
                 requestParams: this.requestParams,
             };
             this.axios.post("/proxy", params).then((res) => {
-                this.responseData = res.data;
+                this.responseData = res.data.data ? res.data.data : res.data;
+                const response = res.data.data;
+                if (response && response.headers && response.headers["set-cookie"]) {
+                    // const cookie = response.headers["set-cookie"][0];
+                    // this.requestData.header.push();
+                }
+                
             }).catch(err => {
                 console.error(err);
             }).finally(() => {
@@ -184,15 +190,15 @@ export default {
                         case "number": { //数字类型需要转换为数字，转换前所有值都为字符串
                             const keyLength = inArray ? -2 : key.length; //-2是两个"占据的位置
                             const currentLength = 40 - level * 4 - 3 - keyLength - value.length;
-                            resultStr += `${createIndent(level)}${inArray ? "" : key + ": "}${Number(value)}, //${createDash(currentLength)}${desc}${required ? " (必填)" : ""}\n`;
-                            result.str += `${createIndent(level)}${inArray ? "" : key + ": "}${Number(value)}, //${createDash(currentLength)}${desc}${required ? " (必填)" : ""}\n`;
+                            resultStr += `${createIndent(level)}${inArray ? "" : key + ": "}${Number(value)}, //${createDash(currentLength)}${desc || ""}${required ? " (必填)" : ""}\n`;
+                            result.str += `${createIndent(level)}${inArray ? "" : key + ": "}${Number(value)}, //${createDash(currentLength)}${desc || ""}${required ? " (必填)" : ""}\n`;
                             break;
                         }
                         case "boolean": {
                             const keyLength = inArray ? -2 : key.length; //-2是两个"占据的位置
                             const currentLength = 40 - level * 4 - 3 - keyLength - value.length;
-                            resultStr += `${createIndent(level)}${inArray ? "" : key + ": "}${value}, //${createDash(currentLength)}${desc}${required ? " (必填)" : ""}\n`;
-                            result.str += `${createIndent(level)}${inArray ? "" : key + ": "}${value}, //${createDash(currentLength)}${desc}${required ? " (必填)" : ""}\n`;
+                            resultStr += `${createIndent(level)}${inArray ? "" : key + ": "}${value}, //${createDash(currentLength)}${desc || ""}${required ? " (必填)" : ""}\n`;
+                            result.str += `${createIndent(level)}${inArray ? "" : key + ": "}${value}, //${createDash(currentLength)}${desc || ""}${required ? " (必填)" : ""}\n`;
                             break;                            
                         }
                         case "object": {
@@ -200,15 +206,15 @@ export default {
                             const currentLength = 40 - level * 4 - 3 - keyLength;
                             if (plainData[i].children && plainData[i].children.length > 0) {
                                 if (level === 0) {
-                                    result.str += `${createIndent(level)}${inArray ? "" : key + ": "}{ //${createDash(currentLength)}${desc}\n${foo(plainData[i].children, level + 1, false)}}`;
+                                    result.str += `${createIndent(level)}${inArray ? "" : key + ": "}{ //${createDash(currentLength)}${desc || ""}\n${foo(plainData[i].children, level + 1, false)}}`;
                                 } else {
-                                    resultStr = `${createIndent(level)}${inArray ? "" : key + ": "}{ //${createDash(currentLength)}${desc}\n${foo(plainData[i].children, level + 1, false)}${createIndent(level)}}\n`;
+                                    resultStr = `${createIndent(level)}${inArray ? "" : key + ": "}{ //${createDash(currentLength)}${desc || ""}\n${foo(plainData[i].children, level + 1, false)}${createIndent(level)}}\n`;
                                 }
                             } else {
                                 if (level === 0) {
-                                    result.str += `${createIndent(level)}${inArray ? "" : key + ": "}{ //${createDash(currentLength)}${desc}\n}, \n`;
+                                    result.str += `${createIndent(level)}${inArray ? "" : key + ": "}{ //${createDash(currentLength)}${desc || ""}\n}, \n`;
                                 } else {
-                                    resultStr = `${createIndent(level)}${inArray ? "" : key + ": "}{ //${createDash(currentLength)}${desc}\n}, \n`;
+                                    resultStr = `${createIndent(level)}${inArray ? "" : key + ": "}{ //${createDash(currentLength)}${desc || ""}\n}, \n`;
                                 }
                             }
                             break;                            
@@ -217,15 +223,15 @@ export default {
                             const currentLength = 40 - level * 4 - 3 - key.length;
                             if (plainData[i].children && plainData[i].children.length > 0) {
                                 if (level === 0) {
-                                    result.str += `${createIndent(level)}${key}: [ //${createDash(currentLength)}${desc}\n${foo(plainData[i].children, level + 1, true)}]`;
+                                    result.str += `${createIndent(level)}${key}: [ //${createDash(currentLength)}${desc || ""}\n${foo(plainData[i].children, level + 1, true)}]`;
                                 } else {
-                                    resultStr = `${createIndent(level)}${key}: [ //${createDash(currentLength)}${desc}\n${foo(plainData[i].children, level + 1, true)}${createIndent(level)}]\n`;
+                                    resultStr = `${createIndent(level)}${key}: [ //${createDash(currentLength)}${desc || ""}\n${foo(plainData[i].children, level + 1, true)}${createIndent(level)}]\n`;
                                 }
                             } else {
                                 if (level === 0) {
-                                    result.str += `${createIndent(level)}${key}: [ //${createDash(currentLength)}${desc}\n], \n`;
+                                    result.str += `${createIndent(level)}${key}: [ //${createDash(currentLength)}${desc || ""}\n], \n`;
                                 } else {
-                                    resultStr = `${createIndent(level)}${key}: [ //${createDash(currentLength)}${desc}\n], \n`;
+                                    resultStr = `${createIndent(level)}${key}: [ //${createDash(currentLength)}${desc || ""}\n], \n`;
                                 }
                             }
                             break;                            
@@ -233,14 +239,14 @@ export default {
                         default: { //字符串或其他类型类型不做处理
                             const keyLength = inArray ? -2 : key.length; //-2是两个"占据的位置
                             let currentLength = 0;
-                            if (value.length > 15) { //字符串长度超过15个字符的做截取操作
+                            if (value && value.length > 15) { //字符串长度超过15个字符的做截取操作
                                 value = value.slice(0, 15) + "...";
-                                currentLength = 40 - level * 4 - 3 - keyLength - value.length - 2 - 3;
+                                currentLength = 40 - level * 4 - 3 - keyLength - value.length - 2;
                             } else {
                                 currentLength = 40 - level * 4 - 3 - keyLength - value.length - 2;
                             }
-                            resultStr += `${createIndent(level)}${inArray ? "" : key + ": "}"${value}", //${createDash(currentLength)}${desc}${required ? " (必填)" : ""}\n`;
-                            result.str += `${createIndent(level)}${inArray ? "" : key + ": "}"${value}", //${createDash(currentLength)}${desc}${required ? " (必填)" : ""}\n`;
+                            resultStr += `${createIndent(level)}${inArray ? "" : key + ": "}"${value}", //${createDash(currentLength)}${desc || ""}${required ? " (必填)" : ""}\n`;
+                            result.str += `${createIndent(level)}${inArray ? "" : key + ": "}"${value}", //${createDash(currentLength)}${desc || ""}${required ? " (必填)" : ""}\n`;
                             break;
                         }
                     }

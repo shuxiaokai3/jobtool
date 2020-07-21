@@ -107,6 +107,10 @@ export default {
             type: Boolean,
             default: false
         },
+        validKey: { //是否验证key值必须为指定类型
+            type: Boolean,
+            default: true
+        }
     },
     data() {
         return {
@@ -116,7 +120,7 @@ export default {
                 reference: "http://baidu.com"
             },
             valueTip: {
-                message: "不能为空并且类型必须为数字",
+                message: "不能为空并且类型必须一致",
             },
             requiredTip: {
                 message: "不能为空",
@@ -228,10 +232,11 @@ export default {
             if (parentNode.level === 0 && parentData.length === 1) { //根元素第一个可以不必校验因为参数可以不必填
                 return;
             }
+            console.log(this.validKey)
             if (nodeIndex !== parentData.length - 1) { //只要不是最后一个值都需要做数据校验 
                 if (data.key.trim() === "") { //非空校验
                     this.$set(data, "_keyError", true)
-                } else if (!data.key.match(/^[a-zA-Z0-9]*$/)) { //字母数据
+                } else if (this.validKey && !data.key.match(/^[a-zA-Z0-9]*$/)) { //字母数据
                     this.$set(data, "_keyError", true)
                 } else {
                     this.$set(data, "_keyError", false)
