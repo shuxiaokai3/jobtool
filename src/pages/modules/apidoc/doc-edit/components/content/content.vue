@@ -51,7 +51,7 @@
             <div>
                 <s-params-tree :tree-data="request.requestParams" title="请求参数" :plain="request.methods === 'get'"></s-params-tree>
                 <s-params-tree :tree-data="request.responseParams" title="响应参数"></s-params-tree>
-                <s-params-tree :tree-data="request.header" title="请求头" plain fold></s-params-tree>            
+                <s-params-tree :tree-data="request.header" title="请求头" plain :fold="foldHeader" :valid-key="false"></s-params-tree>            
             </div>            
         </div>
         <div class="w-35 flex1">
@@ -60,7 +60,7 @@
         <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible" @close="getHostEnum"></s-host-manage>
     </div>
     <div v-else>
-        sadsad
+        
     </div>
 </template>
 
@@ -133,6 +133,7 @@ export default {
             cancel: [], //-----------------------需要取消的接口
             loading: false, //-------------------保存接口
             loading2: false, //------------------获取文档详情接口
+            foldHeader: true, //----------------是否折叠header，当校验错误时候自动展开header
         };
     },
     computed: {
@@ -170,17 +171,22 @@ export default {
             };
             if (this.cancel.length > 0) {
                 this.cancel.forEach(c => {
-                    c();
+                    c("取消请求");
                 })
             }
-            this.loading2 = true;
+            setTimeout(() => { //hack让请求加载不受取消影响
+                this.loading2 = true;
+            })
             this.axios.get("/api/project/doc_detail", {
                 params,
                 cancelToken: new CancelToken((c) => {
                     this.cancel.push(c);
                 })
             }).then(res => {
-                if (res.data === null) {
+                if (res === undefined) { //取消接口
+                    return
+                }
+                if (res.data === null) { //接口不存在提示用户删除接口
                     this.confirmInvalidDoc();
                     return;
                 }
@@ -198,15 +204,13 @@ export default {
                 if (resParamsLen === 0 || !resLastItemIsEmpty) this.request.responseParams.push(this.generateParams());
                 if (headerParamsLen === 0 || !headerLastItemIsEmpty) this.request.header.push(this.generateParams());
                 if (this.request.url.host === "") this.request.url.host = location.origin;
-              
-
-
                 this.request._description = res.data.item.description || "在这里输入文档描述";
             }).catch(err => {
                 this.$errorThrow(err, this);
             }).finally(() => {
                 this.loading2 = false;
             });
+            
         },
         //接口不存在提醒用户，可能是同时操作的用户删掉了这个接口导致接口不存在
         confirmInvalidDoc() {
@@ -341,7 +345,7 @@ export default {
         //=====================================发送请求====================================//
         //发送请求
         sendRequest() {
-            console.log(JSON.parse(JSON.stringify(this.request)))
+            // console.log(JSON.parse(JSON.stringify(this.request)))
             const validParams = this.validateParams();
             if (!validParams) {
                 this.$message.error("xxx");
@@ -367,7 +371,6 @@ export default {
                     if (pData.length - 1 === index) { //最后一个数据不做处理
                         return;
                     }
-                    // console.log(data, pData, 9999)
                     const p = findParentNode(data.id, this.request.responseParams);
                     const isParentArray = (p && p.type === "array");
                     if (!isParentArray && data.key.trim() === "") { //非空校验
@@ -384,6 +387,64 @@ export default {
                     if (data.description.trim() === "") {
                         this.$set(data, "_descriptionError", true);
                         isValidRequest = false;
+                    }
+                }
+            });
+            dfsForest(this.request.requestParams, {
+                rCondition(value) {
+                    return value.children;
+                },
+                rKey: "children",
+                hooks: (data, index, pData) => {
+                    const isComplex = (data.type === "object" || data.type === "array");
+                    if (pData.length - 1 === index) { //最后一个数据不做处理
+                        return;
+                    }
+                    const p = findParentNode(data.id, this.request.requestParams);
+                    const isParentArray = (p && p.type === "array");
+                    if (!isParentArray && data.key.trim() === "") { //非空校验
+                        this.$set(data, "_keyError", true);
+                        isValidRequest = false;
+                    } else if (!isParentArray && !data.key.match(/^[a-zA-Z0-9]*$/)) { //字母数据
+                        this.$set(data, "_keyError", true);
+                        isValidRequest = false;
+                    }       
+                    if (!isComplex && data.value.trim() === "") {
+                        this.$set(data, "_valueError", true);
+                        isValidRequest = false;
+                    }
+                    if (!data.description || data.description.trim() === "") {
+                        this.$set(data, "_descriptionError", true);
+                        isValidRequest = false;
+                    }
+                }
+            });
+            dfsForest(this.request.header, {
+                rCondition(value) {
+                    return value.children;
+                },
+                rKey: "children",
+                hooks: (data, index, pData) => {
+                    const isComplex = (data.type === "object" || data.type === "array");
+                    if (pData.length - 1 === index) { //最后一个数据不做处理
+                        return;
+                    }
+                    const p = findParentNode(data.id, this.request.header);
+                    const isParentArray = (p && p.type === "array");
+                    if (!isParentArray && data.key.trim() === "") { //非空校验
+                        this.$set(data, "_keyError", true);
+                        isValidRequest = false;
+                        this.foldHeader = false;
+                    }      
+                    if (!isComplex && data.value.trim() === "") {
+                        this.$set(data, "_valueError", true);
+                        isValidRequest = false;
+                        this.foldHeader = false;
+                    }
+                    if (!data.description || data.description.trim() === "") {
+                        this.$set(data, "_descriptionError", true);
+                        isValidRequest = false;
+                        this.foldHeader = false;
                     }
                 }
             });
