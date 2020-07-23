@@ -308,11 +308,11 @@ export default {
                 flex: 0 0 auto;
                 width: 200px;
                 cursor: default;
-                padding: 0 1rem;
+                padding: 0 size(10);
                 border-right: 1px solid $gray-400;
                 .item-text {
                     display: inline-block;
-                    max-width: 70%;
+                    max-width: size(100);
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
