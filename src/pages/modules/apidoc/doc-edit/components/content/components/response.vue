@@ -33,7 +33,7 @@
             <pre>{{ requesStringParams.str }}</pre>
         </s-collapse>
         <s-collapse title="返回结果">
-            <pre class="res-data">{{ responseData }}</pre>
+            <pre v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)" class="res-data">{{ responseData }}</pre>
         </s-collapse>
     </div>
 </template>
@@ -78,7 +78,8 @@ export default {
     },
     data() {
         return {
-            responseData: null, //返回结果对象
+            responseData: null, //---返回结果对象
+            loading: false, //-------返回结果加载状态
         };
     },
     created() {
@@ -87,25 +88,29 @@ export default {
     methods: {
         //=====================================前后端交互====================================//
         sendRequest() {
-            const params = {
-                url: this.requestData.url.host + this.requestData.url.path,
-                method: this.requestData.methods,
-                header: this.headerParams,
-                requestParams: this.requestParams,
-            };
-            this.axios.post("/proxy", params).then((res) => {
-                this.responseData = res.data.data ? res.data.data : res.data;
-                const response = res.data.data;
-                if (response && response.headers && response.headers["set-cookie"]) {
-                    // const cookie = response.headers["set-cookie"][0];
-                    // this.requestData.header.push();
-                }
-                
-            }).catch(err => {
-                console.error(err);
-            }).finally(() => {
-                this.loading = false;
-            });
+            return new Promise((resolve) => {
+                this.loading = true;
+                const params = {
+                    url: this.requestData.url.host + this.requestData.url.path,
+                    method: this.requestData.methods,
+                    header: this.headerParams,
+                    requestParams: this.requestParams,
+                };
+                this.axios.post("/proxy", params).then((res) => {
+                    this.responseData = res.data.data ? res.data.data : res.data;
+                    const response = res.data.data;
+                    if (response && response.headers && response.headers["set-cookie"]) {
+                        // const cookie = response.headers["set-cookie"][0];
+                        // this.requestData.header.push();
+                    }
+                }).catch(err => {
+                    console.error(err);
+                }).finally(() => {
+                    resolve();
+                    this.loading = false;
+                });                
+            })
+
         },
         //=====================================组件间交互====================================//  
         //将扁平数据转换为树形结构数据
@@ -267,6 +272,7 @@ export default {
 <style lang="scss">
 .response {
     .res-data {
+        min-height: size(100);
         max-height: size(300);
     }
 }

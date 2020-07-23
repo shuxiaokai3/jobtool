@@ -41,7 +41,7 @@
                                 </el-select>
                             </div>                        
                         </s-v-input>
-                        <el-button type="success" size="small" @click="sendRequest">发送请求</el-button>
+                        <el-button :loading="loading3" type="success" size="small" @click="sendRequest">发送请求</el-button>
                         <el-button :loading="loading" type="primary" size="small" @click="saveRequest">保存接口</el-button>
                     </div>
                 </div>                
@@ -133,6 +133,7 @@ export default {
             cancel: [], //-----------------------需要取消的接口
             loading: false, //-------------------保存接口
             loading2: false, //------------------获取文档详情接口
+            loading3: false, //------------------发送请求状态
             foldHeader: true, //----------------是否折叠header，当校验错误时候自动展开header
         };
     },
@@ -350,7 +351,10 @@ export default {
             if (!validParams) {
                 this.$message.error("xxx");
             } else {
-                this.$refs["response"].sendRequest();
+                this.loading3 = true;
+                this.$refs["response"].sendRequest().finally(() => {
+                    this.loading3 = false;
+                });
             }
         },
         //检查参数是否完备
