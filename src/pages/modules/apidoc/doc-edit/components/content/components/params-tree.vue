@@ -17,7 +17,7 @@
             >
                 <template slot-scope="scope">
                     <div class="custom-tree-node">
-                        <el-button type="text" :title="disableTitleTip" icon="el-icon-plus" :disabled="plain" @click="addNestTreeData(scope.data)"></el-button>
+                        <el-button type="text" :title="disableTitleTip" icon="el-icon-plus" :disabled="scope.data.type === 'file' || plain" @click="addNestTreeData(scope.data)"></el-button>
                         <el-button 
                                 class="mr-2"
                                 :disabled="!scope.node.nextSibling && scope.node.level === 1"
@@ -45,17 +45,18 @@
                         </div>
                         <el-select v-model="scope.data.type" :disabled="plain" :title="disableTypeTip" placeholder="类型" size="mini" class="mr-2" @change="handleChangeParamsType(scope.data)">
                             <el-option :disabled="scope.data.children && scope.data.children.length > 0" label="String" value="string"></el-option>
-                            <el-option :disabled="plain || (scope.data.children && scope.data.children.length > 0)" label="Number" value="number"></el-option>
-                            <el-option :disabled="plain || (scope.data.children && scope.data.children.length > 0)" label="Boolean" value="boolean"></el-option>
-                            <el-option :disabled="plain" label="Object" value="object"></el-option>
-                            <el-option :disabled="plain" label="List | Array" value="array"></el-option>
+                            <el-option :disabled="isFormData || plain || (scope.data.children && scope.data.children.length > 0)" label="Number" value="number"></el-option>
+                            <el-option :disabled="isFormData || plain || (scope.data.children && scope.data.children.length > 0)" label="Boolean" value="boolean"></el-option>
+                            <el-option :disabled="isFormData || plain" label="Object" value="object"></el-option>
+                            <el-option :disabled="isFormData || plain" label="List | Array" value="array"></el-option>
+                            <el-option :disabled="!isFormData" label="file" value="file"></el-option>
                         </el-select>
                         <el-select v-if="scope.data.type === 'boolean'" v-model="scope.data.value" placeholder="请选择" size="mini" class="w-25 mr-2">
                             <el-option label="true" value="true"></el-option>
                             <el-option label="false" value="false"></el-option>
                         </el-select>
                         <s-v-input 
-                                v-if="scope.data.type !== 'boolean'"
+                                v-if="scope.data.type !== 'boolean' && scope.data.type !== 'file'"
                                 :disabled="scope.data.type === 'array' || scope.data.type === 'object'"
                                 title="对象和数组不必填写参数值"
                                 v-model="scope.data.value"
@@ -67,6 +68,11 @@
                                 @blur="handleCheckValue(scope)"
                         >
                         </s-v-input>
+                        <el-select v-if="isFormData && scope.data.type === 'file'" v-model="scope.data.value" placeholder="浏览器限制" size="mini">
+                            <el-option label="图片" value="image"></el-option>
+                            <el-option label="pdf" value="pdf"></el-option>
+                            <el-option label="word" value="word"></el-option>
+                        </el-select>
                         <el-checkbox v-model="scope.data.required" label="必选"></el-checkbox>
                         <s-v-input 
                                 v-model="scope.data.description"
@@ -107,9 +113,13 @@ export default {
             type: Boolean,
             default: false
         },
-        validKey: { //是否验证key值必须为指定类型
+        validKey: { //----------是否验证key值必须为指定类型
             type: Boolean,
             default: true
+        },
+        isFormData: { //----------是否为formData类型的文件上传
+            type: Boolean,
+            default: false
         }
     },
     data() {
@@ -124,7 +134,7 @@ export default {
             },
             requiredTip: {
                 message: "不能为空",
-            }
+            },
         };
     },
     computed: {
@@ -144,7 +154,7 @@ export default {
         }
     },
     created() {
-
+        
     },
     methods: {
         //=====================================参数操作====================================//
@@ -203,7 +213,9 @@ export default {
             if (data.type === "boolean") {
                 data.value = "true";
             }
-
+            if (data.type === "file") {
+                data.value = "image"
+            }
             if (data.type === "object" || data.type === "array") {
                 if (data.type === "array" && data.children && data.children.length > 0) { //清空子元素所有参数名称
                     dfsForest(data.children, {
@@ -223,6 +235,7 @@ export default {
                 this.$set(data, "_valuePlaceholder", "");
             }
         },
+     
         //=====================================数据校验====================================//
         //检查参数是否输入完备
         handleCheckKey({ node, data }) {
