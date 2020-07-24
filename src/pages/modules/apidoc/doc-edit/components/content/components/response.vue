@@ -29,11 +29,35 @@
             <div v-else class="f-xs gray-500">暂无数据</div>
         </s-collapse>
         <s-collapse title="请求参数">
-            <!-- <pre class="request-params">{{ requestParams }}</pre> -->
             <pre>{{ requesStringParams.str }}</pre>
         </s-collapse>
         <s-collapse title="返回结果">
-            <pre v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)" class="res-data">{{ responseData }}</pre>
+            <div v-if="responseData" class="f-xs d-flex j-end mb-2">
+                <div>
+                    <span>Status：</span>
+                    <span v-if="responseData.status >= 200 && responseData.status <= 299" class="green">{{ responseData.status }}</span>
+                    <span v-else-if="responseData.status >= 300 && responseData.status <= 399" class="yellow">{{ responseData.status }}</span>
+                    <span v-else-if="responseData.status >= 400 && responseData.status <= 599" class="red">{{ responseData.status }}</span>
+                </div>
+                <div class="mx-2">
+                    <span>Time：</span>
+                    <span v-if="responseData.rt >= 0 && responseData.rt <= 2000" class="green">{{ responseData.rt }}ms</span>
+                    <span v-else class="red">{{ responseData.rt }}ms</span>
+                </div>
+                <div>
+                    <span>Size：</span>
+                    <span v-if="responseData.size >= 0 && responseData.size <= 10" class="green">{{ responseData.size }}kb</span>
+                    <span v-else class="red">{{ responseData.size }}kb</span>
+                </div>
+            </div>
+            <div v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)">
+                <pre v-if="responseData && responseData.type === 'json'" class="res-data">{{ JSON.parse(responseData.data) }}</pre>
+                <span v-if="responseData && responseData.type === 'svg'" v-html="responseData.data"></span>
+                <img v-if="responseData && responseData.type === 'image'" :src="responseData.data" alt="无法显示">
+                <div v-if="responseData && responseData.type === 'text'" v-html="responseData.data" class="res-text"></div>
+                <iframe v-else-if="responseData && responseData.type === 'pdf'" :src="responseData.data" class="res-pdf"></iframe>
+            </div>
+            
         </s-collapse>
     </div>
 </template>
@@ -75,6 +99,19 @@ export default {
             const result = this.convertPlainParamsToStringTreeData(plainData);
             return result;
         },
+        currentSelectDoc() { //当前选中的doc
+            return this.$store.state.apidoc.activeDoc[this.$route.query.id];
+        },
+    },
+    watch: {
+        currentSelectDoc: {
+            handler(val) {
+                if (val) {
+                    this.responseData = null;
+                }
+            },
+            deep: true
+        }
     },
     data() {
         return {
@@ -89,20 +126,20 @@ export default {
         //=====================================前后端交互====================================//
         sendRequest() {
             return new Promise((resolve) => {
+                let requestParams = this.requestParams;
+                if (this.requestData.requestType === "formData") {
+                    requestParams = this.requestData.requestParams.filter(val => val.key && val.value).map(val => ({ key: val.key, type: val.type, value: val.value }));
+                }
                 this.loading = true;
                 const params = {
                     url: this.requestData.url.host + this.requestData.url.path,
                     method: this.requestData.methods,
                     header: this.headerParams,
-                    requestParams: this.requestParams,
+                    requestParams: requestParams,
+                    requestType: this.requestData.requestType
                 };
                 this.axios.post("/proxy", params).then((res) => {
-                    this.responseData = res.data.data ? res.data.data : res.data;
-                    const response = res.data.data;
-                    if (response && response.headers && response.headers["set-cookie"]) {
-                        // const cookie = response.headers["set-cookie"][0];
-                        // this.requestData.header.push();
-                    }
+                    this.responseData = res.data
                 }).catch(err => {
                     console.error(err);
                 }).finally(() => {
@@ -274,6 +311,15 @@ export default {
     .res-data {
         min-height: size(100);
         max-height: size(300);
+    }
+    .res-text {
+        width: 100%;
+        max-height: size(300);
+        overflow: auto;
+    }
+    .res-pdf {
+        width: 100%;
+        height: size(300);
     }
 }
 </style>
