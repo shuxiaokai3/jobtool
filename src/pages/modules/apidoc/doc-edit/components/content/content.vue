@@ -44,12 +44,24 @@
                         <el-button :loading="loading3" type="success" size="small" @click="sendRequest">发送请求</el-button>
                         <el-button :loading="loading" type="primary" size="small" @click="saveRequest">保存接口</el-button>
                     </div>
-                </div>                
+                </div>         
+                <div class="d-flex">
+                </div>       
                 <pre class="w-100">{{ request.url.host }}{{ request.url.path }}</pre>
+                <div class="w-100 mt-2">
+                    <el-radio-group v-model="request.requestType">
+                        <el-radio :disabled="request.methods !== 'get'" label="query">query</el-radio>
+                        <el-radio :disabled="request.methods === 'get'" label="json">json</el-radio>
+                        <el-radio :disabled="request.methods === 'get' || request.methods === 'put' || request.methods === 'delete'" label="formData">formData</el-radio>
+                        <el-radio disabled label="x-www-form-urlencoded">x-www-form-urlencoded</el-radio>
+                    </el-radio-group>
+                </div>
+                <hr>
+                
             </div>
             <!-- 请求参数 -->
             <div>
-                <s-params-tree :tree-data="request.requestParams" title="请求参数" :plain="request.methods === 'get'"></s-params-tree>
+                <s-params-tree :tree-data="request.requestParams" title="请求参数" :is-form-data="request.requestType === 'formData'" :plain="request.methods === 'get'"></s-params-tree>
                 <s-params-tree :tree-data="request.responseParams" title="响应参数"></s-params-tree>
                 <s-params-tree :tree-data="request.header" title="请求头" plain :fold="foldHeader" :valid-key="false"></s-params-tree>            
             </div>            
@@ -84,6 +96,7 @@ export default {
             //=====================================请求基本信息====================================//
             request: {
                 methods: "get", //---------------请求方式
+                requestType: "query",
                 url: {
                     host: "", //-----------------主机(服务器)地址
                     path: "", //-----------------接口路径
@@ -279,6 +292,7 @@ export default {
             this.request.url.path = this.request.url.path.replace(pathReg, ""); //去除协议，域名，端口
             this.request.url.path = this.request.url.path.replace(queryReg, "");
             this.request.url.path = this.request.url.path.replace(/#/, ""); //去除#
+            this.request.url.path = this.request.url.path.replace(/\/+\d+$/, ""); //去除末尾/3这类restful接口
             this.request.url.path = this.request.url.path.replace(/\/*/, ""); //去除前面多余的/
             const hostHasSlash = this.request.url.host.endsWith("/");
             const pathHasSlash = this.request.url.path.startsWith("/");
@@ -319,6 +333,15 @@ export default {
                 this.request.requestParams.forEach(params => {
                     params.children = [];
                 })
+                this.request.requestType = "query"; 
+            } else if (val === "post") {
+                if (this.request.requestType === "query" || this.request.requestType === "x-www-form-urlencoded") {
+                    this.request.requestType = "json";
+                }
+            } else if (val === "put") {
+                this.request.requestType = "json";
+            } else if (val === "delete") {
+                this.request.requestType = "json";
             }
         },
         //=====================================title编辑处理====================================//
@@ -357,6 +380,42 @@ export default {
                 });
             }
         },
+        //=====================================保存接口====================================//
+        saveRequest() {
+            console.log(this.request)
+            const validParams = this.validateParams();
+            if (validParams) {
+                const params = {
+                    _id: this.currentSelectDoc._id,
+                    projectId: this.$route.query.id,
+                    item: {
+                        requestType: this.request.requestType,
+                        methods: this.request.methods,
+                        url: {
+                            host: this.request.url.host, 
+                            path: this.request.url.path, 
+                        },
+                        requestParams: this.request.requestParams,
+                        responseParams: this.request.responseParams,
+                        header: this.request.header, 
+                        description: this.request.description, 
+                    }
+                };
+                this.loading = true;
+                this.axios.post("/api/project/fill_doc", params).then(() => {
+                    this.$store.commit("changeTabInfo", {
+                        projectId: this.$route.query.id,
+                        tabId: this.currentSelectDoc._id,
+                        method: this.request.methods,
+                    })
+                }).catch(err => {
+                    this.$errorThrow(err, this);
+                }).finally(() => {
+                    this.loading = false;
+                }); 
+            }
+        },
+        //=====================================其他操作=====================================//
         //检查参数是否完备
         validateParams() {
             let isValidRequest = true;
@@ -454,42 +513,6 @@ export default {
             });
             return isValidRequest;
         },
-        //=====================================保存接口====================================//
-        saveRequest() {
-            console.log(JSON.parse(JSON.stringify(this.request)))
-            const validParams = this.validateParams();
-            if (validParams) {
-                const params = {
-                    _id: this.currentSelectDoc._id,
-                    projectId: this.$route.query.id,
-                    item: {
-                        methods: this.request.methods,
-                        url: {
-                            host: this.request.url.host, 
-                            path: this.request.url.path, 
-                        },
-                        requestParams: this.request.requestParams,
-                        responseParams: this.request.responseParams,
-                        header: this.request.header, 
-                        description: this.request.description, 
-                    }
-                };
-                this.loading = true;
-                this.axios.post("/api/project/fill_doc", params).then(() => {
-                    this.$store.commit("changeTabInfo", {
-                        projectId: this.$route.query.id,
-                        tabId: this.currentSelectDoc._id,
-                        method: this.request.methods,
-                    })
-                }).catch(err => {
-                    this.$errorThrow(err, this);
-                }).finally(() => {
-                    this.loading = false;
-                }); 
-            }
-        },
-        //=====================================其他操作=====================================//
-
     }
 };
 </script>
