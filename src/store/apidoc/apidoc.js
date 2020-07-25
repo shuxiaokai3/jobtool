@@ -85,7 +85,7 @@ export default {
             localStorage.setItem("apidoc/editTabs", JSON.stringify(state.tabs))
         },
         //=====================================当前选中的tab====================================//
-        //更新当前被选中的文档(不能未folder)
+        //更新当前被选中的文档(不能为folder)
         changeCurrentTab(state, payload) {
             const { projectId, activeNode } = payload;
             const isInProject = state.activeDoc[projectId]; //当前项目是否存在tabs
