@@ -43,6 +43,7 @@
                         </s-v-input>
                         <el-button :loading="loading3" type="success" size="small" @click="sendRequest">发送请求</el-button>
                         <el-button :loading="loading" type="primary" size="small" @click="saveRequest">保存接口</el-button>
+                        <el-button type="primary" size="small" @click="dialogVisible2 = true" @close="dialogVisible2 = false">全局变量</el-button>
                     </div>
                 </div>         
                 <div class="d-flex">
@@ -57,7 +58,6 @@
                     </el-radio-group>
                 </div>
                 <hr>
-                
             </div>
             <!-- 请求参数 -->
             <div>
@@ -69,7 +69,8 @@
         <div class="w-35 flex1">
             <s-response ref="response" :request-data="request"></s-response>
         </div>
-        <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible" @close="getHostEnum"></s-host-manage>
+        <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible"></s-host-manage>
+        <s-variable-manage v-if="dialogVisible2" :visible.sync="dialogVisible2"></s-variable-manage>
     </div>
     <div v-else>
         
@@ -81,6 +82,7 @@ import axios from "axios"
 import paramsTree from "./components/params-tree"
 import response from "./components/response"
 import hostManage from "./dialog/host-manage"
+import variableManage from "./dialog/variable-manage"
 import { dfsForest, findParentNode } from "@/lib/utils"
 import uuid from "uuid/v4"
 import qs from "qs"
@@ -89,6 +91,7 @@ export default {
     components: {
         "s-params-tree": paramsTree,
         "s-host-manage": hostManage,
+        "s-variable-manage": variableManage,
         "s-response": response,
     },
     data() {
@@ -140,14 +143,16 @@ export default {
             origin: location.origin,
             //=====================================域名相关====================================//
             hostEnum: [], //---------------------域名列表
-            dialogVisible: false, //-------------域名维护弹窗
             //=====================================其他参数====================================//
             urlInvalid: false, //----------------url是否合法
             cancel: [], //-----------------------需要取消的接口
             loading: false, //-------------------保存接口
             loading2: false, //------------------获取文档详情接口
             loading3: false, //------------------发送请求状态
-            foldHeader: true, //----------------是否折叠header，当校验错误时候自动展开header
+            foldHeader: true, //-----------------是否折叠header，当校验错误时候自动展开header
+            dialogVisible: false, //-------------域名维护弹窗
+            dialogVisible2: false, //------------全局变量管理弹窗
+
         };
     },
     computed: {
@@ -382,7 +387,6 @@ export default {
         },
         //=====================================保存接口====================================//
         saveRequest() {
-            console.log(this.request)
             const validParams = this.validateParams();
             if (validParams) {
                 const params = {
