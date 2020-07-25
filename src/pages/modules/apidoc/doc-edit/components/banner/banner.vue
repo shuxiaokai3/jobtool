@@ -335,6 +335,9 @@ export default {
                     this.navTreeData.push(data);
                 }
             } else { //插入到文件夹里面
+                if (!pNode.children) {
+                    this.$set(pNode, "children", [])
+                }
                 if (data.isFolder) { //如果是文件夹则放在第一位
                     this.defaultExpandedKeys.push(data._id)
                     let folderIndex = -1;
@@ -456,7 +459,7 @@ export default {
             deleteId.push(data._id); //删除自己
             if (data.isFolder) { //删除所有子元素
                 forEachForest(data.children, (item) => {
-                    deleteId.push(item);
+                    deleteId.push(item._id);
                 });
             } 
             this.$confirm(`此操作将永久删除 ${data.docName} 节点, 是否继续?`, "提示", {
@@ -488,7 +491,6 @@ export default {
         handleDeleteManyItem() {
             let deleteId = [];
             const selectNodeCopy = this.multiSelectNode; //点击节点会清空选中数据
-
             this.multiSelectNode.forEach(val => {
                 deleteId.push(val.data._id);
                 if (val.data.isFolder) { //删除所有子元素
