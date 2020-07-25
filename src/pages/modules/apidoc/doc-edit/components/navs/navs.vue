@@ -125,6 +125,11 @@ export default {
                             projectId: this.$route.query.id,
                             activeNode: this.tabs[index - 1],
                         });
+                    } else { //上一个元素不存在则置空
+                        this.$store.commit("apidoc/changeCurrentTab", {
+                            projectId: this.$route.query.id,
+                            activeNode: {},
+                        });
                     }
                 } else {
                     this.$store.commit("apidoc/changeCurrentTab", {
