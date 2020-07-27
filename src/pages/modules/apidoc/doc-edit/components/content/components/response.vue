@@ -23,24 +23,46 @@
             <template v-if="requestData.header.length > 1">
                 <div v-for="(item, index) in requestData.header" :key="index" class="d-flex a-center mt">
                     <span v-if="item.key" class="flex0">{{ item.key }}：</span>
-                    <span class="f-xs text-ellipsis" :title="item.value">{{ item.value }}</span>
+                    <span class="f-xs text-ellipsis" :title="item.value">{{ convertVariable(item.value) }}</span>
                 </div>
             </template>
             <div v-else class="f-xs gray-500">暂无数据</div>
         </s-collapse>
         <s-collapse title="请求参数">
-            <!-- <pre class="request-params">{{ requestParams }}</pre> -->
             <pre>{{ requesStringParams.str }}</pre>
         </s-collapse>
         <s-collapse title="返回结果">
-            <pre class="res-data">{{ responseData }}</pre>
+            <div v-if="responseData" class="f-xs d-flex j-end mb-2">
+                <div>
+                    <span>Status：</span>
+                    <span v-if="responseData.status >= 200 && responseData.status <= 299" class="green">{{ responseData.status }}</span>
+                    <span v-else-if="responseData.status >= 300 && responseData.status <= 399" class="yellow">{{ responseData.status }}</span>
+                    <span v-else-if="responseData.status >= 400 && responseData.status <= 599" class="red">{{ responseData.status }}</span>
+                </div>
+                <div class="mx-2">
+                    <span>Time：</span>
+                    <span v-if="responseData.rt >= 0 && responseData.rt <= 2000" class="green">{{ responseData.rt }}ms</span>
+                    <span v-else class="red">{{ responseData.rt }}ms</span>
+                </div>
+                <div>
+                    <span>Size：</span>
+                    <span v-if="responseData.size >= 0 && responseData.size <= 10" class="green">{{ responseData.size }}kb</span>
+                    <span v-else class="red">{{ responseData.size }}kb</span>
+                </div>
+            </div>
+            <div v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)">
+                <pre v-if="responseData && responseData.type === 'json'" class="res-data">{{ JSON.parse(responseData.data) }}</pre>
+                <span v-if="responseData && responseData.type === 'svg'" v-html="responseData.data"></span>
+                <img v-if="responseData && responseData.type === 'image'" :src="responseData.data" alt="无法显示">
+                <div v-if="responseData && responseData.type === 'text'" v-html="responseData.data" class="res-text"></div>
+                <iframe v-else-if="responseData && responseData.type === 'pdf'" :src="responseData.data" class="res-pdf"></iframe>
+            </div>
+            
         </s-collapse>
     </div>
 </template>
 
 <script>
-// import { BaseConfig } from "@/config.default"
-
 export default {
     props: {
         requestData: {
@@ -75,10 +97,29 @@ export default {
             const result = this.convertPlainParamsToStringTreeData(plainData);
             return result;
         },
+        //当前选中的doc
+        currentSelectDoc() { 
+            return this.$store.state.apidoc.activeDoc[this.$route.query.id];
+        },
+        //全局变量
+        variables() {
+            return this.$store.state.apidoc.variables || [];
+        },
+    },
+    watch: {
+        currentSelectDoc: {
+            handler(val) {
+                if (val) {
+                    this.responseData = null;
+                }
+            },
+            deep: true
+        }
     },
     data() {
         return {
-            responseData: null, //返回结果对象
+            responseData: null, //---返回结果对象
+            loading: false, //-------返回结果加载状态
         };
     },
     created() {
@@ -87,25 +128,29 @@ export default {
     methods: {
         //=====================================前后端交互====================================//
         sendRequest() {
-            const params = {
-                url: this.requestData.url.host + this.requestData.url.path,
-                method: this.requestData.methods,
-                header: this.headerParams,
-                requestParams: this.requestParams,
-            };
-            this.axios.post("/proxy", params).then((res) => {
-                this.responseData = res.data.data ? res.data.data : res.data;
-                const response = res.data.data;
-                if (response && response.headers && response.headers["set-cookie"]) {
-                    // const cookie = response.headers["set-cookie"][0];
-                    // this.requestData.header.push();
+            return new Promise((resolve) => {
+                let requestParams = this.requestParams;
+                if (this.requestData.requestType === "formData") {
+                    requestParams = this.requestData.requestParams.filter(val => val.key && val.value).map(val => ({ key: val.key, type: val.type, value: val.value }));
                 }
-                
-            }).catch(err => {
-                console.error(err);
-            }).finally(() => {
-                this.loading = false;
-            });
+                this.loading = true;
+                const params = {
+                    url: this.requestData.url.host + this.requestData.url.path,
+                    method: this.requestData.methods,
+                    header: this.headerParams,
+                    requestParams: requestParams,
+                    requestType: this.requestData.requestType
+                };
+                this.axios.post("/proxy", params).then((res) => {
+                    this.responseData = res.data
+                }).catch(err => {
+                    console.error(err);
+                }).finally(() => {
+                    resolve();
+                    this.loading = false;
+                });                
+            })
+
         },
         //=====================================组件间交互====================================//  
         //将扁平数据转换为树形结构数据
@@ -114,7 +159,7 @@ export default {
             const foo = (plainData, result) => {
                 for(let i = 0,len = plainData.length; i < len; i++) {
                     const key = plainData[i].key.trim();
-                    const value = plainData[i].value;
+                    const value = this.convertVariable(plainData[i].value);
                     const type = plainData[i].type;
                     const resultIsArray = Array.isArray(result);
                     // const desc = plainData[i].description;
@@ -257,7 +302,21 @@ export default {
             return result;
         },
         //=====================================其他操作=====================================//
-
+        convertVariable(val) {
+            const matchedData = val.match(/{{\s*(\w+)\s*}}/);
+            if (val && matchedData) {
+                const varInfo = this.variables?.find(v => {
+                    return v.name === matchedData[1];
+                });
+                if (varInfo) {
+                    return val.replace(/{{\s*(\w+)\s*}}/, varInfo.value);
+                } else {
+                    return val;
+                }
+            } else {
+                return val;
+            }
+        }
     }
 };
 </script>
@@ -267,7 +326,17 @@ export default {
 <style lang="scss">
 .response {
     .res-data {
+        min-height: size(100);
         max-height: size(300);
+    }
+    .res-text {
+        width: 100%;
+        max-height: size(300);
+        overflow: auto;
+    }
+    .res-pdf {
+        width: 100%;
+        height: size(300);
     }
 }
 </style>

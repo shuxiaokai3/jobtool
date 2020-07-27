@@ -6,9 +6,11 @@
 */
 <template>
     <s-dialog title="新建文件夹" :isShow="visible" width="40%" @close="handleClose">
-        <s-form ref="form" :formInfo="formInfo">
-            <s-form-item label="文件夹名称" vModel="name" oneLine required></s-form-item>
-        </s-form>  
+        <el-form ref="form" :model="formInfo" :rules="rules" label-width="150px" @submit.native.prevent="handleAddFolder">
+            <el-form-item label="文件夹名称" prop="name">
+                <el-input ref="nameInput" v-model="formInfo.name" size="mini" placeholder="请输入文件夹名称" class="w-100" maxlength="100" clearable></el-input>
+            </el-form-item>
+        </el-form>
         <div slot="footer">
             <el-button :loading="loading" size="mini" type="primary" @click="handleAddFolder">确定</el-button>
             <el-button size="mini" type="warning" @click="handleClose">取消</el-button>
@@ -30,15 +32,26 @@ export default {
     },
     data() {
         return {
-            formInfo: {}, //------新增文档参数
+            formInfo: {
+                name: "", //------文件夹名称
+            }, 
+            rules: {
+                name: [{ required: true, message: "请输入文件夹名称", trigger: "blur" }]
+            },
             //=====================================其他参数====================================//
             loading: false, //----确认按钮状态
         };
     },
-    created() {
-
+    mounted() {
+        this.init();
     },
     methods: {
+        //=====================================初始化页面====================================//
+        init() {
+            setTimeout(() => {
+                console.log(this.$refs["nameInput"].focus())
+            })
+        },
         //=====================================获取远程数据==================================//
 
         //=====================================前后端交互====================================//

@@ -229,7 +229,7 @@ export default {
                     this.addRestFul(data);
                     break;
                 case "copy":
-                    this.copyDoc(data);
+                    this.copyDoc(data, node);
                     break;
                 default:
                     break;
@@ -283,7 +283,7 @@ export default {
                 this.addRestFul(data);
             })
             this.contextmenu.$on("copy", () => {
-                this.copyDoc(data);
+                this.copyDoc(data, node);
             })
         },   
         //处理节点上面keydown快捷方式(例如f2重命名)
@@ -335,6 +335,9 @@ export default {
                     this.navTreeData.push(data);
                 }
             } else { //插入到文件夹里面
+                if (!pNode.children) {
+                    this.$set(pNode, "children", [])
+                }
                 if (data.isFolder) { //如果是文件夹则放在第一位
                     this.defaultExpandedKeys.push(data._id)
                     let folderIndex = -1;
@@ -425,25 +428,24 @@ export default {
 
         },
         //拷贝节点
-        copyDoc(data) {
+        copyDoc(data, node) {
             const params = {
                 _id: data._id
             };
-            this.axios.post("/api/project/copy_doc", params).then(() => {
-                // data.id = res.data._id;
-                // data.label = res.data.docName;
-                // data.nodeType = res.data.isFolder ? "folder" : "file";
-                // if (data.nodeType === "file") {
-                //     this.$store.commit("addTab", {
-                //         projectId: this.$route.query._id,
-                //         id: res.data._id.toString(),
-                //         title: res.data.docName.toString(),
-                //         method: res.data.item.methods,
-                //         nodeType: data.nodeType,
-                //     });
-                //     this.currentFileTab = res.data;
-                //     this.$route.query.docId = res.data._id.toString();
-                // }
+            this.axios.post("/api/project/copy_doc", params).then(res => {
+                const pNode = node.parent;
+                if (pNode.level === 0) { //在根元素下面插入
+                    pNode.data.push(res.data);
+                } else { //在某个元素下面插入
+                    pNode.data.children.push(res.data);
+                }
+                if (!res.data.isFolder) { //文件夹不做处理
+                    this.$store.commit("apidoc/addTab", res.data);
+                    this.$store.commit("apidoc/changeCurrentTab", {
+                        projectId: this.$route.query.id,
+                        activeNode: res.data
+                    });
+                }
             }).catch(err => {
                 this.$errorThrow(err, this);
             });
@@ -456,7 +458,7 @@ export default {
             deleteId.push(data._id); //删除自己
             if (data.isFolder) { //删除所有子元素
                 forEachForest(data.children, (item) => {
-                    deleteId.push(item);
+                    deleteId.push(item._id);
                 });
             } 
             this.$confirm(`此操作将永久删除 ${data.docName} 节点, 是否继续?`, "提示", {
@@ -488,7 +490,6 @@ export default {
         handleDeleteManyItem() {
             let deleteId = [];
             const selectNodeCopy = this.multiSelectNode; //点击节点会清空选中数据
-
             this.multiSelectNode.forEach(val => {
                 deleteId.push(val.data._id);
                 if (val.data.isFolder) { //删除所有子元素

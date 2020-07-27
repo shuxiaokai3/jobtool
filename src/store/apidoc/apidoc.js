@@ -13,9 +13,15 @@ export default {
         defaultExpandKeys: [], //-----默认展开的节点
         banner: [], //----------------树形导航
         tabs: {}, //------------------api文档tabs
-        activeDoc: {}, //-----------当前被选中的tab页
+        activeDoc: {}, //-------------当前被选中的tab页
+        variables: [], //--------------api文档全局变量
     },
     mutations: {
+        //=====================================全局变量====================================//
+        changeVariable(state, payload) {
+            state.variables = payload;
+        },
+        //=====================================banner====================================//
         //改变文档banner信息
         changeDocBanner(state, payload) {
             state.banner = payload;
@@ -85,7 +91,7 @@ export default {
             localStorage.setItem("apidoc/editTabs", JSON.stringify(state.tabs))
         },
         //=====================================当前选中的tab====================================//
-        //更新当前被选中的文档(不能未folder)
+        //更新当前被选中的文档(不能为folder)
         changeCurrentTab(state, payload) {
             const { projectId, activeNode } = payload;
             const isInProject = state.activeDoc[projectId]; //当前项目是否存在tabs
@@ -106,6 +112,7 @@ export default {
         },
     },
     actions: {
+        //获取文档左侧banner
         async getDocBanner(context, payload) {
             return new Promise((resolve, reject) => {
                 const params = {
@@ -120,7 +127,22 @@ export default {
                     reject(err);
                 });                
             })
-
-        }
+        },
+        //获取全局变量
+        async getDocVariable(context, payload) {
+            return new Promise((resolve, reject) => {
+                const params = {
+                    projectId: payload.projectId
+                };
+                axios.get("/api/project/project_variable_enum", { params }).then(res => {
+                    const result = res.data;
+                    context.commit("changeVariable", result);
+                    resolve();
+                }).catch(err => {
+                    console.error(err);
+                    reject(err);
+                });                
+            })
+        },
     },
 };
