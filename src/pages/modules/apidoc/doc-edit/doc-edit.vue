@@ -30,7 +30,9 @@ export default {
         };
     },
     created() {
-
+        this.$store.dispatch("apidoc/getDocVariable", {
+            projectId: this.$route.query.id
+        });
     },
     methods: {
         //=====================================获取远程数据==================================//
