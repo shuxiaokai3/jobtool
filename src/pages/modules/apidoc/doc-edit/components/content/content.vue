@@ -61,7 +61,7 @@
             </div>
             <!-- 请求参数 -->
             <div>
-                <s-params-tree :tree-data="request.requestParams" title="请求参数" :is-form-data="request.requestType === 'formData'" :plain="request.methods === 'get'"></s-params-tree>
+                <s-params-tree :tree-data="request.requestParams" title="请求参数" :is-form-data="request.requestType === 'formData'" showCheckbox :plain="request.methods === 'get'"></s-params-tree>
                 <s-params-tree :tree-data="request.responseParams" title="响应参数"></s-params-tree>
                 <s-params-tree :tree-data="request.header" title="请求头" plain :fold="foldHeader" :valid-key="false"></s-params-tree>            
             </div>            
@@ -172,7 +172,8 @@ export default {
                     }
                 }
             },
-            deep: true
+            deep: true,
+            immediate: true
         }
     },
     mounted() {

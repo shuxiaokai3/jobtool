@@ -14,6 +14,7 @@
                     node-key="_id" 
                     :expand-on-click-node="false" 
                     default-expand-all
+                    :show-checkbox="showCheckbox"
             >
                 <template slot-scope="scope">
                     <div class="custom-tree-node">
@@ -74,6 +75,7 @@
                             <el-option label="word" value="word"></el-option>
                         </el-select>
                         <el-checkbox v-model="scope.data.required" label="必选"></el-checkbox>
+                        <!-- {{ scope.data.value }} -->
                         <s-v-input 
                                 v-model="scope.data.description"
                                 size="mini" 
@@ -118,6 +120,10 @@ export default {
             default: true
         },
         isFormData: { //----------是否为formData类型的文件上传
+            type: Boolean,
+            default: false
+        },
+        showCheckbox: { //是否展示checkbox
             type: Boolean,
             default: false
         }
@@ -268,7 +274,7 @@ export default {
                 return;
             }
             if (nodeIndex !== parentData.length - 1) { //只要不是最后一个值都需要坐数据校验 
-                if (data.value.trim() === "") { //非空校验
+                if (data.value && data.value.trim() === "") { //非空校验
                     this.valueTip.message = "不能为空"
                     this.$set(data, "_valueError", true);
                 } else if (data.type === "number" && !data.value.match(/^-?(0\.\d+|[1-9]+\.\d+|[1-9]\d{0,20})$/)) { //纯数字校验
@@ -288,7 +294,7 @@ export default {
                 return;
             }
             if (nodeIndex !== parentData.length - 1) { //只要不是最后一个值都需要坐数据校验 
-                if (data.description.trim() === "") { //非空校验
+                if (data.description && data.description.trim() === "") { //非空校验
                     this.$set(data, "_descriptionError", true)
                 } else {
                     this.$set(data, "_descriptionError", false)
