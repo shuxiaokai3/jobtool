@@ -23,7 +23,7 @@
             <template v-if="requestData.header.length > 1">
                 <div v-for="(item, index) in requestData.header" :key="index" class="d-flex a-center mt">
                     <span v-if="item.key" class="flex0">{{ item.key }}：</span>
-                    <span class="f-xs text-ellipsis" :title="item.value">{{ item.value }}</span>
+                    <span class="f-xs text-ellipsis" :title="item.value">{{ convertVariable(item.value) }}</span>
                 </div>
             </template>
             <div v-else class="f-xs gray-500">暂无数据</div>
@@ -63,8 +63,6 @@
 </template>
 
 <script>
-// import { BaseConfig } from "@/config.default"
-
 export default {
     props: {
         requestData: {
@@ -99,8 +97,13 @@ export default {
             const result = this.convertPlainParamsToStringTreeData(plainData);
             return result;
         },
-        currentSelectDoc() { //当前选中的doc
+        //当前选中的doc
+        currentSelectDoc() { 
             return this.$store.state.apidoc.activeDoc[this.$route.query.id];
+        },
+        //全局变量
+        variables() {
+            return this.$store.state.apidoc.variables || [];
         },
     },
     watch: {
@@ -156,7 +159,7 @@ export default {
             const foo = (plainData, result) => {
                 for(let i = 0,len = plainData.length; i < len; i++) {
                     const key = plainData[i].key.trim();
-                    const value = plainData[i].value;
+                    const value = this.convertVariable(plainData[i].value);
                     const type = plainData[i].type;
                     const resultIsArray = Array.isArray(result);
                     // const desc = plainData[i].description;
@@ -299,7 +302,21 @@ export default {
             return result;
         },
         //=====================================其他操作=====================================//
-
+        convertVariable(val) {
+            const matchedData = val.match(/{{\s*(\w+)\s*}}/);
+            if (val && matchedData) {
+                const varInfo = this.variables?.find(v => {
+                    return v.name === matchedData[1];
+                });
+                if (varInfo) {
+                    return val.replace(/{{\s*(\w+)\s*}}/, varInfo.value);
+                } else {
+                    return val;
+                }
+            } else {
+                return val;
+            }
+        }
     }
 };
 </script>
