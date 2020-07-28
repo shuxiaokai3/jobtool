@@ -75,26 +75,26 @@ export default {
     computed: {
         //请求参数(对象类型)
         requestParams() {
-            const plainData = JSON.parse(JSON.stringify(this.requestData.requestParams)); //扁平数据拷贝
-            const result = this.convertPlainParamsToTreeData(plainData);
+            let copyData = JSON.parse(JSON.stringify(this.requestData.requestParams)); //扁平数据拷贝
+            const result = this.convertPlainParamsToTreeData(copyData, true);
             return result;
         },
         //请求头(对象类型)
         headerParams() {
-            const plainData = JSON.parse(JSON.stringify(this.requestData.header)); //扁平数据拷贝
-            const result = this.convertPlainParamsToTreeData(plainData);
+            const copyData = JSON.parse(JSON.stringify(this.requestData.header)); //扁平数据拷贝
+            const result = this.convertPlainParamsToTreeData(copyData);
             return result;
         },
         //返回参数(对象类型)
         responseParams() {
-            const plainData = JSON.parse(JSON.stringify(this.requestData.responseParams)); //扁平数据拷贝
-            const result = this.convertPlainParamsToTreeData(plainData);
+            const copyData = JSON.parse(JSON.stringify(this.requestData.responseParams)); //扁平数据拷贝
+            const result = this.convertPlainParamsToTreeData(copyData);
             return result;
         },
         //请求参数字符串类型
         requesStringParams() {
-            const plainData = JSON.parse(JSON.stringify(this.requestData.requestParams)); //扁平数据拷贝
-            const result = this.convertPlainParamsToStringTreeData(plainData);
+            const copyData = JSON.parse(JSON.stringify(this.requestData.requestParams)); //扁平数据拷贝
+            const result = this.convertPlainParamsToStringTreeData(copyData);
             return result;
         },
         //当前选中的doc
@@ -154,10 +154,13 @@ export default {
         },
         //=====================================组件间交互====================================//  
         //将扁平数据转换为树形结构数据
-        convertPlainParamsToTreeData(plainData) {
+        convertPlainParamsToTreeData(plainData, jumpChecked) {
             const result = {};
             const foo = (plainData, result) => {
                 for(let i = 0,len = plainData.length; i < len; i++) {
+                    if (jumpChecked && !plainData[i]._select) { //若请求参数未选中则不发送请求
+                        continue;
+                    }
                     const key = plainData[i].key.trim();
                     const value = this.convertVariable(plainData[i].value);
                     const type = plainData[i].type;
@@ -202,7 +205,7 @@ export default {
             return result;
         },
         //将扁平数据转换为树形结构字符串数据
-        convertPlainParamsToStringTreeData(plainData) {
+        convertPlainParamsToStringTreeData(plainData, jumpChecked) {
             const result = {
                 str: ""
             };
@@ -218,6 +221,9 @@ export default {
             const foo = (plainData, level, inArray) => {
                 let resultStr = "";
                 for(let i = 0,len = plainData.length; i < len; i++) {
+                    if (jumpChecked && !plainData[i]._select) { //若请求参数未选中则不发送请求
+                        continue; 
+                    }
                     const key = plainData[i].key.toString().trim();
                     let value = plainData[i].value;
                     const type = plainData[i].type;
