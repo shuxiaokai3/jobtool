@@ -61,7 +61,7 @@
             </div>
             <!-- 请求参数 -->
             <div>
-                <s-params-tree :tree-data="request.requestParams" title="请求参数" :is-form-data="request.requestType === 'formData'" showCheckbox :plain="request.methods === 'get'"></s-params-tree>
+                <s-params-tree :tree-data="request.requestParams" title="请求参数" :ready="ready" :is-form-data="request.requestType === 'formData'" showCheckbox :plain="request.methods === 'get'"></s-params-tree>
                 <s-params-tree :tree-data="request.responseParams" title="响应参数"></s-params-tree>
                 <s-params-tree :tree-data="request.header" title="请求头" plain :fold="foldHeader" :valid-key="false"></s-params-tree>            
             </div>            
@@ -152,7 +152,7 @@ export default {
             foldHeader: true, //-----------------是否折叠header，当校验错误时候自动展开header
             dialogVisible: false, //-------------域名维护弹窗
             dialogVisible2: false, //------------全局变量管理弹窗
-
+            ready: false, //---------------------是否完成第一次数据请求
         };
     },
     computed: {
@@ -196,6 +196,7 @@ export default {
             }
             setTimeout(() => { //hack让请求加载不受取消影响
                 this.loading2 = true;
+                this.ready = false;
             })
             this.axios.get("/api/project/doc_detail", {
                 params,
@@ -210,7 +211,13 @@ export default {
                     this.confirmInvalidDoc();
                     return;
                 }
+                this.ready = true;
                 Object.assign(this.request, res.data.item);
+                this.request.requestParams.forEach(val => this.$set(val, "id", val._id))
+                this.request.responseParams.forEach(val => this.$set(val, "id", val._id))
+                this.request.header.forEach(val => this.$set(val, "id", val._id))
+
+
                 const reqParams = this.request.requestParams;
                 const resParams = this.request.responseParams;
                 const headerParams = this.request.header;
@@ -470,7 +477,9 @@ export default {
                     }
                     const p = findParentNode(data.id, this.request.requestParams);
                     const isParentArray = (p && p.type === "array");
-                    if (!isParentArray && data.key.trim() === "") { //非空校验
+                    if (data.key === "_id") { //白名单
+                        this.$set(data, "_keyError", false)
+                    } else if (!isParentArray && data.key.trim() === "") { //非空校验
                         this.$set(data, "_keyError", true);
                         isValidRequest = false;
                     } else if (!isParentArray && !data.key.match(/^[a-zA-Z0-9]*$/)) { //字母数据
