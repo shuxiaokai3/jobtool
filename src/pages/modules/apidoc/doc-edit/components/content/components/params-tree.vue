@@ -8,12 +8,14 @@
     <s-card2 :title="title" collapse :fold="fold" class="collapse-wrap">
         <div class="params-edit">
             <el-tree 
+                    ref="tree"
                     :data="treeData" 
                     :indent="50"
                     :highlight-current="true"
-                    node-key="_id" 
+                    node-key="id" 
                     :expand-on-click-node="false" 
                     default-expand-all
+                    @check-change="handleCheckChange"
                     :show-checkbox="showCheckbox"
             >
                 <template slot-scope="scope">
@@ -126,6 +128,10 @@ export default {
         showCheckbox: { //是否展示checkbox
             type: Boolean,
             default: false
+        },
+        ready: { //是否完成第一次后台数据获取
+            type: Boolean,
+            default: false
         }
     },
     data() {
@@ -157,6 +163,18 @@ export default {
             } else {
                 return ""
             }
+        }
+    },
+    watch: {
+        ready: {
+            handler(value) {
+                if (value === true) { //第一次值改变
+                    setTimeout(() => {
+                        this.$refs["tree"].setCheckedNodes(this.treeData);
+                    })
+                }
+            },
+            immediate: true
         }
     },
     created() {
@@ -212,6 +230,8 @@ export default {
                         parentData.children.push(this.generateParams());
                     }
                 }
+                // this.$set(data, "checked", true);
+                this.$refs["tree"].setChecked(data.id, true);
             }
         },
         //改变参数类型
@@ -241,7 +261,26 @@ export default {
                 this.$set(data, "_valuePlaceholder", "");
             }
         },
-     
+        handleCheckChange() {     
+            //首先清空所有选中数据  
+            dfsForest(this.treeData, {
+                rCondition(value) {
+                    return value.children;
+                },
+                rKey: "children",
+                hooks: (data) => {
+                    this.$set(data, "_select", false);
+                }
+            });
+            const checkedNodes = this.$refs["tree"].getCheckedNodes();
+            const halfCheckedNodes = this.$refs["tree"].getHalfCheckedNodes();
+            checkedNodes.forEach(val => {
+                this.$set(val, "_select", true)
+            })
+            halfCheckedNodes.forEach(val => {
+                this.$set(val, "_select", true)
+            })
+        },
         //=====================================数据校验====================================//
         //检查参数是否输入完备
         handleCheckKey({ node, data }) {
@@ -251,15 +290,16 @@ export default {
             if (parentNode.level === 0 && parentData.length === 1) { //根元素第一个可以不必校验因为参数可以不必填
                 return;
             }
-            console.log(this.validKey)
             if (nodeIndex !== parentData.length - 1) { //只要不是最后一个值都需要做数据校验 
-                if (data.key.trim() === "") { //非空校验
+                if (data.key === "_id") { //白名单
+                    this.$set(data, "_keyError", false)
+                } else if (data.key.trim() === "") { //非空校验
                     this.$set(data, "_keyError", true)
                 } else if (this.validKey && !data.key.match(/^[a-zA-Z0-9]*$/)) { //字母数据
                     this.$set(data, "_keyError", true)
                 } else {
                     this.$set(data, "_keyError", false)
-                }                
+                }         
             } 
         },
         //检查参数值
@@ -310,7 +350,7 @@ export default {
                 description: "",
                 type: type,
                 value: "",
-                required: true
+                required: true,
             }
         },
         //=====================================其他操作=====================================//
