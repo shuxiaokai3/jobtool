@@ -57,13 +57,18 @@
                 <div v-if="responseData && responseData.type === 'text'" v-html="responseData.data" class="res-text"></div>
                 <iframe v-else-if="responseData && responseData.type === 'pdf'" :src="responseData.data" class="res-pdf"></iframe>
             </div>
-            
+            <!-- <pre>{{ requestData.requestParams }}</pre> -->
+            <s-json :data="requestData.requestParams"></s-json>
         </s-collapse>
     </div>
 </template>
 
 <script>
+import sJson from "./json.vue"
 export default {
+    components: {
+        "s-json": sJson
+    },
     props: {
         requestData: {
             type: Object,
@@ -118,6 +123,24 @@ export default {
     },
     data() {
         return {
+            jsonData: {
+                x: "aaaa",
+                y: 2,
+                arr: {
+                    a: 1,
+                    b: "cccc",
+                    arr: {
+                        aa: true,
+                        bb: null,
+                        ccc: undefined,
+                        ddd: NaN,
+                        children: {
+                            xx: 1,
+                            yy: 2
+                        }
+                    }
+                }
+            },
             responseData: null, //---返回结果对象
             loading: false, //-------返回结果加载状态
         };
