@@ -51,23 +51,24 @@
                 </div>
             </div>
             <div v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)">
-                <pre v-if="responseData && responseData.type === 'json'" class="res-data">{{ JSON.parse(responseData.data) }}</pre>
+                <!-- <pre v-if="responseData && responseData.type === 'json'" class="res-data">{{ JSON.parse(responseData.data) }}</pre> -->
+                <s-json v-if="responseData && responseData.type === 'json'" :data="JSON.parse(responseData.data)"></s-json>
                 <span v-if="responseData && responseData.type === 'svg'" v-html="responseData.data"></span>
                 <img v-if="responseData && responseData.type === 'image'" :src="responseData.data" alt="无法显示">
                 <div v-if="responseData && responseData.type === 'text'" v-html="responseData.data" class="res-text"></div>
                 <iframe v-else-if="responseData && responseData.type === 'pdf'" :src="responseData.data" class="res-pdf"></iframe>
             </div>
             <!-- <pre>{{ requestData.requestParams }}</pre> -->
-            <s-json :data="requestData.requestParams"></s-json>
+            <s-json :data="jsonData"></s-json>
         </s-collapse>
     </div>
 </template>
 
 <script>
-import sJson from "./json.vue"
+// import sJson from "./json.vue"
 export default {
     components: {
-        "s-json": sJson
+        // "s-json": sJson
     },
     props: {
         requestData: {
@@ -125,21 +126,16 @@ export default {
         return {
             jsonData: {
                 x: "aaaa",
-                y: 2,
-                arr: {
-                    a: 1,
-                    b: "cccc",
-                    arr: {
-                        aa: true,
-                        bb: null,
-                        ccc: undefined,
-                        ddd: NaN,
-                        children: {
-                            xx: 1,
-                            yy: 2
-                        }
+                y: [
+                    {
+                        x: 3
+                    },
+                    222,
+                    {
+                        xxx: 33,
+                        yyy: true
                     }
-                }
+                ],
             },
             responseData: null, //---返回结果对象
             loading: false, //-------返回结果加载状态

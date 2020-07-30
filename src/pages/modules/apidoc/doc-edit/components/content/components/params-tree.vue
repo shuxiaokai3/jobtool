@@ -185,9 +185,13 @@ export default {
         //添加嵌套数据
         addNestTreeData(data) {
             if (data.children == null) {
-                this.$set(data, "children", [])
+                this.$set(data, "children", []);
             }
-            data.children.push(this.generateParams());
+            const params = this.generateParams();
+            data.children.push(params);
+            setTimeout(() => { //hack
+                this.$refs["tree"].setChecked(params.id, true);
+            })
             data.value = "";
             this.$set(data, "_valueError", false);
             this.$set(data, "_valuePlaceholder", "对象和数组不必填写参数值");
@@ -251,6 +255,7 @@ export default {
                         rKey: "children",
                         hooks: (data) => {
                             data.key = "";
+                            this.$set(data, "_keyError", false); //清除子元素key值校验
                         }
                     });
                 }
