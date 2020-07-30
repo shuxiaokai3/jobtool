@@ -5,7 +5,7 @@
     备注：xxxx
 */
 <template>
-    <el-tooltip effect="light" placement="top-start" :content="value" :disabled="isOverflow">
+    <el-tooltip effect="light" placement="top-start" :content="value.toString()" :disabled="isOverflow">
         <span ref="text" class="s-ellipsis-content">{{ value }}</span>
     </el-tooltip>
 </template>
@@ -14,7 +14,7 @@
 export default {
     props: {
         value: {
-            type: String,
+            type: [String, Number, Boolean],
             default: ""
         },
         maxWidth: {
@@ -28,7 +28,7 @@ export default {
                 setTimeout(() => {
                     const textDom = this.$refs["text"];
                     if (textDom) {
-                        const textOverWidth = textDom.scrollWidth - 5;
+                        const textOverWidth = textDom.scrollWidth;
                         const warpWidth = textDom.getBoundingClientRect()["width"];
                         this.isOverflow = textOverWidth < warpWidth;
                     }                    
