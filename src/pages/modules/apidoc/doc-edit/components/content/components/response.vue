@@ -8,10 +8,9 @@
     <div class="response">
         <s-collapse title="基本信息">
             <div>
-                <div class="my-2">
-                    <span>请求地址：</span>
-                    <span class="f-xs">{{ requestData.url.host }}</span>
-                    <span class="f-xs">{{ requestData.url.path }}</span>
+                <div class="my-2 d-flex a-center">
+                    <span class="flex0">请求地址：</span>
+                    <s-ellipsis-content :value="requestData.url.host + requestData.url.path" max-width="100%"></s-ellipsis-content>
                 </div>
                 <div class="my-2">
                     <span>请求方式：</span>
@@ -23,7 +22,8 @@
             <template v-if="requestData.header.length > 1">
                 <div v-for="(item, index) in requestData.header" :key="index" class="d-flex a-center mt">
                     <span v-if="item.key" class="flex0">{{ item.key }}：</span>
-                    <span class="f-xs text-ellipsis" :title="item.value">{{ convertVariable(item.value) }}</span>
+                    <s-ellipsis-content :value="convertVariable(item.value)" :max-width="200"></s-ellipsis-content>
+                    <!-- <span class="f-xs text-ellipsis" :title="convertVariable(item.value)">{{ convertVariable(item.value) }}</span> -->
                 </div>
             </template>
             <div v-else class="f-xs gray-500">暂无数据</div>
@@ -52,20 +52,22 @@
             </div>
             <div v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)">
                 <!-- <pre v-if="responseData && responseData.type === 'json'" class="res-data">{{ JSON.parse(responseData.data) }}</pre> -->
-                <s-json v-if="responseData && responseData.type === 'json'" :data="JSON.parse(responseData.data)"></s-json>
+                <s-json v-if="responseData && responseData.type === 'json'" :data="JSON.parse(responseData.data)" @export="handleExport"></s-json>
                 <span v-if="responseData && responseData.type === 'svg'" v-html="responseData.data"></span>
                 <img v-if="responseData && responseData.type === 'image'" :src="responseData.data" alt="无法显示">
                 <div v-if="responseData && responseData.type === 'text'" v-html="responseData.data" class="res-text"></div>
                 <iframe v-else-if="responseData && responseData.type === 'pdf'" :src="responseData.data" class="res-pdf"></iframe>
             </div>
             <!-- <pre>{{ requestData.requestParams }}</pre> -->
-            <s-json :data="jsonData"></s-json>
+            <!-- <s-json :data="jsonData"></s-json> -->
         </s-collapse>
     </div>
 </template>
 
 <script>
 // import sJson from "./json.vue"
+import { dfsForest } from "@/lib/utils"
+import uuid from "uuid/v4"
 export default {
     components: {
         // "s-json": sJson
@@ -124,19 +126,6 @@ export default {
     },
     data() {
         return {
-            jsonData: {
-                x: "aaaa",
-                y: [
-                    {
-                        x: 3
-                    },
-                    222,
-                    {
-                        xxx: 33,
-                        yyy: true
-                    }
-                ],
-            },
             responseData: null, //---返回结果对象
             loading: false, //-------返回结果加载状态
         };
@@ -214,7 +203,6 @@ export default {
                             }
                             break;
                         default: //字符串或其他类型类型不做处理
-                            // console.log(result, key)
                             resultIsArray ? result.push(value) : (result[key] = value);
                             break;
                     }
@@ -325,6 +313,26 @@ export default {
             }
             foo(plainData, 0, false);
             return result;
+        },
+        //导出数据
+        handleExport(data) {
+            const copyData =JSON.parse(JSON.stringify(data))
+            // 
+            dfsForest(copyData, {
+                rCondition(value) {
+                    return value.children;
+                },
+                rKey: "children",
+                hooks: (val) => {
+                    Object.assign(val, {
+                        id: uuid(),
+                        description: "", //------描述
+                        required: true, //-------是否必填
+                    })
+                }
+            });
+            this.requestData.responseParams = copyData
+            // console.log(copyData)
         },
         //=====================================其他操作=====================================//
         convertVariable(val) {
