@@ -237,7 +237,6 @@ export default {
             }).finally(() => {
                 this.loading2 = false;
             });
-            
         },
         //接口不存在提醒用户，可能是同时操作的用户删掉了这个接口导致接口不存在
         confirmInvalidDoc() {
@@ -385,7 +384,7 @@ export default {
             // console.log(JSON.parse(JSON.stringify(this.request)))
             const validParams = this.validateParams();
             if (!validParams) {
-                this.$message.error("xxx");
+                this.$message.error("参数校验错误");
             } else {
                 this.loading3 = true;
                 this.$refs["response"].sendRequest().finally(() => {
