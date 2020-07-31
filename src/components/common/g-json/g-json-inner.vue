@@ -22,7 +22,7 @@
                     <!-- 对象 -->
                     <template v-else-if="typeof value === 'object'">
                         <span class="symbol">{</span>
-                        <s-json :full-array="fullArray" :data="fullArray ? value : value[0]" :level="level + 1"></s-json>
+                        <s-json :full-array="fullArray" :data="value" :level="level + 1"></s-json>
                         <span class="symbol">}</span>
                     </template>
                     <!-- 常规数据 -->
@@ -52,7 +52,7 @@
                     <!-- 对象 -->
                     <template v-else-if="typeof value === 'object'">
                         <span class="symbol">{</span>
-                        <s-json :full-array="fullArray" :data="fullArray ? value : value[0]" :level="level + 1"></s-json>
+                        <s-json :full-array="fullArray" :data="value" :level="level + 1"></s-json>
                         <span class="symbol">}</span>
                     </template>
                     <!-- 常规数据 -->
