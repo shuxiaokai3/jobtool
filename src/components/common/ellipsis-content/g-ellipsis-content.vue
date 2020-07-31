@@ -18,7 +18,7 @@ export default {
             default: ""
         },
         maxWidth: {
-            type: Number,
+            type: [String, Number],
             default: 100
         }
     },
@@ -45,7 +45,11 @@ export default {
     },
     mounted() {
         const textDom = this.$refs["text"];
-        textDom.style.maxWidth = this.maxWidth + "px"
+        if (typeof this.maxWidth === "number") {
+            textDom.style.maxWidth = this.maxWidth + "px"
+        } else if (typeof this.maxWidth === "string") {
+            textDom.style.maxWidth = this.maxWidth
+        }
     },
     methods: {
         //=====================================获取远程数据==================================//
