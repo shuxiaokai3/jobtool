@@ -70,12 +70,24 @@ export default {
                             value: "",
                             children: []
                         }
-                        result.push(current)
-                        foo(obj[i][0], current.children);
+                        result.push(current);
+                        if (this.getType(obj[i][0]) === "object") {
+                            current.children.push({
+                                key: "",
+                                type: "object",
+                                value: "",
+                                children: []
+                            })
+                            foo(obj[i][0], current.children[0].children);
+                        } else {
+                            foo(obj[i][0], current.children);
+                        }
+                        
                     }
                 }
             }
             foo(copyData, result);
+            console.log(result)
             this.$emit("export", result);
         },
         //生成请求数据
