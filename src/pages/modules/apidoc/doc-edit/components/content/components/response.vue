@@ -16,6 +16,29 @@
                     <span>请求方式：</span>
                     <span class="f-xs green">{{ requestData.methods.toUpperCase() }}</span>
                 </div>
+                <div class="d-flex">
+                    <div>
+                        <span>连通&nbsp;</span>
+                        <span v-if="currentCondition.connected === -1" class="gray-600 el-icon-question"></span>
+                        <span v-else-if="currentCondition.connected === 0" class="red el-icon-error"></span>
+                        <span v-else-if="currentCondition.connected === 1" class="green el-icon-success"></span>
+                        <span class="mx-1 gray-400">|</span>
+                    </div>
+                    <div>
+                        <span>状态码&nbsp;</span>
+                        <span v-if="currentCondition.status === -1" class="gray-600 el-icon-question"></span>
+                        <span v-else-if="currentCondition.status >= 200 && currentCondition.status < 300" class="green el-icon-success"></span>
+                        <span v-else class="red el-icon-error"></span>
+                        <span class="mx-1 gray-400">|</span>
+                    </div>
+                    <div>
+                        <span>大小&nbsp;</span>
+                        <span v-if="currentCondition.size === 0" class="gray-600 el-icon-question"></span>
+                        <span v-else-if="currentCondition.size <= 10" class="red el-icon-error"></span>
+                        <span v-if="currentCondition.size" class="green el-icon-success"></span>
+                        <span class="mx-1 gray-400">|</span>
+                    </div>
+                </div>
             </div>
         </s-collapse>
         <s-collapse title="请求头">
@@ -84,12 +107,9 @@ export default {
             const result = this.convertPlainParamsToTreeData(copyData);
             return result;
         },
-        //请求参数字符串类型
-        requesStringParams() {
-            // console.log(this.requestData.requestParams)
-            const copyData = JSON.parse(JSON.stringify(this.requestData.requestParams)); //扁平数据拷贝
-            const result = this.convertPlainParamsToStringTreeData(copyData);
-            return result;
+        //请求条件
+        currentCondition() {
+            return this.$store.state.apidocRules.currentCondition
         },
         //当前选中的doc
         currentSelectDoc() { 
