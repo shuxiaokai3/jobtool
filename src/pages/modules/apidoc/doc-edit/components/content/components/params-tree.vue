@@ -15,6 +15,9 @@
                     node-key="id" 
                     :expand-on-click-node="false" 
                     default-expand-all
+                    :draggable="enableDrag"
+                    :allow-drop="handleCheckNodeCouldDrop"
+                    @node-drop="handleNodeDrop"
                     @check-change="handleCheckChange"
                     :show-checkbox="showCheckbox"
             >
@@ -39,7 +42,8 @@
                                     :title="`${scope.node.parent.data.type === 'array' ?  '父元素为list不必填写参数名称' : '参数名称，例如：age name job'}`"
                                     :placeholder="`${scope.node.parent.data.type === 'array' ?  '父元素为list不必填写参数名称' : '参数名称，例如：age name job'}`"
                                     @input="addNewLine(scope)"
-                                    @blur="handleCheckKey(scope)"
+                                    @focus="enableDrag = false"
+                                    @blur="handleCheckKey(scope);enableDrag=true"
                             >
                                 <el-popover slot="tip" placement="top-start" trigger="hover" content="_id">
                                     <span slot="reference" class="theme-color ml-2">白名单</span>
@@ -68,7 +72,8 @@
                                 :error="scope.data._valueError"
                                 class="w-25 mr-2"
                                 :placeholder="`${scope.data._valuePlaceholder || '参数值,例如：20 张三'}`"
-                                @blur="handleCheckValue(scope)"
+                                @focus="enableDrag = false"
+                                @blur="handleCheckValue(scope);enableDrag=true"
                         >
                         </s-v-input>
                         <el-select v-if="isFormData && scope.data.type === 'file'" v-model="scope.data.value" placeholder="浏览器限制" size="mini">
@@ -85,7 +90,8 @@
                                 :error="scope.data._descriptionError"
                                 class="w-40 ml-2"
                                 placeholder="参数描述与备注"
-                                @blur="handleCheckDescription(scope)">
+                                @focus="enableDrag = false"
+                                @blur="handleCheckDescription(scope);enableDrag=true">
                         </s-v-input>
                     </div>
                 </template>
@@ -136,7 +142,7 @@ export default {
     },
     data() {
         return {
-            activeCollapse: "1",
+            //=====================================提示====================================//
             keyTip: {
                 message: "字母,数字,驼峰命名",
                 reference: "http://baidu.com"
@@ -147,6 +153,8 @@ export default {
             requiredTip: {
                 message: "不能为空",
             },
+            //=====================================其他参数====================================//
+            enableDrag: true,
         };
     },
     computed: {
@@ -319,10 +327,11 @@ export default {
                 return;
             }
             if (nodeIndex !== parentData.length - 1) { //只要不是最后一个值都需要坐数据校验 
+                console.log(data.value)
                 if (data.value && data.value.trim() === "") { //非空校验
                     this.valueTip.message = "不能为空"
                     this.$set(data, "_valueError", true);
-                } else if (data.type === "number" && !data.value.match(/^-?(0\.\d+|[1-9]+\.\d+|[1-9]\d{0,20})$/)) { //纯数字校验
+                } else if (data.type === "number" && !data.value.match(/^-?(0\.\d+|[1-9]+\.\d+|[1-9]\d{0,20}|[0-9])$/)) { //纯数字校验
                     this.valueTip.message = "不能为空，并且值必须为数字"
                     this.$set(data, "_valueError", true);
                 } else {
@@ -359,7 +368,13 @@ export default {
             }
         },
         //=====================================其他操作=====================================//
-
+        //判断是否允许拖拽
+        handleCheckNodeCouldDrop(draggingNode, dropNode, type) {
+            return type !== "inner";
+        },
+        handleNodeDrop({ data }) {
+            this.$refs["tree"].setChecked(data.id, true);
+        },
     }
 };
 </script>
