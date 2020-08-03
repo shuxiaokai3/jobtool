@@ -60,7 +60,7 @@
                 <hr>
             </div>
             <!-- 请求参数 -->
-            <div>
+            <div class="params-wrap">
                 <s-params-tree :tree-data="request.requestParams" title="请求参数" :ready="ready" :is-form-data="request.requestType === 'formData'" showCheckbox :plain="request.methods === 'get'"></s-params-tree>
                 <s-params-tree :tree-data="request.responseParams" title="响应参数"></s-params-tree>
                 <s-params-tree :tree-data="request.header" title="请求头" plain :fold="foldHeader" :valid-key="false"></s-params-tree>            
@@ -70,7 +70,7 @@
             <s-response ref="response" :request-data="request"></s-response>
         </div>
         <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible"></s-host-manage>
-        <s-variable-manage v-if="dialogVisible2" :visible.sync="dialogVisible2"></s-variable-manage>
+        <s-variable-manage v-if="dialogVisible2" :visible.sync="dialogVisible2" @change="handleVariableChange"></s-variable-manage>
     </div>
     <div v-else>
         
@@ -139,6 +139,7 @@ export default {
                 ], //----------------------------请求头信息
                 description: "在这里输入文档描述", //--------------请求描述
                 _description: "", //-------------请求描述拷贝
+                _variableChange: true, //----------hack强制触发request数据发生改变
             },
             origin: location.origin,
             //=====================================域名相关====================================//
@@ -447,7 +448,9 @@ export default {
                     }
                     const p = findParentNode(data.id, this.request.responseParams);
                     const isParentArray = (p && p.type === "array");
-                    if (!isParentArray && data.key.trim() === "") { //非空校验
+                    if (data.key === "_id") { //白名单
+                        this.$set(data, "_keyError", false)
+                    } else if (!isParentArray && data.key.trim() === "") { //非空校验
                         this.$set(data, "_keyError", true);
                         isValidRequest = false;
                     } else if (!isParentArray && !data.key.match(/^[a-zA-Z0-9]*$/)) { //字母数据
@@ -507,7 +510,9 @@ export default {
                     }
                     const p = findParentNode(data.id, this.request.header);
                     const isParentArray = (p && p.type === "array");
-                    if (!isParentArray && data.key.trim() === "") { //非空校验
+                    if (data.key === "_id") { //白名单
+                        this.$set(data, "_keyError", false)
+                    } else if (!isParentArray && data.key.trim() === "") { //非空校验
                         this.$set(data, "_keyError", true);
                         isValidRequest = false;
                         this.foldHeader = false;
@@ -525,6 +530,11 @@ export default {
                 }
             });
             return isValidRequest;
+        },
+        //全局变量改变
+        handleVariableChange() {
+            console.log("change")
+            this.request._variableChange = !this.request._variableChange;
         },
     }
 };
@@ -554,6 +564,10 @@ export default {
         .el-radio {
             margin-right: size(10);
         }
+    }
+    .params-wrap {
+        height: calc(100vh - 320px);
+        overflow-y: auto;
     }
     
 }
