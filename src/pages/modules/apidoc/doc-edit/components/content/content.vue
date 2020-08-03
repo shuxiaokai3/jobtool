@@ -425,6 +425,11 @@ export default {
                 }).finally(() => {
                     this.loading = false;
                 }); 
+            } else {
+                this.$nextTick(() => {
+                    const errorIptDom = document.querySelector(".v-input.valid-error .el-input__inner");
+                    errorIptDom ? errorIptDom.focus() : null;
+                })
             }
         },
         //=====================================其他操作=====================================//
