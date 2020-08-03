@@ -119,6 +119,7 @@ export default {
                     this.successLoading = false;
                     this.axios.post("/api/project/project_variable", params).then(() => {
                         this.successLoading = true;
+                        this.$emit("change")
                         this.getData();
                     }).catch(err => {
                         this.$errorThrow(err, this);
@@ -141,6 +142,8 @@ export default {
             const params = row;
             this.axios.put("/api/project/project_variable", params).then(() => {
                 this.$message.success("修改成功");
+                this.$emit("change")
+                this.getData();
                 this.isEditing = false;
             }).catch(err => {
                 this.$errorThrow(err, this);
@@ -162,6 +165,7 @@ export default {
             }).then(() => {
                 this.axios.delete("/api/project/project_variable", { data: { ids: [_id] }}).then(() => {
                     this.$message.success("删除成功");
+                    this.$emit("change")
                     this.getData();
                 }).catch(err => {
                     this.$errorThrow(err, this);
