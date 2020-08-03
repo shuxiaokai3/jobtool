@@ -6,7 +6,7 @@
 */
 <template>
     <div class="v-input" :class="{'valid-error': error}">
-        <el-input :value="value" v-bind="$attrs"  v-on="$listeners" @input="handleInput">
+        <el-input :value="value" v-bind="$attrs"  v-on="$listeners">
             <template slot="prepend">
                 <slot name="prepend"/>
             </template>
@@ -51,9 +51,6 @@ export default {
         //=====================================前后端交互====================================//
 
         //=====================================组件间交互====================================//  
-        handleInput(val) {
-            this.$emit("input", val);
-        },
         //查看规范
         handleJumpToStander() {
             window.open(this.tip?.reference)

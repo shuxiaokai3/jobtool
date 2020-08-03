@@ -8,12 +8,17 @@
     <s-card2 :title="title" collapse :fold="fold" class="collapse-wrap">
         <div class="params-edit">
             <el-tree 
+                    ref="tree"
                     :data="treeData" 
                     :indent="50"
                     :highlight-current="true"
-                    node-key="_id" 
+                    node-key="id" 
                     :expand-on-click-node="false" 
                     default-expand-all
+                    :draggable="enableDrag"
+                    :allow-drop="handleCheckNodeCouldDrop"
+                    @node-drop="handleNodeDrop"
+                    @check-change="handleCheckChange"
                     :show-checkbox="showCheckbox"
             >
                 <template slot-scope="scope">
@@ -37,7 +42,8 @@
                                     :title="`${scope.node.parent.data.type === 'array' ?  '父元素为list不必填写参数名称' : '参数名称，例如：age name job'}`"
                                     :placeholder="`${scope.node.parent.data.type === 'array' ?  '父元素为list不必填写参数名称' : '参数名称，例如：age name job'}`"
                                     @input="addNewLine(scope)"
-                                    @blur="handleCheckKey(scope)"
+                                    @focus="enableDrag = false"
+                                    @blur="handleCheckKey(scope);enableDrag=true"
                             >
                                 <el-popover slot="tip" placement="top-start" trigger="hover" content="_id">
                                     <span slot="reference" class="theme-color ml-2">白名单</span>
@@ -66,7 +72,8 @@
                                 :error="scope.data._valueError"
                                 class="w-25 mr-2"
                                 :placeholder="`${scope.data._valuePlaceholder || '参数值,例如：20 张三'}`"
-                                @blur="handleCheckValue(scope)"
+                                @focus="enableDrag = false"
+                                @blur="handleCheckValue(scope);enableDrag=true"
                         >
                         </s-v-input>
                         <el-select v-if="isFormData && scope.data.type === 'file'" v-model="scope.data.value" placeholder="浏览器限制" size="mini">
@@ -83,7 +90,8 @@
                                 :error="scope.data._descriptionError"
                                 class="w-40 ml-2"
                                 placeholder="参数描述与备注"
-                                @blur="handleCheckDescription(scope)">
+                                @focus="enableDrag = false"
+                                @blur="handleCheckDescription(scope);enableDrag=true">
                         </s-v-input>
                     </div>
                 </template>
@@ -126,11 +134,15 @@ export default {
         showCheckbox: { //是否展示checkbox
             type: Boolean,
             default: false
+        },
+        ready: { //是否完成第一次后台数据获取
+            type: Boolean,
+            default: false
         }
     },
     data() {
         return {
-            activeCollapse: "1",
+            //=====================================提示====================================//
             keyTip: {
                 message: "字母,数字,驼峰命名",
                 reference: "http://baidu.com"
@@ -141,6 +153,8 @@ export default {
             requiredTip: {
                 message: "不能为空",
             },
+            //=====================================其他参数====================================//
+            enableDrag: true,
         };
     },
     computed: {
@@ -159,6 +173,18 @@ export default {
             }
         }
     },
+    watch: {
+        ready: {
+            handler(value) {
+                if (value === true) { //第一次值改变
+                    setTimeout(() => {
+                        this.$refs["tree"].setCheckedNodes(this.treeData);
+                    })
+                }
+            },
+            immediate: true
+        }
+    },
     created() {
         
     },
@@ -167,9 +193,13 @@ export default {
         //添加嵌套数据
         addNestTreeData(data) {
             if (data.children == null) {
-                this.$set(data, "children", [])
+                this.$set(data, "children", []);
             }
-            data.children.push(this.generateParams());
+            const params = this.generateParams();
+            data.children.push(params);
+            setTimeout(() => { //hack
+                this.$refs["tree"].setChecked(params.id, true);
+            })
             data.value = "";
             this.$set(data, "_valueError", false);
             this.$set(data, "_valuePlaceholder", "对象和数组不必填写参数值");
@@ -212,6 +242,8 @@ export default {
                         parentData.children.push(this.generateParams());
                     }
                 }
+                // this.$set(data, "checked", true);
+                this.$refs["tree"].setChecked(data.id, true);
             }
         },
         //改变参数类型
@@ -231,6 +263,7 @@ export default {
                         rKey: "children",
                         hooks: (data) => {
                             data.key = "";
+                            this.$set(data, "_keyError", false); //清除子元素key值校验
                         }
                     });
                 }
@@ -241,7 +274,26 @@ export default {
                 this.$set(data, "_valuePlaceholder", "");
             }
         },
-     
+        handleCheckChange() {     
+            //首先清空所有选中数据  
+            dfsForest(this.treeData, {
+                rCondition(value) {
+                    return value.children;
+                },
+                rKey: "children",
+                hooks: (data) => {
+                    this.$set(data, "_select", false);
+                }
+            });
+            const checkedNodes = this.$refs["tree"].getCheckedNodes();
+            const halfCheckedNodes = this.$refs["tree"].getHalfCheckedNodes();
+            checkedNodes.forEach(val => {
+                this.$set(val, "_select", true)
+            })
+            halfCheckedNodes.forEach(val => {
+                this.$set(val, "_select", true)
+            })
+        },
         //=====================================数据校验====================================//
         //检查参数是否输入完备
         handleCheckKey({ node, data }) {
@@ -251,15 +303,16 @@ export default {
             if (parentNode.level === 0 && parentData.length === 1) { //根元素第一个可以不必校验因为参数可以不必填
                 return;
             }
-            console.log(this.validKey)
             if (nodeIndex !== parentData.length - 1) { //只要不是最后一个值都需要做数据校验 
-                if (data.key.trim() === "") { //非空校验
+                if (data.key === "_id") { //白名单
+                    this.$set(data, "_keyError", false)
+                } else if (data.key.trim() === "") { //非空校验
                     this.$set(data, "_keyError", true)
                 } else if (this.validKey && !data.key.match(/^[a-zA-Z0-9]*$/)) { //字母数据
                     this.$set(data, "_keyError", true)
                 } else {
                     this.$set(data, "_keyError", false)
-                }                
+                }         
             } 
         },
         //检查参数值
@@ -274,10 +327,11 @@ export default {
                 return;
             }
             if (nodeIndex !== parentData.length - 1) { //只要不是最后一个值都需要坐数据校验 
+                console.log(data.value)
                 if (data.value && data.value.trim() === "") { //非空校验
                     this.valueTip.message = "不能为空"
                     this.$set(data, "_valueError", true);
-                } else if (data.type === "number" && !data.value.match(/^-?(0\.\d+|[1-9]+\.\d+|[1-9]\d{0,20})$/)) { //纯数字校验
+                } else if (data.type === "number" && !data.value.match(/^-?(0\.\d+|[1-9]+\.\d+|[1-9]\d{0,20}|[0-9])$/)) { //纯数字校验
                     this.valueTip.message = "不能为空，并且值必须为数字"
                     this.$set(data, "_valueError", true);
                 } else {
@@ -310,11 +364,17 @@ export default {
                 description: "",
                 type: type,
                 value: "",
-                required: true
+                required: true,
             }
         },
         //=====================================其他操作=====================================//
-
+        //判断是否允许拖拽
+        handleCheckNodeCouldDrop(draggingNode, dropNode, type) {
+            return type !== "inner";
+        },
+        handleNodeDrop({ data }) {
+            this.$refs["tree"].setChecked(data.id, true);
+        },
     }
 };
 </script>

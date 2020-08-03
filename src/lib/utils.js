@@ -473,17 +473,17 @@ export const dfsForest = (forestData, config) => {
     }
 
     //开始递归
-    const foo = (forestData, rCondition, hooks, rKey, parent) => {
+    const foo = (forestData, rCondition, hooks, rKey, parent, deep) => {
         for (let i = 0, len = forestData.length; i < len; i++) {
-            hooks && hooks(forestData[i], i, forestData, parent);
+            hooks && hooks(forestData[i], i, forestData, parent, deep);
             if (rCondition && rCondition(forestData[i])) {
                 if (!forestData[i][rKey] || !Array.isArray(forestData[i][rKey])) {
                     console.warn("当前指定字段值不为数组，将会忽略本次循环");
                     continue;
                 }
-                foo(forestData[i][rKey], rCondition, hooks, rKey, forestData[i]);
+                foo(forestData[i][rKey], rCondition, hooks, rKey, forestData[i], deep+1);
             }
         }
     }
-    foo(forestData, rCondition, hooks, rKey, null);
+    foo(forestData, rCondition, hooks, rKey, null, 0);
 }

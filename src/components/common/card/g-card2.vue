@@ -77,7 +77,7 @@ export default {
 <style lang="scss">
 .widget-card {
     width: 100%;
-    height: 100%;
+    // height: 100%;
     border: 1px solid $gray-200;
     background: $white;
     border-radius: $border-radius-base;

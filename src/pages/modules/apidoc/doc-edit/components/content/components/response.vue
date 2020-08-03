@@ -8,14 +8,36 @@
     <div class="response">
         <s-collapse title="基本信息">
             <div>
-                <div class="my-2">
-                    <span>请求地址：</span>
-                    <span class="f-xs">{{ requestData.url.host }}</span>
-                    <span class="f-xs">{{ requestData.url.path }}</span>
+                <div class="my-2 d-flex a-center">
+                    <span class="flex0">请求地址：</span>
+                    <s-ellipsis-content :value="requestData.url.host + requestData.url.path" max-width="100%"></s-ellipsis-content>
                 </div>
                 <div class="my-2">
                     <span>请求方式：</span>
                     <span class="f-xs green">{{ requestData.methods.toUpperCase() }}</span>
+                </div>
+                <div class="d-flex">
+                    <div>
+                        <span>连通&nbsp;</span>
+                        <span v-if="currentCondition.connected === -1" class="gray-600 el-icon-question"></span>
+                        <span v-else-if="currentCondition.connected === 0" class="red el-icon-error"></span>
+                        <span v-else-if="currentCondition.connected === 1" class="green el-icon-success"></span>
+                        <span class="mx-1 gray-400">|</span>
+                    </div>
+                    <div>
+                        <span>状态码&nbsp;</span>
+                        <span v-if="currentCondition.status === -1" class="gray-600 el-icon-question"></span>
+                        <span v-else-if="currentCondition.status >= 200 && currentCondition.status < 300" class="green el-icon-success"></span>
+                        <span v-else class="red el-icon-error"></span>
+                        <span class="mx-1 gray-400">|</span>
+                    </div>
+                    <div>
+                        <span>大小&nbsp;</span>
+                        <span v-if="currentCondition.size === 0" class="gray-600 el-icon-question"></span>
+                        <span v-else-if="currentCondition.size <= 10" class="red el-icon-error"></span>
+                        <span v-if="currentCondition.size" class="green el-icon-success"></span>
+                        <span class="mx-1 gray-400">|</span>
+                    </div>
                 </div>
             </div>
         </s-collapse>
@@ -23,15 +45,19 @@
             <template v-if="requestData.header.length > 1">
                 <div v-for="(item, index) in requestData.header" :key="index" class="d-flex a-center mt">
                     <span v-if="item.key" class="flex0">{{ item.key }}：</span>
-                    <span class="f-xs text-ellipsis" :title="item.value">{{ convertVariable(item.value) }}</span>
+                    <s-ellipsis-content :value="convertVariable(item.value)" :max-width="200"></s-ellipsis-content>
+                    <!-- <span class="f-xs text-ellipsis" :title="convertVariable(item.value)">{{ convertVariable(item.value) }}</span> -->
                 </div>
             </template>
             <div v-else class="f-xs gray-500">暂无数据</div>
         </s-collapse>
         <s-collapse title="请求参数">
-            <pre>{{ requesStringParams.str }}</pre>
+            <s-tree-json :data="requestData.requestParams"></s-tree-json>
         </s-collapse>
-        <s-collapse title="返回结果">
+        <s-collapse title="返回参数">
+            <s-tree-json :data="requestData.responseParams"></s-tree-json>
+        </s-collapse>
+        <s-collapse title="远程结果">
             <div v-if="responseData" class="f-xs d-flex j-end mb-2">
                 <div>
                     <span>Status：</span>
@@ -51,19 +77,21 @@
                 </div>
             </div>
             <div v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)">
-                <pre v-if="responseData && responseData.type === 'json'" class="res-data">{{ JSON.parse(responseData.data) }}</pre>
+                <s-json v-if="responseData && responseData.type === 'json'" :data="JSON.parse(responseData.data)" :check-data="checkJsonData" @export="handleExport"></s-json>
                 <span v-if="responseData && responseData.type === 'svg'" v-html="responseData.data"></span>
                 <img v-if="responseData && responseData.type === 'image'" :src="responseData.data" alt="无法显示">
                 <div v-if="responseData && responseData.type === 'text'" v-html="responseData.data" class="res-text"></div>
                 <iframe v-else-if="responseData && responseData.type === 'pdf'" :src="responseData.data" class="res-pdf"></iframe>
             </div>
-            
         </s-collapse>
     </div>
 </template>
 
 <script>
+import { dfsForest } from "@/lib/utils"
+import uuid from "uuid/v4"
 export default {
+    components: {},
     props: {
         requestData: {
             type: Object,
@@ -73,29 +101,15 @@ export default {
         },
     },
     computed: {
-        //请求参数(对象类型)
-        requestParams() {
-            const plainData = JSON.parse(JSON.stringify(this.requestData.requestParams)); //扁平数据拷贝
-            const result = this.convertPlainParamsToTreeData(plainData);
-            return result;
-        },
-        //请求头(对象类型)
-        headerParams() {
-            const plainData = JSON.parse(JSON.stringify(this.requestData.header)); //扁平数据拷贝
-            const result = this.convertPlainParamsToTreeData(plainData);
-            return result;
-        },
         //返回参数(对象类型)
         responseParams() {
-            const plainData = JSON.parse(JSON.stringify(this.requestData.responseParams)); //扁平数据拷贝
-            const result = this.convertPlainParamsToTreeData(plainData);
+            const copyData = JSON.parse(JSON.stringify(this.requestData.responseParams)); //扁平数据拷贝
+            const result = this.convertPlainParamsToTreeData(copyData);
             return result;
         },
-        //请求参数字符串类型
-        requesStringParams() {
-            const plainData = JSON.parse(JSON.stringify(this.requestData.requestParams)); //扁平数据拷贝
-            const result = this.convertPlainParamsToStringTreeData(plainData);
-            return result;
+        //请求条件
+        currentCondition() {
+            return this.$store.state.apidocRules.currentCondition
         },
         //当前选中的doc
         currentSelectDoc() { 
@@ -119,6 +133,7 @@ export default {
     data() {
         return {
             responseData: null, //---返回结果对象
+            checkJsonData: null, //--用于对比本地书写的返回参数与实际返回参数
             loading: false, //-------返回结果加载状态
         };
     },
@@ -129,7 +144,9 @@ export default {
         //=====================================前后端交互====================================//
         sendRequest() {
             return new Promise((resolve) => {
-                let requestParams = this.requestParams;
+                let copyData = JSON.parse(JSON.stringify(this.requestData)); //扁平数据拷贝
+                let requestParams = this.convertPlainParamsToTreeData(copyData.requestParams, true);
+                const headerParams = this.convertPlainParamsToTreeData(copyData.header);
                 if (this.requestData.requestType === "formData") {
                     requestParams = this.requestData.requestParams.filter(val => val.key && val.value).map(val => ({ key: val.key, type: val.type, value: val.value }));
                 }
@@ -137,12 +154,13 @@ export default {
                 const params = {
                     url: this.requestData.url.host + this.requestData.url.path,
                     method: this.requestData.methods,
-                    header: this.headerParams,
+                    header: headerParams,
                     requestParams: requestParams,
                     requestType: this.requestData.requestType
                 };
                 this.axios.post("/proxy", params).then((res) => {
-                    this.responseData = res.data
+                    this.responseData = res.data;
+                    this.checkResponseParams();
                 }).catch(err => {
                     console.error(err);
                 }).finally(() => {
@@ -154,20 +172,19 @@ export default {
         },
         //=====================================组件间交互====================================//  
         //将扁平数据转换为树形结构数据
-        convertPlainParamsToTreeData(plainData) {
+        convertPlainParamsToTreeData(plainData, jumpChecked) {
             const result = {};
             const foo = (plainData, result) => {
                 for(let i = 0,len = plainData.length; i < len; i++) {
+                    if (jumpChecked && !plainData[i]._select) { //若请求参数未选中则不发送请求
+                        continue;
+                    }
                     const key = plainData[i].key.trim();
                     const value = this.convertVariable(plainData[i].value);
                     const type = plainData[i].type;
                     const resultIsArray = Array.isArray(result);
-                    // const desc = plainData[i].description;
                     const isComplex = (type === "object" || type === "array");
                     let arrTypeResultLength = 0; //数组类型值长度，用于数组里面嵌套对象时候对象取值
-                    // if (isComplex && key === "") { //复杂数据必须填写参数名称
-                    //     continue;
-                    // }
                     if (!isComplex && (key === "" || value === "")) { //非复杂数据需要填写参数名称才可以显示
                         continue
                     }
@@ -192,7 +209,6 @@ export default {
                             }
                             break;
                         default: //字符串或其他类型类型不做处理
-                            // console.log(result, key)
                             resultIsArray ? result.push(value) : (result[key] = value);
                             break;
                     }
@@ -202,7 +218,7 @@ export default {
             return result;
         },
         //将扁平数据转换为树形结构字符串数据
-        convertPlainParamsToStringTreeData(plainData) {
+        convertPlainParamsToStringTreeData(plainData, jumpChecked) {
             const result = {
                 str: ""
             };
@@ -218,6 +234,9 @@ export default {
             const foo = (plainData, level, inArray) => {
                 let resultStr = "";
                 for(let i = 0,len = plainData.length; i < len; i++) {
+                    if (jumpChecked && !plainData[i]._select) { //若请求参数未选中则不发送请求
+                        continue; 
+                    }
                     const key = plainData[i].key.toString().trim();
                     let value = plainData[i].value;
                     const type = plainData[i].type;
@@ -300,6 +319,36 @@ export default {
             }
             foo(plainData, 0, false);
             return result;
+        },
+        //导出数据
+        handleExport(data) {
+            const copyData =JSON.parse(JSON.stringify(data))
+            // 
+            dfsForest(copyData, {
+                rCondition(value) {
+                    return value.children;
+                },
+                rKey: "children",
+                hooks: (val) => {
+                    Object.assign(val, {
+                        id: uuid(),
+                        description: "", //------描述
+                        required: true, //-------是否必填
+                    })
+                }
+            });
+            this.requestData.responseParams = copyData
+            // console.log(copyData)
+        },
+        //检查返回值与响应参数是否一致
+        checkResponseParams() {
+            if (this.responseData.type === "json") {
+                const remoteParams = JSON.parse(this.responseData.data);
+                const localParams = this.responseParams;
+                this.checkJsonData = localParams;
+                console.log(localParams, remoteParams)
+            }
+            
         },
         //=====================================其他操作=====================================//
         convertVariable(val) {
