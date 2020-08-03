@@ -29,9 +29,12 @@
             <div v-else class="f-xs gray-500">暂无数据</div>
         </s-collapse>
         <s-collapse title="请求参数">
-            <pre>{{ requesStringParams.str }}</pre>
+            <s-tree-json :data="requestData.requestParams"></s-tree-json>
         </s-collapse>
-        <s-collapse title="返回结果">
+        <s-collapse title="返回参数">
+            <s-tree-json :data="requestData.responseParams"></s-tree-json>
+        </s-collapse>
+        <s-collapse title="远程结果">
             <div v-if="responseData" class="f-xs d-flex j-end mb-2">
                 <div>
                     <span>Status：</span>
@@ -51,27 +54,21 @@
                 </div>
             </div>
             <div v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)">
-                <!-- <pre v-if="responseData && responseData.type === 'json'" class="res-data">{{ JSON.parse(responseData.data) }}</pre> -->
-                <s-json v-if="responseData && responseData.type === 'json'" :data="JSON.parse(responseData.data)" @export="handleExport"></s-json>
+                <s-json v-if="responseData && responseData.type === 'json'" :data="JSON.parse(responseData.data)" :check-data="checkJsonData" @export="handleExport"></s-json>
                 <span v-if="responseData && responseData.type === 'svg'" v-html="responseData.data"></span>
                 <img v-if="responseData && responseData.type === 'image'" :src="responseData.data" alt="无法显示">
                 <div v-if="responseData && responseData.type === 'text'" v-html="responseData.data" class="res-text"></div>
                 <iframe v-else-if="responseData && responseData.type === 'pdf'" :src="responseData.data" class="res-pdf"></iframe>
             </div>
-            <!-- <pre>{{ requestData.requestParams }}</pre> -->
-            <!-- <s-json :data="jsonData"></s-json> -->
         </s-collapse>
     </div>
 </template>
 
 <script>
-// import sJson from "./json.vue"
 import { dfsForest } from "@/lib/utils"
 import uuid from "uuid/v4"
 export default {
-    components: {
-        // "s-json": sJson
-    },
+    components: {},
     props: {
         requestData: {
             type: Object,
@@ -81,18 +78,6 @@ export default {
         },
     },
     computed: {
-        //请求参数(对象类型)
-        requestParams() {
-            let copyData = JSON.parse(JSON.stringify(this.requestData.requestParams)); //扁平数据拷贝
-            const result = this.convertPlainParamsToTreeData(copyData, true);
-            return result;
-        },
-        //请求头(对象类型)
-        headerParams() {
-            const copyData = JSON.parse(JSON.stringify(this.requestData.header)); //扁平数据拷贝
-            const result = this.convertPlainParamsToTreeData(copyData);
-            return result;
-        },
         //返回参数(对象类型)
         responseParams() {
             const copyData = JSON.parse(JSON.stringify(this.requestData.responseParams)); //扁平数据拷贝
@@ -101,6 +86,7 @@ export default {
         },
         //请求参数字符串类型
         requesStringParams() {
+            // console.log(this.requestData.requestParams)
             const copyData = JSON.parse(JSON.stringify(this.requestData.requestParams)); //扁平数据拷贝
             const result = this.convertPlainParamsToStringTreeData(copyData);
             return result;
@@ -127,6 +113,7 @@ export default {
     data() {
         return {
             responseData: null, //---返回结果对象
+            checkJsonData: null, //--用于对比本地书写的返回参数与实际返回参数
             loading: false, //-------返回结果加载状态
         };
     },
@@ -137,7 +124,9 @@ export default {
         //=====================================前后端交互====================================//
         sendRequest() {
             return new Promise((resolve) => {
-                let requestParams = this.requestParams;
+                let copyData = JSON.parse(JSON.stringify(this.requestData)); //扁平数据拷贝
+                let requestParams = this.convertPlainParamsToTreeData(copyData.requestParams, true);
+                const headerParams = this.convertPlainParamsToTreeData(copyData.header);
                 if (this.requestData.requestType === "formData") {
                     requestParams = this.requestData.requestParams.filter(val => val.key && val.value).map(val => ({ key: val.key, type: val.type, value: val.value }));
                 }
@@ -145,12 +134,13 @@ export default {
                 const params = {
                     url: this.requestData.url.host + this.requestData.url.path,
                     method: this.requestData.methods,
-                    header: this.headerParams,
+                    header: headerParams,
                     requestParams: requestParams,
                     requestType: this.requestData.requestType
                 };
                 this.axios.post("/proxy", params).then((res) => {
-                    this.responseData = res.data
+                    this.responseData = res.data;
+                    this.checkResponseParams();
                 }).catch(err => {
                     console.error(err);
                 }).finally(() => {
@@ -173,12 +163,8 @@ export default {
                     const value = this.convertVariable(plainData[i].value);
                     const type = plainData[i].type;
                     const resultIsArray = Array.isArray(result);
-                    // const desc = plainData[i].description;
                     const isComplex = (type === "object" || type === "array");
                     let arrTypeResultLength = 0; //数组类型值长度，用于数组里面嵌套对象时候对象取值
-                    // if (isComplex && key === "") { //复杂数据必须填写参数名称
-                    //     continue;
-                    // }
                     if (!isComplex && (key === "" || value === "")) { //非复杂数据需要填写参数名称才可以显示
                         continue
                     }
@@ -333,6 +319,16 @@ export default {
             });
             this.requestData.responseParams = copyData
             // console.log(copyData)
+        },
+        //检查返回值与响应参数是否一致
+        checkResponseParams() {
+            if (this.responseData.type === "json") {
+                const remoteParams = JSON.parse(this.responseData.data);
+                const localParams = this.responseParams;
+                this.checkJsonData = localParams;
+                console.log(localParams, remoteParams)
+            }
+            
         },
         //=====================================其他操作=====================================//
         convertVariable(val) {
