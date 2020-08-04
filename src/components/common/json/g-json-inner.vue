@@ -15,14 +15,14 @@
                     <template v-if="Array.isArray(value)">
                         <span class="symbol">[</span>
                         <span v-if="!fullArray && typeof value[0] === 'object' && value !== null" class="symbol">{</span>
-                        <s-json :full-array="fullArray" :data="fullArray ? value : value[0]" :check-data="checkData[key] ? checkData[key][0] : []" :level="level + 1"></s-json>
+                        <s-json-inner :full-array="fullArray" :data="fullArray ? value : value[0]" :check-data="checkData[key] ? checkData[key][0] : []" :level="level + 1"></s-json-inner>
                         <span v-if="!fullArray && typeof value[0] === 'object' && value !== null" class="symbol">}</span>
                         <span class="symbol">]</span>
                     </template>
                     <!-- 对象 -->
                     <template v-else-if="typeof value === 'object'">
                         <span class="symbol">{</span>
-                        <s-json :full-array="fullArray" :data="value" :check-data="checkData[key]" :level="level + 1"></s-json>
+                        <s-json-inner :full-array="fullArray" :data="value" :check-data="checkData[key]" :level="level + 1"></s-json-inner>
                         <span class="symbol">}</span>
                     </template>
                     <!-- 常规数据 -->
@@ -46,14 +46,14 @@
                     <template v-if="Array.isArray(value)">
                         <span class="symbol">[</span>
                         <span v-if="!fullArray && typeof value[0] === 'object' && value !== null" class="symbol">{</span>
-                        <s-json :full-array="fullArray" :data="fullArray ? value : value[0]" :check-data="checkData[key] ? checkData[key][0] : []" :level="level + 1"></s-json>
+                        <s-json-inner :full-array="fullArray" :data="fullArray ? value : value[0]" :check-data="checkData[key] ? checkData[key][0] : []" :level="level + 1"></s-json-inner>
                         <span v-if="!fullArray && typeof value[0] === 'object' && value !== null" class="symbol">}</span>
                         <span class="symbol">]</span>
                     </template>
                     <!-- 对象 -->
                     <template v-else-if="typeof value === 'object'">
                         <span class="symbol">{</span>
-                        <s-json :full-array="fullArray" :data="value" :check-data="checkData[key]" :level="level + 1"></s-json>
+                        <s-json-inner :full-array="fullArray" :data="value" :check-data="checkData[key]" :level="level + 1"></s-json-inner>
                         <span class="symbol">}</span>
                     </template>
                     <!-- 常规数据 -->
@@ -128,15 +128,14 @@ export default {
             const localKeys = Object.keys(this.checkData);
             const localValue = this.checkData[key];
             const localType = this.getType(localValue);
-            // const remoteKey = key;
-            // const remoteKeys = Object.keys(this.data);
             const remoteValue = value;
             const remoteType = this.getType(remoteValue)
             if (!localKeys.includes(key)) {
+                this.$emit("error", "tooMuchField");
                 return `字段冗余`
             }
-           
             if (localType !== remoteType) {
+                this.$emit("error", "typeError");
                 return `类型错误(${remoteType}|${localType})`
             }
         },
@@ -147,13 +146,14 @@ export default {
             const lackKeys = [];
             for(let i = 0; i < localKeys.length; i++) {
                 if (remoteKeys.every(val => val !== localKeys[i])) {
-                    // console.log(remoteKeys, localKeys[i])
                     lackKeys.push(localKeys[i])
                 }
             }
             if (lackKeys.length > 0) {
+                this.$emit("error", "lackField");
                 return `缺少字段${lackKeys.join()}`
             }
+            
         },
         //获取参数类型
         getType(value) {
@@ -170,9 +170,8 @@ export default {
             } else { // null undefined ...
                 return "string"
             }
-        }
+        },
         //=====================================其他操作=====================================//
-
     }
 };
 </script>
