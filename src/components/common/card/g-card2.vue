@@ -86,7 +86,7 @@ export default {
     // 头部
     .collapse {
         user-select: none;
-        background: $gray-100;
+        background: $gray-200;
     }
     header {
         display: flex;
