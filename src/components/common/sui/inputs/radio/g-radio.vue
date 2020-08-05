@@ -1,44 +1,40 @@
 /*
     创建者：shuxiaokai
-    创建时间：2020-03-30 15:19
-    模块名称：数字输入框二次封装
+    创建时间：2020-05-20 15:19
+    模块名称：radio二次封装
     备注：xxxx
 */
 <template>
     <s-col v-bind="$attrs">
         <!-- 存在el-form-item包裹 -->
         <el-form-item v-if="!noFormItem" :label="realLabel" :prop="prop" :label-width="labelWidth">
-            <el-input-number 
+            <el-radio-group 
                     :value="value"
                     v-bind="$attrs"
                     :placeholder="placeholder" 
-                    :min="min"
-                    :max="max"
-                    :step="step"
                     :size="$root.VUE_BASE_CONFIG.styleConfig.size" 
-                    :class="className"
-                    clearable
-                    @input="handleInput"
+                    :class="className" 
+                    @change="handleInput"
                     v-on="$listeners"
+
             >
-            </el-input-number>
+                <el-radio v-for="(item, index) in options" :key="index" :label="item.id">{{ item.name }}</el-radio>
+            </el-radio-group>
         </el-form-item>   
         <!-- 不存在el-form-item包裹 -->
-        <el-input-number  
+        <el-radio-group 
                 v-else
-                v-bind="$attrs"
                 :value="value"
+                v-bind="$attrs"
                 :placeholder="placeholder" 
                 :size="$root.VUE_BASE_CONFIG.styleConfig.size" 
-                :min="min"
-                :max="max"
-                :step="step"
-                :class="className"
-                clearable
-                @input="handleInput"
+                :class="className" 
+                @change="handleInput"
                 v-on="$listeners"
+
         >
-        </el-input-number>   
+            <el-radio v-for="(item, index) in options" :key="index" :label="item.id">{{ item.name }}</el-radio>
+        </el-radio-group>  
     </s-col>
 </template>
 
@@ -50,8 +46,8 @@ export default {
             default: ""
         },
         value: { //v-model绑定的值
-            type: Number,
-            default: null
+            type: [String, Number],
+            default: ""
         },
         noFormItem: { //是否存在el-form-item包裹
             type: Boolean,
@@ -61,18 +57,6 @@ export default {
             type: String,
             default: ""
         },
-        min: {
-            type: Number,
-            default: 0,
-        },
-        max: {
-            type: Number,
-            default: 999999
-        },
-        step: {
-            type: Number,
-            default: 1
-        },
         className: { //自定义class值
             type: String,
             default: "w-100"
@@ -80,6 +64,12 @@ export default {
         labelWidth: {
             type: String,
             default: null
+        },
+        options: { //配置信息
+            type: Array,
+            default() {
+                return [];
+            }
         },
     },
     data() {
@@ -96,7 +86,7 @@ export default {
             }
         },
         placeholder() {
-            return "请输入" + this.label;
+            return "请选择" + this.label;
         },
     },
     created() {

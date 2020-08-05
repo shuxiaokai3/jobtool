@@ -8,49 +8,17 @@
     <s-col v-bind="$attrs">
         <!-- 存在el-form-item包裹 -->
         <el-form-item v-if="!noFormItem" :label="realLabel" :prop="prop" :label-width="labelWidth">
-            <el-radio
-                    :value="value" 
-                    v-bind="$attrs"
-                    :size="$root.VUE_BASE_CONFIG.styleConfig.size" 
-                    :label="trueValue"
-                    @change="handleInput"
-                    v-on="$listeners"
-            >
-                {{ trueText }}
-            </el-radio>
-            <el-radio
-                    :value="value" 
-                    v-bind="$attrs"
-                    :size="$root.VUE_BASE_CONFIG.styleConfig.size" 
-                    :label="falseValue"
-                    @change="handleInput"
-                    v-on="$listeners"
-            >
-                {{ falseText }}
-            </el-radio>
+            <el-radio-group :value="value" @input="handleInput">
+                <el-radio :label="trueValue">{{ trueText }}</el-radio>
+                <el-radio :label="falseValue">{{ falseText }}</el-radio>
+            </el-radio-group>
         </el-form-item>   
         <!-- 不存在el-form-item包裹 -->
         <div v-else>
-            <el-radio
-                    :value="value" 
-                    v-bind="$attrs"
-                    :size="$root.VUE_BASE_CONFIG.styleConfig.size" 
-                    :label="trueValue"
-                    @change="handleInput"
-                    v-on="$listeners"
-            >
-                {{ trueText }}
-            </el-radio>
-            <el-radio
-                    :value="value" 
-                    v-bind="$attrs"
-                    :size="$root.VUE_BASE_CONFIG.styleConfig.size" 
-                    :label="falseValue"
-                    @change="handleInput"
-                    v-on="$listeners"
-            >
-                {{ falseText }}
-            </el-radio>
+            <el-radio-group :value="value" @input="handleInput">
+                <el-radio :label="trueValue">{{ trueText }}</el-radio>
+                <el-radio :label="falseValue">{{ falseText }}</el-radio>
+            </el-radio-group>
         </div>
     </s-col>
 </template>
@@ -63,7 +31,7 @@ export default {
             default: ""
         },
         value: { //v-model绑定的值
-            type: String,
+            type: [String, Boolean, Number],
             default: ""
         },
         noFormItem: { //是否存在el-form-item包裹
@@ -83,12 +51,12 @@ export default {
             default: "否"
         },
         trueValue: {
-            type: [String, Boolean],
-            default: "1"
+            type: [Number, String, Boolean],
+            default: true
         },
         falseValue: {
-            type: [String, Boolean],
-            default: "0"
+            type: [Number, String, Boolean],
+            default: false
         },
         labelWidth: {
             type: String,
@@ -96,7 +64,9 @@ export default {
         },
     },
     data() {
-        return {};
+        return {
+            radio: ""
+        };
     },
     computed: {
         realLabel() { //实际label值，自动拼接
@@ -121,9 +91,13 @@ export default {
         //=====================================前后端交互====================================//
 
         //=====================================组件间交互====================================//  
-        handleInput() {
-            this.$emit("input", this.value);
-        },
+        handleInput(val) {
+            this.$emit("input", val);
+            setTimeout(() => {
+                this.$emit("_change", val);
+            }, 1);
+            console.log(val)
+        }
         //=====================================其他操作=====================================//
 
     }

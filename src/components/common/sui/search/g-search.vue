@@ -44,7 +44,7 @@ export default {
             type: Boolean,
             default: false,
         },
-        authorequest: { //是否触发自动请求
+        autoRequest: { //是否触发自动请求
             type: Boolean,
             default: false
         },
@@ -75,8 +75,10 @@ export default {
                     return val.componentOptions.propsData.label.length 
                 }
             });
-            const maxLen = Math.max.apply(Math, widgets) + 1; //加一增加了中文引号的宽度
+            let maxLen = Math.max.apply(Math, widgets) + 1; //加一增加了中文引号的宽度
             const fz = parseInt(window.getComputedStyle(document.documentElement)["fontSize"], 10) || 16; //根元素字体大小
+            (maxLen > 10) && (maxLen = 10);
+            (maxLen < 4) && (maxLen = 4);
             return maxLen * (fz + 5) + "px";
         },
         loading() {
@@ -128,8 +130,11 @@ export default {
                     this.$set(this.formInfo, propsData.vModel, propsData.defaultValue || null);
                     this.$set(this.formInfo, propsData.vModel2, propsData.defaultValue || null);
                 } else if (propsData.type === "cascader") { //级联选择
-                    propsData.vModels && propsData.vModels.forEach(val => {
-                        this.$set(this.formInfo, val, propsData.defaultValue || null);
+                    // propsData.vModels && propsData.vModels.forEach(val => {
+                    //     this.$set(this.formInfo, val, propsData.defaultValue || null);
+                    // })
+                    propsData.cascaderOptions.forEach(val => {
+                        this.$set(this.formInfo, val.vModel, val.value || this.formInfo[val.vModel] || null);
                     })
                 } else {
                     this.$set(this.formInfo, propsData.vModel, propsData.defaultValue || null);
@@ -151,7 +156,11 @@ export default {
                 this.itemDom = this.$slots.default[0].elm
                 itemHeight = this.itemDom.getBoundingClientRect()["height"];
             }
+            console.log(realHeight, itemHeight, 9999)
             this.couldExpand = realHeight > 1 * itemHeight;
+            if (realHeight === itemHeight) {
+                this.isExpand = false;
+            }
             this.handleExpand();
         },
         //=========================================================================//

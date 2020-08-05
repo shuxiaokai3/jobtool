@@ -246,7 +246,7 @@ export default {
         },
         //搜索框数据发生改变
         handleChange(val) {
-            if (!this.getAncestorComponent("SSearch").authorequest) {
+            if (!this.getAncestorComponent("SSearch").autoRequest) {
                 return;
             }
             if (!this.debounceFn) {
