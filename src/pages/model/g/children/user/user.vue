@@ -6,24 +6,32 @@
 */
 <template>
     <div>
+        <!-- 搜索条件 -->
+        <s-search autoRequest @change="handleChange">
+            <s-search-item label="登录名称" vModel="loginName"></s-search-item>
+            <s-search-item label="真实姓名" vModel="realName"></s-search-item>
+            <s-search-item label="手机号" vModel="phone"></s-search-item>
+            <s-search-item label="部门" vModel="department"></s-search-item>
+            <s-search-item label="职位" vModel="title"></s-search-item>
+            <el-button slot="operation" size="mini" type="success" @click="isShow = true">新增用户</el-button>
+            <s-download slot="operation" class="ml-2" url="/api/security/user_excel_template" @finish="loading = false">
+                <el-button :loading="loading" size="mini" type="primary" icon="el-icon-upload" @click="loading = true">下载模板</el-button>
+            </s-download>
+            <s-upload-plain slot="operation" url="/api/security/add_user_by_excel" excel @success="getData" @upload="loading2 = true" @finish="loading2 = false">
+                <el-button :loading="loading2" size="mini" type="primary" icon="el-icon-upload">导入用户</el-button>
+            </s-upload-plain>
+        </s-search>
         <!-- 表格展示 -->
         <s-table ref="table" url="/api/security/user_list">
             <el-table-column prop="loginName" label="登录名称" align="center"></el-table-column>
             <el-table-column prop="realName" label="真实姓名" align="center"></el-table-column>
             <el-table-column prop="phone" label="手机号" align="center"></el-table-column>
+            <el-table-column prop="department" label="部门" align="center"></el-table-column>
+            <el-table-column prop="title" label="职位" align="center"></el-table-column>
+            <el-table-column prop="qq" label="qq号码" align="center"></el-table-column>
             <el-table-column label="角色信息" align="center" width="200px">
                 <template slot-scope="scope">
                     <el-tag v-for="(item, index) in scope.row.roleNames" :key="index" class="d-block mb-1">{{ item }}</el-tag>
-                </template>
-            </el-table-column>
-            <el-table-column label="创建时间" align="center">
-                <template slot-scope="scope">
-                    {{ new Date(scope.row.createdAt).toLocaleString() }}
-                </template>
-            </el-table-column>
-            <el-table-column label="更新时间" align="center">
-                <template slot-scope="scope">
-                    {{ new Date(scope.row.updatedAt).toLocaleString() }}
                 </template>
             </el-table-column>
             <el-table-column label="状态" align="center">
@@ -41,10 +49,7 @@
                     </el-button>
                 </template>
             </el-table-column>
-            <el-button slot="operation" size="mini" type="success" @click="isShow = true">新增用户</el-button>
-            <s-download slot="operation" class="ml-2" url="/system/user/download" @finish="loading = false">
-                <el-button :loading="loading" size="mini" type="primary" icon="el-icon-upload" @click="loading = true">下载模板</el-button>
-            </s-download>
+
         </s-table>
         <s-add-user :isShow.sync="isShow" @success="getData"></s-add-user>
         <s-edit-user v-if="isShow2" :id="roleId" :isShow.sync="isShow2" @success="getData"></s-edit-user>
@@ -54,12 +59,10 @@
 
 <script>
 import addUser from "./add/add"
-// import editRole from "./edit/edit-role"
 import editUser from "./edit/edit"
 export default {
     components: {
         "s-add-user": addUser, 
-        // "s-edit-role": editRole, 
         "s-edit-user": editUser, 
     },
     data() {
@@ -71,6 +74,7 @@ export default {
             roleIds: [], //编辑时候已存在角色信息
             //=====================================其他参数====================================//
             loading: false, //下载模板加载效果
+            loading2: false, //批量导入用户加载效果
         };
     },
     created() {
@@ -78,11 +82,13 @@ export default {
     },
     methods: {
         //=====================================获取远程数据==================================//
-        getData() {
-            this.$refs["table"].getData();
+        getData(params) {
+            this.$refs["table"].getData(params);
         },
         //=====================================前后端交互====================================//
-
+        handleChange(params) {
+            this.getData(params);
+        },
         //=====================================组件间交互====================================//  
         handleForbidRole(_id, enable) {
             const tipLabel = enable ? "禁用" : "启用";
