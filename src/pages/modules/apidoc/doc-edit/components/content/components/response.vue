@@ -173,7 +173,26 @@ export default {
                     requestType: this.requestData.requestType
                 };
                 this.axios.post("/proxy", params).then((res) => {
+                    console.log(res, 3333)
                     this.responseData = res.data;
+                    if (this.responseData.type === "excel") {
+                        const arrayData = this.responseData.data.data
+                        let ab = new ArrayBuffer(arrayData.length);
+                        let view = new Uint8Array(ab);
+                        for (var i = 0; i < arrayData.length; ++i) {
+                            view[i] = arrayData[i];
+                        }
+                        const blob = new Blob([view]);
+                        let blobUrl = "";
+                        blobUrl = URL.createObjectURL(blob);
+                        const downloadElement = document.createElement("a");
+                        downloadElement.href = blobUrl;
+                        downloadElement.download = decodeURIComponent(this.responseData.fileName) || "未命名"; //下载后文件名
+                        document.body.appendChild(downloadElement);
+                        downloadElement.click(); //点击下载
+                        document.body.removeChild(downloadElement); //下载完成移除元素
+                        window.URL.revokeObjectURL(blobUrl); //释放掉blob对象
+                    }
                     this.checkResponseParams();
                     resolve(res.data);
                 }).catch(err => {
@@ -400,7 +419,6 @@ export default {
                     }                    
                 }
                 foo(localParams, remoteParams);
-                console.log(responseErrorType)
                 if (responseErrorType) {
                     this.$store.commit("apidocRules/changeCurrentCondition", {
                         remoteResponse: 0, 
