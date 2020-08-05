@@ -70,12 +70,10 @@
         <div class="w-35 flex1">
             <s-response ref="response" :request-data="request"></s-response>
         </div>
-        <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible"></s-host-manage>
+        <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible" @change="getHostEnum"></s-host-manage>
         <s-variable-manage v-if="dialogVisible2" :visible.sync="dialogVisible2" @change="handleVariableChange"></s-variable-manage>
     </div>
-    <div v-else>
-        
-    </div>
+    <div v-else></div>
 </template>
 
 <script>

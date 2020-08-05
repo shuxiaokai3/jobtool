@@ -126,6 +126,7 @@ export default {
                     this.axios.post("/api/project/doc_service", params).then(() => {
                         this.successLoading = true;
                         this.$refs["table"].getData();
+                        this.$emit("change");
                     }).catch(err => {
                         this.$errorThrow(err, this);
                     }).finally(() => {
@@ -163,6 +164,7 @@ export default {
             this.axios.put("api/project/doc_service", params).then(() => {
                 this.$message.success("修改成功");
                 this.isEditing = false;
+                this.$emit("change");
             }).catch(err => {
                 this.$errorThrow(err, this);
             });
@@ -183,6 +185,7 @@ export default {
             }).then(() => {
                 this.axios.delete("api/project/doc_service", { data: { ids: [_id] }}).then(() => {
                     this.$refs["table"].getData();
+                    this.$emit("change");
                 }).catch(err => {
                     this.$errorThrow(err, this);
                 }).finally(() => {
