@@ -6,7 +6,7 @@
 */
 <template>
     <div class="response">
-        <s-collapse title="基本信息">
+        <s-collapse title="基本信息" class="baseInfo">
             <div>
                 <div class="my-2 d-flex a-center">
                     <span class="flex0">请求地址：</span>
@@ -16,7 +16,7 @@
                     <span>请求方式：</span>
                     <span class="f-xs green">{{ requestData.methods.toUpperCase() }}</span>
                 </div>
-                <div class="d-flex">
+                <div class="d-flex mb-1">
                     <div>
                         <span>连通&nbsp;</span>
                         <span v-if="currentCondition.connected === -1" class="gray-600 el-icon-question"></span>
@@ -24,18 +24,32 @@
                         <span v-else-if="currentCondition.connected === 1" class="green el-icon-success"></span>
                         <span class="mx-1 gray-400">|</span>
                     </div>
-                    <div>
+                    <div :title="currentCondition.status">
                         <span>状态码&nbsp;</span>
                         <span v-if="currentCondition.status === -1" class="gray-600 el-icon-question"></span>
                         <span v-else-if="currentCondition.status >= 200 && currentCondition.status < 300" class="green el-icon-success"></span>
                         <span v-else class="red el-icon-error"></span>
                         <span class="mx-1 gray-400">|</span>
                     </div>
-                    <div>
+                    <div :title="`不超过10kb,当前${currentCondition.size}kb`">
                         <span>大小&nbsp;</span>
                         <span v-if="currentCondition.size === 0" class="gray-600 el-icon-question"></span>
-                        <span v-else-if="currentCondition.size <= 10" class="red el-icon-error"></span>
-                        <span v-if="currentCondition.size" class="green el-icon-success"></span>
+                        <span v-else-if="currentCondition.size >= 10" class="red el-icon-error"></span>
+                        <span v-else class="green el-icon-success"></span>
+                        <span class="mx-1 gray-400">|</span>
+                    </div>
+                    <div>
+                        <span>本地参数&nbsp;</span>
+                        <span v-if="currentCondition.localParams === -1" class="gray-600 el-icon-question"></span>
+                        <span v-else-if="currentCondition.localParams === 0" class="red el-icon-error"></span>
+                        <span v-else class="green el-icon-success"></span>
+                        <span class="mx-1 gray-400">|</span>
+                    </div>
+                    <div :title="`${currentCondition.responseErrorType}`">
+                        <span>返回参数&nbsp;</span>
+                        <span v-if="currentCondition.remoteResponse === -1" class="gray-600 el-icon-question"></span>
+                        <span v-else-if="currentCondition.remoteResponse === 0" class="red el-icon-error"></span>
+                        <span v-else class="green el-icon-success"></span>
                         <span class="mx-1 gray-400">|</span>
                     </div>
                 </div>
@@ -46,13 +60,12 @@
                 <div v-for="(item, index) in requestData.header" :key="index" class="d-flex a-center mt">
                     <span v-if="item.key" class="flex0">{{ item.key }}：</span>
                     <s-ellipsis-content :value="convertVariable(item.value)" :max-width="200"></s-ellipsis-content>
-                    <!-- <span class="f-xs text-ellipsis" :title="convertVariable(item.value)">{{ convertVariable(item.value) }}</span> -->
                 </div>
             </template>
             <div v-else class="f-xs gray-500">暂无数据</div>
         </s-collapse>
         <s-collapse title="请求参数">
-            <s-tree-json :data="requestData.requestParams"></s-tree-json>
+            <s-tree-json :data="requestParams"></s-tree-json>
         </s-collapse>
         <s-collapse title="返回参数">
             <s-tree-json :data="requestData.responseParams"></s-tree-json>
@@ -78,11 +91,13 @@
             </div>
             <div v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)">
                 <s-json v-if="responseData && responseData.type === 'json'" :data="JSON.parse(responseData.data)" :check-data="checkJsonData" @export="handleExport"></s-json>
-                <span v-if="responseData && responseData.type === 'svg'" v-html="responseData.data"></span>
-                <img v-if="responseData && responseData.type === 'image'" :src="responseData.data" alt="无法显示">
-                <div v-if="responseData && responseData.type === 'text'" v-html="responseData.data" class="res-text"></div>
+                <span v-else-if="responseData && responseData.type === 'svg'" v-html="responseData.data"></span>
+                <img v-else-if="responseData && responseData.type === 'image'" :src="responseData.data" alt="无法显示">
+                <pre v-else-if="responseData && responseData.type === 'text'" v-text="responseData.data" class="res-text"></pre>
                 <iframe v-else-if="responseData && responseData.type === 'pdf'" :src="responseData.data" class="res-pdf"></iframe>
+                <pre v-else>{{ responseData }}</pre>
             </div>
+            
         </s-collapse>
     </div>
 </template>
@@ -107,7 +122,26 @@ export default {
             const result = this.convertPlainParamsToTreeData(copyData);
             return result;
         },
-        //请求条件
+        requestParams() {
+            const copyData = JSON.parse(JSON.stringify(this.requestData.requestParams)); //扁平数据拷贝
+            dfsForest(copyData, {
+                rCondition(value) {
+                    return value?.children;
+                },
+                rKey: "children",
+                hooks: (val, i, forestData, parent) => {
+                    if (val && !val._select) {
+                        if (!parent) {
+                            copyData.splice(i, 1);
+                        } else {
+                            parent.children.splice(i, 1);
+                        }
+                    }
+                }
+            });
+            return copyData;
+        },
+        //预发布满足提交的条件
         currentCondition() {
             return this.$store.state.apidocRules.currentCondition
         },
@@ -119,6 +153,7 @@ export default {
         variables() {
             return this.$store.state.apidoc.variables || [];
         },
+       
     },
     watch: {
         currentSelectDoc: {
@@ -143,7 +178,7 @@ export default {
     methods: {
         //=====================================前后端交互====================================//
         sendRequest() {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 let copyData = JSON.parse(JSON.stringify(this.requestData)); //扁平数据拷贝
                 let requestParams = this.convertPlainParamsToTreeData(copyData.requestParams, true);
                 const headerParams = this.convertPlainParamsToTreeData(copyData.header);
@@ -160,15 +195,37 @@ export default {
                 };
                 this.axios.post("/proxy", params).then((res) => {
                     this.responseData = res.data;
-                    this.checkResponseParams();
+                    if (this.responseData?.type === "excel") {
+                        const arrayData = this.responseData.data.data
+                        let ab = new ArrayBuffer(arrayData.length);
+                        let view = new Uint8Array(ab);
+                        for (var i = 0; i < arrayData.length; ++i) {
+                            view[i] = arrayData[i];
+                        }
+                        const blob = new Blob([view], {
+                            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        });
+                        let blobUrl = "";
+                        blobUrl = URL.createObjectURL(blob);
+                        const downloadElement = document.createElement("a");
+                        downloadElement.href = blobUrl;
+                        downloadElement.download = decodeURIComponent(this.responseData.fileName) || "未命名"; //下载后文件名
+                        document.body.appendChild(downloadElement);
+                        downloadElement.click(); //点击下载
+                        document.body.removeChild(downloadElement); //下载完成移除元素
+                        window.URL.revokeObjectURL(blobUrl); //释放掉blob对象
+                        resolve();
+                    } else {
+                        this.checkResponseParams();
+                        resolve(res.data);
+                    }
                 }).catch(err => {
                     console.error(err);
+                    reject();
                 }).finally(() => {
-                    resolve();
                     this.loading = false;
                 });                
             })
-
         },
         //=====================================组件间交互====================================//  
         //将扁平数据转换为树形结构数据
@@ -323,7 +380,6 @@ export default {
         //导出数据
         handleExport(data) {
             const copyData =JSON.parse(JSON.stringify(data))
-            // 
             dfsForest(copyData, {
                 rCondition(value) {
                     return value.children;
@@ -342,13 +398,62 @@ export default {
         },
         //检查返回值与响应参数是否一致
         checkResponseParams() {
-            if (this.responseData.type === "json") {
+            if (this.responseData?.type === "json") {
                 const remoteParams = JSON.parse(this.responseData.data);
                 const localParams = this.responseParams;
                 this.checkJsonData = localParams;
-                console.log(localParams, remoteParams)
+                let responseErrorType = null;
+                const hasOwn = Object.hasOwnProperty;
+                if (Object.keys(localParams).length === 0) {
+                    responseErrorType = "lackKey"
+                }
+                const foo = (localData, remoteData) => {
+                    for (let i in localData) { //不处理原型链上的数据
+                        if (!hasOwn.call(localData, i)) {
+                            continue;
+                        }
+                        const remoteKeys = Object.keys(remoteData); //-----远程keys
+                        const localKeys = Object.keys(localData); //-------本地keys
+                        const isLackKey = localKeys.some(val => !remoteKeys.includes(val)); //远程结果是否缺少对应字段
+                        const isTooMuchKey = !remoteKeys.every(val => localKeys.includes(val)); //远程结果是否超出字段
+                        //字段超出或者缺少判断
+                        if (isLackKey) {
+                            responseErrorType = "lackKey";
+                            return;
+                        }   
+                        if (isTooMuchKey) {
+                            responseErrorType = "tooMuchKey"
+                            return
+                        }
+                        //判断字段类型是否一致
+                        const localValue = localData[i];
+                        const remoteValue = remoteData[i];
+                        const localType = this.getType(localValue);
+                        const remoteType = this.getType(remoteValue);
+                        if (localType !== remoteType) {
+                            responseErrorType = "typeError"
+                            return
+                        }
+                        if (localType === "object") {
+                            foo(localValue, remoteValue);
+                        }
+                        if (localType === "array") {
+                            foo(localValue[0], remoteValue[0]);
+                        }
+                    }                    
+                }
+                foo(localParams, remoteParams);
+                if (responseErrorType) {
+                    this.$store.commit("apidocRules/changeCurrentCondition", {
+                        remoteResponse: 0, 
+                        responseErrorType, 
+                    })
+                } else {
+                    this.$store.commit("apidocRules/changeCurrentCondition", {
+                        remoteResponse: 1, 
+                    })
+                }
             }
-            
         },
         //=====================================其他操作=====================================//
         convertVariable(val) {
@@ -365,7 +470,24 @@ export default {
             } else {
                 return val;
             }
-        }
+        },
+        //获取参数类型
+        getType(value) {
+            if (typeof value === "string") {
+                return "string"
+            } else if (typeof value === "number") { //NaN
+                return "number"
+            } else if (typeof value === "boolean") {
+                return "boolean"
+            } else if (Array.isArray(value)) {
+                return "array"
+            } else if (typeof value === "object" && value !== null) {
+                return "object"
+            } else { // null undefined ...
+                return "string"
+            }
+        },
+
     }
 };
 </script>
@@ -374,6 +496,14 @@ export default {
 
 <style lang="scss">
 .response {
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+    .baseInfo {
+        position: sticky;
+        top: 0;
+        background: $white;
+        z-index: 1;
+    }
     .res-data {
         min-height: size(100);
         max-height: size(300);

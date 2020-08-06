@@ -9,6 +9,7 @@ import permission from "./permission/permission"
 import config from "./config/config"
 import layout from "./layout/layout"
 import apidoc from "./apidoc/apidoc"
+import apidocRules from "./apidoc/rules"
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
@@ -27,7 +28,8 @@ const store = new Vuex.Store({
         layout,
         config,
         permission,
-        apidoc
+        apidoc,
+        apidocRules,
     },
     strict: false
 });

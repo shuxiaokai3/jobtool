@@ -12,7 +12,7 @@
                     v-model="dateValue" 
                     v-bind="$attrs"
                     value-format="yyyy-MM-dd" 
-                    :picker-options="dateOptions" 
+                    :picker-options="customValidate || dateOptions" 
                     type="date" 
                     :placeholder="placeholder" 
                     clearable
@@ -29,7 +29,7 @@
                 v-model="dateValue" 
                 v-bind="$attrs"
                 value-format="yyyy-MM-dd" 
-                :picker-options="dateOptions" 
+                :picker-options="customValidate || dateOptions" 
                 type="date" 
                 :placeholder="placeholder" 
                 clearable
@@ -72,6 +72,12 @@ export default {
         labelWidth: {
             type: String,
             default: null
+        },
+        customValidate: {
+            type: Object,
+            default() {
+                return null
+            }
         },
     },
     data() {

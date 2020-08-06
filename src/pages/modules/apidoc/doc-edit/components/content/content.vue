@@ -43,6 +43,7 @@
                         </s-v-input>
                         <el-button :loading="loading3" type="success" size="small" @click="sendRequest">发送请求</el-button>
                         <el-button :loading="loading" type="primary" size="small" @click="saveRequest">保存接口</el-button>
+                        <el-button :loading="loading4" type="primary" size="small" @click="publishRequest">发布接口</el-button>
                         <el-button type="primary" size="small" @click="dialogVisible2 = true" @close="dialogVisible2 = false">全局变量</el-button>
                     </div>
                 </div>         
@@ -69,12 +70,10 @@
         <div class="w-35 flex1">
             <s-response ref="response" :request-data="request"></s-response>
         </div>
-        <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible"></s-host-manage>
+        <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible" @change="getHostEnum"></s-host-manage>
         <s-variable-manage v-if="dialogVisible2" :visible.sync="dialogVisible2" @change="handleVariableChange"></s-variable-manage>
     </div>
-    <div v-else>
-        
-    </div>
+    <div v-else></div>
 </template>
 
 <script>
@@ -150,6 +149,7 @@ export default {
             loading: false, //-------------------保存接口
             loading2: false, //------------------获取文档详情接口
             loading3: false, //------------------发送请求状态
+            loading4: false, //------------------发布接口状态
             foldHeader: true, //-----------------是否折叠header，当校验错误时候自动展开header
             dialogVisible: false, //-------------域名维护弹窗
             dialogVisible2: false, //------------全局变量管理弹窗
@@ -160,8 +160,11 @@ export default {
         currentSelectDoc() { //当前选中的doc
             return this.$store.state.apidoc.activeDoc[this.$route.query.id];
         },
-        tabs() { //-----------全部tabs
+        tabs() { //全部tabs
             return this.$store.state.apidoc.tabs[this.$route.query.id];
+        },
+        currentCondition() { //预发布满足提交的条件
+            return this.$store.state.apidocRules.currentCondition
         },
     },
     watch: {
@@ -169,6 +172,7 @@ export default {
             handler(val, oldVal) {
                 if (val) {
                     if (!oldVal || val._id !== oldVal._id) {
+                        this.$store.commit("apidocRules/resetCondition");
                         this.getDocDetail();
                     }
                 }
@@ -382,16 +386,22 @@ export default {
         //=====================================发送请求====================================//
         //发送请求
         sendRequest() {
-            // console.log(JSON.parse(JSON.stringify(this.request)))
-            const validParams = this.validateParams();
-            if (!validParams) {
-                this.$message.error("参数校验错误");
-            } else {
-                this.loading3 = true;
-                this.$refs["response"].sendRequest().finally(() => {
-                    this.loading3 = false;
-                });
-            }
+            return new Promise((resolve, reject) => {
+                const validParams = this.validateParams();
+                if (!validParams) {
+                    this.$message.error("参数校验错误");
+                    reject();
+                } else {
+                    this.loading3 = true;
+                    this.$refs["response"].sendRequest().then((res) => {
+                        resolve(res);
+                    }).catch(() => {
+                        reject();
+                    }).finally(() => {
+                        this.loading3 = false;
+                    });
+                }                
+            });
         },
         //=====================================保存接口====================================//
         saveRequest() {
@@ -431,6 +441,47 @@ export default {
                     errorIptDom ? errorIptDom.focus() : null;
                 })
             }
+        },
+        publishRequest() {
+            this.loading4 = true;
+            this.sendRequest().then(res => {
+                this.$store.commit("apidocRules/changeCurrentCondition", {
+                    connected: 1, 
+                    status: res.status, 
+                    size: res.size,
+                    localParams: 1, 
+                    resType: res.type, 
+                });
+                const r = this.currentCondition;
+                if (r.connected === 1 && r.status >= 200 && r.status < 300 && r.size < 10 && r.localParams === 1 && r.remoteResponse === 1) {
+                    this.axios.put("/api/project/publish_doc", { _id: this.currentSelectDoc._id }).then(() => {
+                        this.$message.success("发布成功")
+                    }).catch(err => {
+                        this.$errorThrow(err, this);
+                    }).finally(() => {
+                        this.loading4 = false;
+                    });
+                } else {
+                    this.$confirm("接口未通过验证，无法提交", "提示", {
+                        confirmButtonText: "确定",
+                        cancelButtonText: "取消",
+                        type: "warning"
+                    }).then(() => {
+                    
+                    }).catch(err => {
+                        if (err === "cancel" || err === "close") {
+                            return;
+                        }
+                        this.$errorThrow(err, this);
+                    });
+                }
+            }).catch(() => {
+                this.$store.commit("apidocRules/changeCurrentCondition", {
+                    localParams: 0, 
+                })
+            }).finally(() => {
+                this.loading4 = false;
+            })
         },
         //=====================================其他操作=====================================//
         //检查参数是否完备
@@ -549,7 +600,7 @@ export default {
 
 <style lang="scss">
 .edit-content {
-    padding: size(10) size(20);
+    padding: size(10) size(0) size(10) size(20);
     .request {
         .request-input {
             display: flex;

@@ -10,6 +10,7 @@
         <el-form-item v-if="!noFormItem" :label="realLabel" :prop="prop" :label-width="labelWidth">
             <el-date-picker 
                     v-model="time" 
+                    v-bind="$attrs"
                     value-format="yyyy-MM-dd" 
                     range-separator="-" 
                     type="daterange"
@@ -28,6 +29,7 @@
         <el-date-picker 
                 v-else
                 v-model="time" 
+                v-bind="$attrs"
                 value-format="yyyy-MM-dd" 
                 range-separator="-" 
                 type="daterange"
@@ -156,7 +158,9 @@ export default {
             handler(value) {
                 if (!value) {
                     this.time = []
-                } 
+                } else {
+                    this.time = [value, this.vModel2]
+                }
             },
             deep: true,
         },

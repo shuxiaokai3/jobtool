@@ -148,11 +148,14 @@ export default {
             this.$refs["form2"].validate((valid) => {
                 if (valid) {
                     this.loading = true;
-                    this.axios.post("/api/security/login_phone", this.userInfo2).then(() => {
-                        // if (res.code === 2006 || res.code === 2003) {
-                        //     this.$message.warning(res.msg);
-                        //     this.isShowCapture = true;
-                        // }
+                    this.axios.post("/api/security/login_phone", this.userInfo2).then((res) => {
+                        if (res.code === 2006 || res.code === 2003) {
+                            this.$message.warning(res.msg);
+                            this.isShowCapture = true;
+                        } else {
+                            this.$router.push("/v1/apidoc/doc-list");
+                            sessionStorage.setItem("userInfo", JSON.stringify(res.data));
+                        }
                     }).catch(err => {
                         this.$errorThrow(err, this);
                     }).finally(() => {

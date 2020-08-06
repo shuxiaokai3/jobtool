@@ -101,6 +101,7 @@ export default {
                                     cancelButtonText: "取消",
                                     type: "warning"
                                 }).then(() => {
+                                    sessionStorage.clear();
                                     router.replace("/login");
                                 }).catch(() => {});
                                 Vue.prototype.$message.warning("登陆已过期");

@@ -11,7 +11,7 @@
     <!-- 选择框 -->
     <s-select v-else-if="type !== 'custom' && type === 'select'" v-model="formInfo[vModel]" v-bind="$attrs" :label="label" @change="handleChange" v-on="$listeners"></s-select>
     <!-- 级联选择 -->
-    <s-cascader
+    <!-- <s-cascader2
             v-else-if="type !== 'custom' && type === 'cascader'"
             :vModels="vModels"
             :value="cascaderData"
@@ -20,7 +20,16 @@
             @change="handleChange"
             v-on="$listeners"
     >
-    </s-cascader>
+    </s-cascader2> -->
+    <s-cascader2 
+            v-else-if="type !== 'custom' && type === 'cascader'"
+            :options="cascaderOptions"
+            v-bind="$attrs"
+            :label="label"
+            @input="handleChange"
+            v-on="$listeners"
+    >
+    </s-cascader2>
     <!-- 单日期 -->
     <s-date v-else-if="type !== 'custom' && type === 'date'" v-model="formInfo[vModel]" v-bind="$attrs" :label="label" @change="handleChange" v-on="$listeners"></s-date>
     <!-- 多日期 -->
@@ -57,10 +66,15 @@ export default {
                 return [];
             }
         }, 
+        cascaderOptions: { //级联选择器配置
+            type: Array,
+            default() {
+                return [];
+            }
+        },
     },
     data() {
         return {
-            cascaderData: [], //级联选择器的值
             //=========================================================================//
             debounceFn: null, //节流函数
         };
@@ -100,12 +114,11 @@ export default {
     },
     watch: {
         formInfo: {
-            handler() {
+            handler(formInfo) {
                 if (this.type === "cascader") { //级联选择器处理
-                    this.vModels.forEach(val => {
-                        if (this.formInfo[val]) {
-                            this.cascaderData.push(this.formInfo[val])
-                        }
+                    this.cascaderOptions.forEach((val, index) => {
+                        const key = val.vModel;
+                        this.$set(this.cascaderOptions[index], "value", formInfo[key])
                     })
                 }
             },
@@ -120,14 +133,11 @@ export default {
         //搜索框数据发生改变
         handleChange(value) {
             if (this.type === "cascader") {
-                this.vModels.forEach((val, index) => { //清空以前数据
-                    this.$set(this.formInfo, this.vModels[index], null)
-                })
-                value.forEach((val, index) => {
-                    this.formInfo[this.vModels[index]] = val;
-                })
+                for (const i in value) {
+                    this.formInfo[i] = value[i]
+                }
             }
-            if (!this.getAncestorComponent("SSearch").authorequest) {
+            if (!this.getAncestorComponent("SSearch").autoRequest) {
                 return;
             }
             if (!this.debounceFn) {

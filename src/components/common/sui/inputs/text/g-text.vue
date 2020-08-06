@@ -8,10 +8,11 @@
     <s-col v-bind="$attrs">
         <!-- 存在el-form-item包裹 -->
         <el-form-item v-if="!noFormItem" :label="realLabel" :label-width="labelWidth">
-            <span class="text-ellipsis gray-600" :class="className">{{ value }}</span>
+            <span v-if="!$slots.default" class="text-ellipsis gray-600" :title="value" :class="className">{{ value }}</span>
+            <slot v-else />
         </el-form-item>   
         <!-- 不存在el-form-item包裹 -->
-        <span v-else class="text-ellipsis gray-600" :class="className">{{ value }}</span>  
+        <span v-else class="text-ellipsis gray-600" :title="value" :class="className">{{ value }}</span>  
     </s-col>
 </template>
 

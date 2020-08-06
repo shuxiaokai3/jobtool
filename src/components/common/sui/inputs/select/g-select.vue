@@ -12,6 +12,7 @@
                     v-if="multi"
                     v-model="multiData" 
                     v-bind="$attrs" 
+                    :placeholder="placeholder" 
                     :multiple="multi"
                     filterable 
                     :size="$root.VUE_BASE_CONFIG.styleConfig.size"
@@ -26,6 +27,7 @@
                     v-else
                     v-model="singleData" 
                     v-bind="$attrs" 
+                    :placeholder="placeholder" 
                     :multiple="multi"
                     filterable 
                     :size="$root.VUE_BASE_CONFIG.styleConfig.size"
@@ -38,10 +40,10 @@
             </el-select>
         </el-form-item>   
         <!-- 不存在el-form-item包裹 -->
-        <el-select v-else-if="noFormItem && multi" v-model="multiData" v-bind="$attrs" :multiple="multi" filterable :size="$root.VUE_BASE_CONFIG.styleConfig.size" :class="{'w-100': !className, className}" clearable @change="handleChange" v-on="$listeners">
+        <el-select v-else-if="noFormItem && multi" v-model="multiData" v-bind="$attrs" :placeholder="placeholder" :multiple="multi" filterable :size="$root.VUE_BASE_CONFIG.styleConfig.size" :class="{'w-100': !className, className}" clearable @change="handleChange" v-on="$listeners">
             <el-option v-for="(item, index) in realSelectEnum" :key="index" :label="item[selectProps.name]" :value="item[selectProps.id]"></el-option>
         </el-select>   
-        <el-select v-else-if="noFormItem && !multi" v-model="singleData" v-bind="$attrs" :multiple="multi" filterable :size="$root.VUE_BASE_CONFIG.styleConfig.size" :class="{'w-100': !className, className}" clearable @change="handleChange" v-on="$listeners">
+        <el-select v-else-if="noFormItem && !multi" v-model="singleData" v-bind="$attrs" :placeholder="placeholder" :multiple="multi" filterable :size="$root.VUE_BASE_CONFIG.styleConfig.size" :class="{'w-100': !className, className}" clearable @change="handleChange" v-on="$listeners">
             <el-option v-for="(item, index) in realSelectEnum" :key="index" :label="item[selectProps.name]" :value="item[selectProps.id]"></el-option>
         </el-select>   
     </s-col>
@@ -123,6 +125,9 @@ export default {
                 return this.label + "："
             }
         },
+        placeholder() {
+            return "请选择" + this.label;
+        },
         realSelectEnum() {
             if (Array.isArray(this.selectEnum) && this.selectEnum.length > 0) {
                 return this.selectEnum
@@ -183,6 +188,10 @@ export default {
                 this.$emit("input", val.join(","));
                 this.$emit("change", val.join(","));
             } else if (!this.multi) { //单选
+                //如果是空字符，则返回null
+                if (val === "") {
+                    val = null
+                }
                 this.$emit("input", val);
                 this.$emit("change", val);
             }

@@ -7,10 +7,13 @@
 <template>
     <s-dialog class="g-user" title="修改用户基本信息" :isShow="isShow" @close="handleClose">
         <el-divider content-position="left">基础信息</el-divider>
-        <s-form ref="form" :editData="formInfo">
-            <s-form-item label="登录名称" vModel="loginName" required oneLine></s-form-item>
-            <s-form-item label="真实姓名" vModel="realName" required oneLine></s-form-item>
-            <s-form-item label="手机号" vModel="phone" required oneLine phone></s-form-item>
+        <s-form v-loading="loading2" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)" ref="form" :editData="formInfo">
+            <s-form-item label="登录名称" vModel="loginName" required halfLine></s-form-item>
+            <s-form-item label="真实姓名" vModel="realName" required halfLine disabled></s-form-item>
+            <s-form-item label="手机号" vModel="phone" required halfLine phone></s-form-item>
+            <s-form-item label="部门" vModel="department" required halfLine></s-form-item>
+            <s-form-item label="职位" vModel="title" required halfLine></s-form-item>
+            <s-form-item label="qq号" vModel="qq" required halfLine></s-form-item>
         </s-form>  
         <el-divider content-position="left">角色选择</el-divider>
         <el-checkbox-group v-model="formInfo.roleIds">
