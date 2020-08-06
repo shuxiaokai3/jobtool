@@ -65,7 +65,7 @@
             <div v-else class="f-xs gray-500">暂无数据</div>
         </s-collapse>
         <s-collapse title="请求参数">
-            <s-tree-json :data="requestData.requestParams"></s-tree-json>
+            <s-tree-json :data="requestParams"></s-tree-json>
         </s-collapse>
         <s-collapse title="返回参数">
             <s-tree-json :data="requestData.responseParams"></s-tree-json>
@@ -91,11 +91,13 @@
             </div>
             <div v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)">
                 <s-json v-if="responseData && responseData.type === 'json'" :data="JSON.parse(responseData.data)" :check-data="checkJsonData" @export="handleExport"></s-json>
-                <span v-if="responseData && responseData.type === 'svg'" v-html="responseData.data"></span>
-                <img v-if="responseData && responseData.type === 'image'" :src="responseData.data" alt="无法显示">
-                <div v-if="responseData && responseData.type === 'text'" v-html="responseData.data" class="res-text"></div>
+                <span v-else-if="responseData && responseData.type === 'svg'" v-html="responseData.data"></span>
+                <img v-else-if="responseData && responseData.type === 'image'" :src="responseData.data" alt="无法显示">
+                <pre v-else-if="responseData && responseData.type === 'text'" v-text="responseData.data" class="res-text"></pre>
                 <iframe v-else-if="responseData && responseData.type === 'pdf'" :src="responseData.data" class="res-pdf"></iframe>
+                <pre v-else>{{ responseData }}</pre>
             </div>
+            
         </s-collapse>
     </div>
 </template>
@@ -119,6 +121,25 @@ export default {
             const copyData = JSON.parse(JSON.stringify(this.requestData.responseParams)); //扁平数据拷贝
             const result = this.convertPlainParamsToTreeData(copyData);
             return result;
+        },
+        requestParams() {
+            const copyData = JSON.parse(JSON.stringify(this.requestData.requestParams)); //扁平数据拷贝
+            dfsForest(copyData, {
+                rCondition(value) {
+                    return value?.children;
+                },
+                rKey: "children",
+                hooks: (val, i, forestData, parent) => {
+                    if (val && !val._select) {
+                        if (!parent) {
+                            copyData.splice(i, 1);
+                        } else {
+                            parent.children.splice(i, 1);
+                        }
+                    }
+                }
+            });
+            return copyData;
         },
         //预发布满足提交的条件
         currentCondition() {
@@ -173,16 +194,17 @@ export default {
                     requestType: this.requestData.requestType
                 };
                 this.axios.post("/proxy", params).then((res) => {
-                    console.log(res, 3333)
                     this.responseData = res.data;
-                    if (this.responseData.type === "excel") {
+                    if (this.responseData?.type === "excel") {
                         const arrayData = this.responseData.data.data
                         let ab = new ArrayBuffer(arrayData.length);
                         let view = new Uint8Array(ab);
                         for (var i = 0; i < arrayData.length; ++i) {
                             view[i] = arrayData[i];
                         }
-                        const blob = new Blob([view]);
+                        const blob = new Blob([view], {
+                            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        });
                         let blobUrl = "";
                         blobUrl = URL.createObjectURL(blob);
                         const downloadElement = document.createElement("a");
@@ -192,9 +214,11 @@ export default {
                         downloadElement.click(); //点击下载
                         document.body.removeChild(downloadElement); //下载完成移除元素
                         window.URL.revokeObjectURL(blobUrl); //释放掉blob对象
+                        resolve();
+                    } else {
+                        this.checkResponseParams();
+                        resolve(res.data);
                     }
-                    this.checkResponseParams();
-                    resolve(res.data);
                 }).catch(err => {
                     console.error(err);
                     reject();
@@ -374,7 +398,7 @@ export default {
         },
         //检查返回值与响应参数是否一致
         checkResponseParams() {
-            if (this.responseData.type === "json") {
+            if (this.responseData?.type === "json") {
                 const remoteParams = JSON.parse(this.responseData.data);
                 const localParams = this.responseParams;
                 this.checkJsonData = localParams;
