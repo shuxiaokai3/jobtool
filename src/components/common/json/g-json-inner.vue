@@ -64,14 +64,17 @@
                     </template>
                     <span class="symbol">,</span>
                     <s-ellipsis-content class="error" :value="checkResponse(key, value)"></s-ellipsis-content>
-                    <!-- <span class="error">{{ checkResponse(key, value) }}</span> -->
                 </span>                
             </div>
             <div v-if="checkLackKey()" class="indent red line active">...{{ checkLackKey() }}</div>
         </template>
         <!-- 常规数据 -->
         <template v-else>
-            {{ data }}
+            <div class="indent">
+                <s-ellipsis-content v-if="typeof data === 'string'" maxWidth="100%" class="string-value" :value='`"${data}"`'></s-ellipsis-content>
+                <s-ellipsis-content v-if="typeof data === 'number'" maxWidth="100%" class="number-value" :value="data"></s-ellipsis-content>
+                <s-ellipsis-content v-if="typeof data === 'boolean'" maxWidth="100%" class="boolean-value" :value="data"></s-ellipsis-content>
+            </div>
         </template>
         <span v-if="level === 0" class="symbol">}</span>
     </div>
@@ -82,7 +85,7 @@ export default {
     name: "SJson",
     props: {
         data: {
-            type: [Object, Array],
+            type: [Object, Array, String, Number, Boolean],
             default() {
                 return {};
             }
