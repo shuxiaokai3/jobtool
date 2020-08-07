@@ -90,7 +90,7 @@
                 </div>
             </div>
             <div v-loading="loading" :element-loading-text="randomTip()" element-loading-background="rgba(255, 255, 255, 0.9)">
-                <s-json v-if="responseData && responseData.type === 'json'" :data="JSON.parse(responseData.data)" :check-data="checkJsonData" @export="handleExport"></s-json>
+                <s-json v-if="responseData && responseData.type === 'json'" :data="responseData.data" :check-data="checkJsonData" @export="handleExport"></s-json>
                 <span v-else-if="responseData && responseData.type === 'svg'" v-html="responseData.data"></span>
                 <img v-else-if="responseData && responseData.type === 'image'" :src="responseData.data" alt="无法显示">
                 <pre v-else-if="responseData && responseData.type === 'text'" v-text="responseData.data" class="res-text"></pre>
@@ -193,38 +193,77 @@ export default {
                     requestParams: requestParams,
                     requestType: this.requestData.requestType
                 };
-                this.axios.post("/proxy", params).then((res) => {
-                    this.responseData = res.data;
-                    if (this.responseData?.type === "excel") {
-                        const arrayData = this.responseData.data.data
-                        let ab = new ArrayBuffer(arrayData.length);
-                        let view = new Uint8Array(ab);
-                        for (var i = 0; i < arrayData.length; ++i) {
-                            view[i] = arrayData[i];
+                window.postMessage({
+                    type: "jobtool_proxy_web_request",
+                    data: params
+                });
+                window.addEventListener("message", (msg) => {
+                    const responseType = msg.data?.type
+                    const response = msg.data?.data;
+                    if (responseType === "jobtool_proxy_web_response") {
+                        this.loading = false;
+                        this.responseData = response;
+                        if (this.responseData?.type === "excel") {
+                            const arrayData = this.responseData.data.data
+                            let ab = new ArrayBuffer(arrayData.length);
+                            let view = new Uint8Array(ab);
+                            for (var i = 0; i < arrayData.length; ++i) {
+                                view[i] = arrayData[i];
+                            }
+                            const blob = new Blob([view], {
+                                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                            });
+                            let blobUrl = "";
+                            blobUrl = URL.createObjectURL(blob);
+                            const downloadElement = document.createElement("a");
+                            downloadElement.href = blobUrl;
+                            downloadElement.download = decodeURIComponent(this.responseData.fileName) || "未命名"; //下载后文件名
+                            document.body.appendChild(downloadElement);
+                            downloadElement.click(); //点击下载
+                            document.body.removeChild(downloadElement); //下载完成移除元素
+                            window.URL.revokeObjectURL(blobUrl); //释放掉blob对象
+                            resolve();
+                        } else {
+                            this.checkResponseParams();
+                            resolve(response);
                         }
-                        const blob = new Blob([view], {
-                            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                        });
-                        let blobUrl = "";
-                        blobUrl = URL.createObjectURL(blob);
-                        const downloadElement = document.createElement("a");
-                        downloadElement.href = blobUrl;
-                        downloadElement.download = decodeURIComponent(this.responseData.fileName) || "未命名"; //下载后文件名
-                        document.body.appendChild(downloadElement);
-                        downloadElement.click(); //点击下载
-                        document.body.removeChild(downloadElement); //下载完成移除元素
-                        window.URL.revokeObjectURL(blobUrl); //释放掉blob对象
-                        resolve();
-                    } else {
-                        this.checkResponseParams();
-                        resolve(res.data);
+                    } else if (responseType === "jobtool_proxy_web_response_error") {
+                        reject(msg.data);
                     }
-                }).catch(err => {
-                    console.error(err);
-                    reject();
-                }).finally(() => {
-                    this.loading = false;
-                });                
+                });
+                
+                // this.axios.post("/proxy", params).then((res) => {
+                //     this.responseData = res.data;
+                //     if (this.responseData?.type === "excel") {
+                //         const arrayData = this.responseData.data.data
+                //         let ab = new ArrayBuffer(arrayData.length);
+                //         let view = new Uint8Array(ab);
+                //         for (var i = 0; i < arrayData.length; ++i) {
+                //             view[i] = arrayData[i];
+                //         }
+                //         const blob = new Blob([view], {
+                //             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                //         });
+                //         let blobUrl = "";
+                //         blobUrl = URL.createObjectURL(blob);
+                //         const downloadElement = document.createElement("a");
+                //         downloadElement.href = blobUrl;
+                //         downloadElement.download = decodeURIComponent(this.responseData.fileName) || "未命名"; //下载后文件名
+                //         document.body.appendChild(downloadElement);
+                //         downloadElement.click(); //点击下载
+                //         document.body.removeChild(downloadElement); //下载完成移除元素
+                //         window.URL.revokeObjectURL(blobUrl); //释放掉blob对象
+                //         resolve();
+                //     } else {
+                //         this.checkResponseParams();
+                //         resolve(res.data);
+                //     }
+                // }).catch(err => {
+                //     console.error(err);
+                //     reject();
+                // }).finally(() => {
+                //     this.loading = false;
+                // });                
             })
         },
         //=====================================组件间交互====================================//  
@@ -399,7 +438,7 @@ export default {
         //检查返回值与响应参数是否一致
         checkResponseParams() {
             if (this.responseData?.type === "json") {
-                const remoteParams = JSON.parse(this.responseData.data);
+                const remoteParams = this.responseData.data;
                 const localParams = this.responseParams;
                 this.checkJsonData = localParams;
                 let responseErrorType = null;
