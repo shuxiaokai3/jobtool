@@ -62,8 +62,16 @@
             </div>
             <!-- 请求参数 -->
             <div class="params-wrap">
-                <s-params-tree :tree-data="request.requestParams" title="请求参数" :ready="ready" :is-form-data="request.requestType === 'formData'" showCheckbox :plain="request.methods === 'get'"></s-params-tree>
-                <s-params-tree :tree-data="request.responseParams" title="响应参数"></s-params-tree>
+                <s-params-tree :tree-data="request.requestParams" title="请求参数" :ready="ready" :is-form-data="request.requestType === 'formData'" showCheckbox :plain="request.methods === 'get'">
+                    <div slot="operation" class="operation d-flex h-100 flex1 pl-3 d-flex a-center">
+                        <div class="op_item" @click.stop="dialogVisible3 = true">json</div>
+                    </div>
+                </s-params-tree>
+                <s-params-tree :tree-data="request.responseParams" title="响应参数">
+                    <div slot="operation" class="operation d-flex h-100 flex1 pl-3 d-flex a-center">
+                        <div class="op_item" @click.stop="dialogVisible4 = true">json</div>
+                    </div>
+                </s-params-tree>
                 <s-params-tree :tree-data="request.header" title="请求头" plain :fold="foldHeader" :valid-key="false"></s-params-tree>            
             </div>            
         </div>
@@ -72,6 +80,8 @@
         </div>
         <s-host-manage v-if="dialogVisible" :visible.sync="dialogVisible" @change="getHostEnum"></s-host-manage>
         <s-variable-manage v-if="dialogVisible2" :visible.sync="dialogVisible2" @change="handleVariableChange"></s-variable-manage>
+        <s-json-schema :visible.sync="dialogVisible3" plain @success="handleConvertJsonToRequestParams"></s-json-schema>
+        <s-json-schema :visible.sync="dialogVisible4" @success="handleConvertJsonToResponseParams"></s-json-schema>
     </div>
     <div v-else></div>
 </template>
@@ -82,6 +92,7 @@ import paramsTree from "./components/params-tree"
 import response from "./components/response"
 import hostManage from "./dialog/host-manage"
 import variableManage from "./dialog/variable-manage"
+import jsonSchema from "./dialog/json-schema"
 import { dfsForest, findParentNode } from "@/lib/utils"
 import uuid from "uuid/v4"
 import qs from "qs"
@@ -92,6 +103,7 @@ export default {
         "s-host-manage": hostManage,
         "s-variable-manage": variableManage,
         "s-response": response,
+        "s-json-schema": jsonSchema,
     },
     data() {
         return {
@@ -153,6 +165,8 @@ export default {
             foldHeader: true, //-----------------是否折叠header，当校验错误时候自动展开header
             dialogVisible: false, //-------------域名维护弹窗
             dialogVisible2: false, //------------全局变量管理弹窗
+            dialogVisible3: false, //------------将json格式的请求参数转换为标准请求参数弹窗
+            dialogVisible4: false, //------------将json格式的返回参数转换为标准返回参数弹窗
             ready: false, //---------------------是否完成第一次数据请求
         };
     },
@@ -386,22 +400,20 @@ export default {
         //=====================================发送请求====================================//
         //发送请求
         sendRequest() {
-            return new Promise((resolve, reject) => {
-                const validParams = this.validateParams();
-                if (!validParams) {
-                    this.$message.error("参数校验错误");
-                    reject();
-                } else {
-                    this.loading3 = true;
-                    this.$refs["response"].sendRequest().then((res) => {
-                        resolve(res);
-                    }).catch(() => {
-                        reject();
-                    }).finally(() => {
-                        this.loading3 = false;
-                    });
-                }                
-            });
+            const validParams = this.validateParams();
+            if (!validParams) {
+                this.$message.error("参数校验错误");
+            } else {
+                this.loading3 = true;
+                this.$refs["response"].sendRequest().then(() => {
+                    
+                }).catch(err => {
+                    console.error(err);
+                }).finally(() => {
+                    this.loading3 = false;
+                });
+                
+            }  
         },
         //=====================================保存接口====================================//
         saveRequest() {
@@ -483,6 +495,13 @@ export default {
                 this.loading4 = false;
             })
         },
+        //=====================================快捷操作====================================//
+        handleConvertJsonToRequestParams(val) {
+            this.request.requestParams = val;
+        },
+        handleConvertJsonToResponseParams(val) {
+            this.request.responseParams = val;
+        },
         //=====================================其他操作=====================================//
         //检查参数是否完备
         validateParams() {
@@ -513,7 +532,7 @@ export default {
                         this.$set(data, "_keyError", true);
                         isValidRequest = false;
                     }       
-                    if (!isComplex && data.value.trim() === "") {
+                    if (!isComplex && data.value.toString().trim() === "") {
                         this.$set(data, "_valueError", true);
                         isValidRequest = false;
                     }
@@ -544,7 +563,7 @@ export default {
                         this.$set(data, "_keyError", true);
                         isValidRequest = false;
                     }       
-                    if (!isComplex && data.value.trim() === "") {
+                    if (!isComplex && data.value.toString().trim() === "") {
                         this.$set(data, "_valueError", true);
                         isValidRequest = false;
                     }
@@ -573,7 +592,7 @@ export default {
                         isValidRequest = false;
                         this.foldHeader = false;
                     }      
-                    if (!isComplex && data.value.trim() === "") {
+                    if (!isComplex && data.value.toString().trim() === "") {
                         this.$set(data, "_valueError", true);
                         isValidRequest = false;
                         this.foldHeader = false;
@@ -624,6 +643,20 @@ export default {
     .params-wrap {
         height: calc(100vh - 320px);
         overflow-y: auto;
+        .operation {
+            .op_item {
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: size(0) size(10);
+                cursor: pointer;
+                &:hover {
+                    // background: mix($theme-color, $white, 80%);
+                    color: $theme-color;
+                }
+            }
+        }
     }
     
 }
