@@ -13,10 +13,8 @@
         <header v-if="$slots.operation || title" :class="{collapse: collapse}" @click="showContent = !showContent">
             <span v-if="!showContent" class="el-icon-caret-right"></span>
             <span v-else class="el-icon-caret-bottom"></span>
-            <div class="ml-2 title" :title="title" :style="{ color: titleColor }">{{ title }}</div>
-            <div class="operation">
-                <slot name="operation"></slot>
-            </div>
+            <div class="mx-2 title" :title="title" :style="{ color: titleColor }">{{ title }}</div>
+            <slot name="operation"></slot>
         </header>
         <section v-show="showContent" ref="content" class="content">
             <slot></slot>
@@ -100,21 +98,10 @@ export default {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-        }
-        .operation {
-            display: flex;
-            &>div {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                width: size(25);
-                height: size(25);
-                cursor: pointer;
-                color: $gray-600;
-                &:hover {
-                    background: $gray-300;
-                }
-            }
+            height: size(40);
+            line-height: size(40);
+            padding-right: size(20);
+            border-right: 1px solid $gray-300;
         }
     }
     // 内容区域
