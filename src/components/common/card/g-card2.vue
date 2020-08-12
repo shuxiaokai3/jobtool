@@ -11,9 +11,11 @@
             :style="{ width: width }"
     >
         <header v-if="$slots.operation || title" :class="{collapse: collapse}" @click="showContent = !showContent">
-            <span v-if="!showContent" class="el-icon-caret-right"></span>
-            <span v-else class="el-icon-caret-bottom"></span>
-            <div class="mx-2 title" :title="title" :style="{ color: titleColor }">{{ title }}</div>
+            <div class="d-flex flex0 a-center">
+                <span v-if="!showContent" class="el-icon-caret-right"></span>
+                <span v-else class="el-icon-caret-bottom"></span>
+                <div class="ml-2 title" :title="title" :style="{ color: titleColor }">{{ title }}</div>
+            </div>
             <slot name="operation"></slot>
         </header>
         <section v-show="showContent" ref="content" class="content">
@@ -89,9 +91,9 @@ export default {
     header {
         display: flex;
         border-bottom: 1px solid $gray-200;
-        // justify-content: space-between;
         align-items: center;
         flex: 0 0 size(40);
+        height: size(40);
         padding: 0 size(20);
         .title {
             max-width: 80%;
