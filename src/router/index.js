@@ -85,6 +85,15 @@ const allRoutes = [
         },
         component: () => import("@/pages/model/g/g")
     },
+    {
+        path: "/v1/rtc",
+        name: "音视频直播",
+        meta: {
+            title: "音视频直播"
+        },
+        component: () => import("@/pages/modules/rtc/rtc")
+    },
+    
 ]
 
 
